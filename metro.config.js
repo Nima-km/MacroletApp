@@ -1,0 +1,18 @@
+// Learn more https://docs.expo.io/guides/customizing-metro
+const { getDefaultConfig } = require('expo/metro-config');
+
+/** @type {import('expo/metro-config').MetroConfig} */
+const config = getDefaultConfig(__dirname);
+
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
+};
+
+config.resolver = {
+  ...config.resolver,
+  assetExts: config.resolver.assetExts.filter(ext => ext !== 'svg'), // remove .svg from assetExts
+  sourceExts: [...config.resolver.sourceExts, 'svg', 'sql'], // add .svg and .sql to sourceExts
+};
+
+module.exports = config;
