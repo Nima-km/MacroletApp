@@ -11,12 +11,11 @@ export const food = sqliteTable('food', {
     fat: integer('fat').default(0).notNull(),
     carbs: integer('carbs').default(0).notNull(),
     fiber: integer('fiber').default(0).notNull(),
+
     barcode: integer('barcode').default(0),
-    
     serving_100g: integer('serving_100g').default(1).notNull(),
     volume_100ml: integer('volume_100ml').default(1).notNull(),
     micro_nutriants: text('micro_nutriants', { mode: 'json' }),
-    is_recipe: integer('is_recipe', {mode: 'boolean'}).default(false).notNull(),
   
     recipe_id: integer('recipe_id')
     .references(() => recipe.id),
