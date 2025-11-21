@@ -1,11 +1,11 @@
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 
 export const food = sqliteTable('food', {
     id: integer('id').primaryKey({autoIncrement: true}),
     name: text('name').notNull(),
-    nickname: text('nickname').notNull(),
+    nickname: text('nickname'),
     // Macronutrients per 100g (or standard unit)
     protein: integer('protein').default(0).notNull(),
     fat: integer('fat').default(0).notNull(),
@@ -19,7 +19,12 @@ export const food = sqliteTable('food', {
   
     recipe_id: integer('recipe_id')
     .references(() => recipe.id),
-})
+    
+}, 
+    (table) => ({
+        nicknameUnique: uniqueIndex("users_nickname_unique").on(table.nickname),
+    })
+)
 export const recipe = sqliteTable('recipe', {
     id: integer('id').primaryKey({autoIncrement: true}),
     servings_yield: integer('servings_yield').default(0).notNull(),
@@ -41,21 +46,27 @@ export const foodItem = sqliteTable ('foodItem', {
     serving_mult: integer('serving_mult').default(1).notNull(),
     serving_type: text('serving_type').notNull(),
     
-}
-)
+})
+export const servingSize = sqliteTable ('servingSize', {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    serving_mult: integer('serving_mult').default(1).notNull(),
+    serving_type: text('serving_type').notNull(),
+    food_id: integer('food_id')
+    .notNull()
+    .references(() => food.id),
+})
 
-export const IngredientItem = sqliteTable ('IngredientItem', {
+export const ingredientItem = sqliteTable ('IngredientItem', {
     id: integer('id').primaryKey({autoIncrement: true}),
     recipe_id: integer('recipe_id')
     .notNull()
     .references(() => recipe.id),
-    ingredient_id: integer('food_id')
+    ingredient_id: integer('ingredient_id')
     .notNull()
     .references(() => food.id),
     servings: integer('servings').notNull(),
     serving_mult: integer('serving_mult').default(1).notNull(),
     serving_type: text('serving_type').notNull(),
-    
 }
 )
 
