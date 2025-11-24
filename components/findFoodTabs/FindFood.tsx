@@ -1,8 +1,8 @@
-import BarcodeComponent from '@/components/findFoodComponents/BarcodeComponent';
-import QuickAddComponent from '@/components/findFoodComponents/QuickAddComponent';
-import RecentComponent from '@/components/findFoodComponents/RecentComponent';
-import RecipeComponent from '@/components/findFoodComponents/RecipeComponent';
-import VoiceComponent from '@/components/findFoodComponents/VoiceComponent';
+import BarcodeComponent from '@/components/findFoodTabs/BarcodeComponent';
+import QuickAddComponent from '@/components/findFoodTabs/QuickAddComponent';
+import RecentComponent from '@/components/findFoodTabs/RecentComponent';
+import RecipeComponent from '@/components/findFoodTabs/RecipeComponent';
+import VoiceComponent from '@/components/findFoodTabs/VoiceComponent';
 import { Link } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';

@@ -42,6 +42,8 @@ export const getFoodItemRecent = async () => {
     return result
 };
 
+// for retrieving the total sum of macros logged in foodItem from-to date
+
 export const getFoodItemSum = async (from: Date, to: Date) => {
 //  console.log('getDailyHistory')
   return db.select({

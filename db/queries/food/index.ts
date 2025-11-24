@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
-import { food, foodItem, nutritionGoal } from "@/db/schema";
+import { food, foodItem } from "@/db/schema";
 import { FoodInsert, FoodItemInsert, FoodItemType, FoodType } from "@/types/food";
-import { desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const getFood = async (foodID: number) => {
   const res = db.select().from(food).where(eq(food.id, foodID));
@@ -26,6 +26,9 @@ export const getFoodItem = async (foodItemID: number) => {
 export const insertFoodItem = async (foodItemObject: FoodItemInsert) => {
   return db.insert(foodItem).values(foodItemObject).returning();
 };
+export const insertFoodItems = async (foodItemObject: FoodItemInsert[]) => {
+  return db.insert(foodItem).values(foodItemObject).returning();
+};
 
 export const updateFoodItem = async (foodItemID: number, foodItemObject: FoodItemType) => {
   return db.update(foodItem).set(foodItemObject).where(eq(foodItem.id, foodItemID)).returning();
@@ -33,8 +36,4 @@ export const updateFoodItem = async (foodItemID: number, foodItemObject: FoodIte
 
 export const deleteFoodItem = async (foodItemID: number) => {
   return db.delete(foodItem).where(eq(foodItem.id, foodItemID)).returning();
-};
-
-export const getNutriGoals = async () => {
-  return db.select().from(nutritionGoal).orderBy(desc(nutritionGoal.timestamp)).get()
 };

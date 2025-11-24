@@ -7,6 +7,11 @@ export const getServingSize = async (servingSizeID: number) => {
   const res = db.select().from(servingSize).where(eq(servingSize.id, servingSizeID));
   return res
 };
+export const getFoodServingSize = async (foodID: number) => {
+  const res = db.select().from(servingSize).where(eq(servingSize.food_id, foodID));
+  return res
+};
+
 
 export const insertServingSize = async (servingSizeObject: ServingSizeInsert) => {
   return db.insert(servingSize).values(servingSizeObject).returning();

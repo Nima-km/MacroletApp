@@ -28,6 +28,7 @@ export const food = sqliteTable('food', {
 export const recipe = sqliteTable('recipe', {
     id: integer('id').primaryKey({autoIncrement: true}),
     servings_yield: integer('servings_yield').default(0).notNull(),
+    recipe_slug: text('recipe_slug'),
     directions: text('directions', { mode: 'json' }),
     prep_time: integer('prep_time').default(0).notNull(),
     cook_time: integer('cook_time').default(0).notNull(),
