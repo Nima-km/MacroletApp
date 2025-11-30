@@ -1,0 +1,18 @@
+
+
+export const colors = {
+    white: "#FFFFFF",
+    off_white: "#F7F4F1",
+    primary: "#B7410E",
+    primary_bg: "#F5E6E0",
+    primary_inactive: "#D79A80",
+    protein: '#E67263',
+    fat: '#FCD247',
+    carbs: '#FD9E4B',
+    error: '#D72424',
+    black: '#2E221C',
+    medium_gray: '#5B5252',
+    light_gray: '#C5C5C5',
+    inactive: '#938B87',
+};
+
