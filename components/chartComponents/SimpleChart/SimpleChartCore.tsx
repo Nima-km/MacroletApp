@@ -1,0 +1,77 @@
+import { H4 } from '@/components/UIComponents/Typography';
+import { useSkiaFonts } from '@/context/FontProvider';
+import { Canvas, RoundedRect, Text as SKText } from '@shopify/react-native-skia';
+import React, { FC, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Easing, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import { SvgProps } from "react-native-svg";
+
+
+const strokeWidth = 16
+const margin = 2
+const iconWidth = 25
+type SimpleChartProps = {
+    target: number,
+    progress: number,
+    mode: boolean,
+    width: number,
+    topText: string,
+    barColor: string,
+    backgroundColor: string,
+    Icon?: FC<SvgProps>;
+}
+
+const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mode, Icon, topText} : SimpleChartProps) => {
+    const { h5 } = useSkiaFonts();
+    const animatedBar = useSharedValue(0)
+    const animateChart = () => {
+        animatedBar.value = withTiming(progress,  {
+        duration: 1250,
+        easing: Easing.inOut(Easing.cubic),
+        });
+    };
+    useEffect(() => {
+        animateChart()
+    }, [target, progress])
+    const end = useDerivedValue(() => (target ? Math.min(((animatedBar.value / target) * (width - 2 * margin)), (width - 2 * margin)) : 0));
+    const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
+    const widthGoal = useDerivedValue(() => (width - (h5.measureText(goalText.value).width)) / 2);
+    return (
+        <View style={{alignSelf: "flex-start", alignItems: 'center'}}>
+            <View style={{flexDirection: 'row', marginBottom: 4, justifyContent: 'center'}}>
+                <H4>
+                    {topText}
+                </H4>
+                {Icon && <Icon width={iconWidth} height={iconWidth} style={{marginLeft: 2}} />}
+            </View>
+            <Canvas style={{ width: width, height: 35 }}> 
+                <RoundedRect
+                    x={0}
+                    y={0}
+                    width={width}
+                    height={strokeWidth}
+                    r={20}
+                    color={backgroundColor}
+                />
+                <RoundedRect
+                    x={2}
+                    y={2}
+                    width={end}
+                    height={strokeWidth - 2 * margin}
+                    r={20}
+                    color={barColor}
+                />
+                <SKText
+                x={widthGoal}
+                y={strokeWidth + h5.getSize()}
+                font={h5}
+                text={goalText}
+                />
+            </Canvas>
+        </View>
+    )
+}
+
+export default SimpleChartCore
+
+const styles = StyleSheet.create({})

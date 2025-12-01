@@ -1,3 +1,4 @@
+import { FontProvider } from '@/context/FontProvider';
 import migrations from '@/drizzle/migrations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
@@ -39,11 +40,13 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
             <Suspense fallback={<ActivityIndicator size="large" />}>
                 <SQLiteProvider
-                databaseName={DATABASE_NAME}
-                options={{ enableChangeListener: true }}
-                useSuspense>
-                
-                    <Stack />
+                    databaseName={DATABASE_NAME}
+                    options={{ enableChangeListener: true }}
+                    useSuspense
+                >
+                    <FontProvider>
+                        <Stack />
+                    </FontProvider>
                 </SQLiteProvider>
             </Suspense>
         </QueryClientProvider>

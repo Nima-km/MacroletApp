@@ -1,4 +1,8 @@
 
+
+import { SimpleChartCarbsGoal, SimpleChartFatGoal, SimpleChartProteinGoal } from '@/components/chartComponents/SimpleChart/SimpleChartGoal'
+import { SimpleChartCarbsMacro, SimpleChartFatMacro, SimpleChartProteinMacro } from '@/components/chartComponents/SimpleChart/SimpleChartMacro'
+import { SimpleChartCarbsSmall, SimpleChartFatSmall, SimpleChartProteinSmall } from '@/components/chartComponents/SimpleChart/SimpleChartSmall'
 import { InlineButton, PrimaryButton, SecondaryButton, SubButton } from '@/components/UIComponents/Buttons/Button'
 import StyledRadioButton, { DefaultRadioButton } from '@/components/UIComponents/Buttons/RadioButton'
 import ExpandableTextInput from '@/components/UIComponents/TextInputs/ExpandableTextInput'
@@ -46,7 +50,24 @@ const test = () => {
                 value={note}
                 onChangeText={setNote}
                 placeholder="Write your note..."
-                collapsedPlaceholder="Expandable Text Input"/>
+                collapsedPlaceholder="Expandable Text Input"
+            />
+            <H3>charts</H3>
+            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                <SimpleChartProteinGoal target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartFatGoal target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartCarbsGoal target={150} progress={90} backgroundColor={'black'}/>
+            </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                <SimpleChartProteinMacro target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartFatMacro target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartCarbsMacro target={150} progress={90} backgroundColor={'black'}/>
+            </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                <SimpleChartProteinSmall target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartFatSmall target={150} progress={90} backgroundColor={'black'}/>
+                <SimpleChartCarbsSmall target={150} progress={90} backgroundColor={'black'}/>
+            </View>
         </View>
     )
 }
