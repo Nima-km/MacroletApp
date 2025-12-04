@@ -11,6 +11,7 @@ export default function Layout() {
             <Tabs.Screen name="(logs)" options={{ title: 'Logs' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
             <Tabs.Screen name="test" options={{ title: 'test' }} />
+            <Tabs.Screen name="test1" options={{ title: 'test1' }} />
 
         </Tabs>
     )

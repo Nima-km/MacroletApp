@@ -6,9 +6,11 @@ import { SimpleChartCarbsSmall, SimpleChartFatSmall, SimpleChartProteinSmall } f
 import { InlineButton, PrimaryButton, SecondaryButton, SubButton } from '@/components/UIComponents/Buttons/Button'
 import StyledRadioButton, { DefaultRadioButton } from '@/components/UIComponents/Buttons/RadioButton'
 import ExpandableTextInput from '@/components/UIComponents/TextInputs/ExpandableTextInput'
+import { FormInput, FormInputMacro, FormInputSearch } from '@/components/UIComponents/TextInputs/FormInput'
 import { H1, H2, H3, H4, H4_Bold, H5, H5_SemiBold, H6 } from '@/components/UIComponents/Typography'
 import React, { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
+
 
 const test = () => {
     const AutoCalorie = [
@@ -17,58 +19,83 @@ const test = () => {
         
     ];
     const [note, setNote] = useState("");
+    const [input, setInput] = useState("")
+    const [searchInput, setSearchInput] = useState("")
+    const [macroInput, setMacroInput] = useState("")
+    
     return (
-        <View>
-            <H1>H1</H1>
-            <H2>H2</H2>
-            <H3>H3</H3>
-            <H4>H4</H4>
-            <H4_Bold>Test4*</H4_Bold>
-            <H5>H5</H5>
-            <H5_SemiBold>H5_SemiBold*</H5_SemiBold>
-            <H6>H6</H6>
-            <PrimaryButton>
-                Primary Button
-            </PrimaryButton>
-            <SecondaryButton>
-                Secondary Button
-            </SecondaryButton>
-            <InlineButton>
-                Inline Button
-            </InlineButton>
-            <SubButton>
-                + Add Nickname
-            </SubButton>
-            <View style = {{}}>
-                <StyledRadioButton options={AutoCalorie} onSelect={(value) => console.log('SELECTED', value)}/>
-            </View>
+        <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={100} // adjust if header is present
+        >
+            <ScrollView>
+            
+                <H1>H1</H1>
+                <H2>H2</H2>
+                <H3>H3</H3>
+                <H4>H4</H4>
+                <H4_Bold>Test4*</H4_Bold>
+                <H5>H5</H5>
+                <H5_SemiBold>H5_SemiBold*</H5_SemiBold>
+                <H6>H6</H6>
+                <PrimaryButton>
+                    Primary Button
+                </PrimaryButton>
+                <SecondaryButton>
+                    Secondary Button
+                </SecondaryButton>
+                <InlineButton>
+                    Inline Button
+                </InlineButton>
+                <SubButton>
+                    + Add Nickname
+                </SubButton>
+                <View style = {{}}>
+                    <StyledRadioButton options={AutoCalorie} onSelect={(value) => console.log('SELECTED', value)}/>
+                </View>
 
-            <View style = {{}}>
-                <DefaultRadioButton options={AutoCalorie} onSelect={(value) => console.log('SELECTED', value)}/>
-            </View>
-            <ExpandableTextInput 
-                value={note}
-                onChangeText={setNote}
-                placeholder="Write your note..."
-                collapsedPlaceholder="Expandable Text Input"
-            />
-            <H3>charts</H3>
-            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <SimpleChartProteinGoal target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartFatGoal target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartCarbsGoal target={150} progress={90} backgroundColor={'black'}/>
-            </View>
-            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <SimpleChartProteinMacro target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartFatMacro target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartCarbsMacro target={150} progress={90} backgroundColor={'black'}/>
-            </View>
-            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <SimpleChartProteinSmall target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartFatSmall target={150} progress={90} backgroundColor={'black'}/>
-                <SimpleChartCarbsSmall target={150} progress={90} backgroundColor={'black'}/>
-            </View>
-        </View>
+                <View style = {{}}>
+                    <DefaultRadioButton options={AutoCalorie} onSelect={(value) => console.log('SELECTED', value)}/>
+                </View>
+                <ExpandableTextInput 
+                    value={note}
+                    onChangeText={setNote}
+                    placeholder="Write your note..."
+                    collapsedPlaceholder="Expandable Text Input"
+                />
+                <H3>charts</H3>
+                <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                    <SimpleChartProteinGoal target={150} progress={90} backgroundColor={'black'}/>
+                    
+                    <SimpleChartCarbsGoal target={150} progress={90} backgroundColor={'black'}/><SimpleChartFatGoal target={150} progress={90} backgroundColor={'black'}/>
+                </View>
+                <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                    <SimpleChartProteinMacro target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartCarbsMacro target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartFatMacro target={150} progress={90} backgroundColor={'black'}/>
+                </View>
+                <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                    <SimpleChartProteinSmall target={150} progress={90} backgroundColor={'black'}/>
+                    
+                    <SimpleChartCarbsSmall target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartFatSmall target={150} progress={90} backgroundColor={'black'}/>
+                </View>
+                <H3>Inputs</H3>
+                <View style={{gap: 20}}>
+                    
+                    <FormInput value={input} onChangeText={setInput} placeholder='Empty Field'/>
+                    <FormInputSearch value={searchInput} onChangeText={setSearchInput} />
+                    <FormInput value={input} onChangeText={setInput} error={'Nickname already in use.'}/>
+                    <View style= {{width: 70}}>
+                        <FormInputMacro value={macroInput} onChangeText={setMacroInput} />
+                    </View>
+                </View>
+                
+                <View style={{padding: 20,}}/>
+            
+            </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
 

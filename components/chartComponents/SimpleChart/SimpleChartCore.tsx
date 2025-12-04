@@ -2,11 +2,11 @@ import { H4 } from '@/components/UIComponents/Typography';
 import { useSkiaFonts } from '@/context/FontProvider';
 import { Canvas, RoundedRect, Text as SKText } from '@shopify/react-native-skia';
 import React, { FC, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { Easing, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SvgProps } from "react-native-svg";
 
-
+const { width: swidth, height } = Dimensions.get('window');
 const strokeWidth = 16
 const margin = 2
 const iconWidth = 25
@@ -32,6 +32,7 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
     };
     useEffect(() => {
         animateChart()
+        console.log("width", swidth, height)
     }, [target, progress])
     const end = useDerivedValue(() => (target ? Math.min(((animatedBar.value / target) * (width - 2 * margin)), (width - 2 * margin)) : 0));
     const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
