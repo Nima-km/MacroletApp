@@ -24,8 +24,8 @@ export function SecondaryButton({ children, style, ...props }: ButtonProps) {
 }
 export function InlineButton({ children, style, ...props }: ButtonProps) {
     return (
-        <TouchableOpacity {...props}>
-            <H5 style={styles.secondaryText}>{children}</H5>
+        <TouchableOpacity {...props} style={[style]}>
+            <H5 style={[styles.secondaryText, {textDecorationLine: 'underline'}]}>{children}</H5>
         </TouchableOpacity>
     );
 }
@@ -39,34 +39,34 @@ export function SubButton({ children, style, ...props }: ButtonProps) {
 
 
 const styles = StyleSheet.create({
-  button: {
-    padding: 15,
-    borderRadius: 7,
-    alignItems: 'center',
-  },
-  sub_button: {
-    padding: 12,
-    borderRadius: 22,
-    alignItems: 'center',
-    backgroundColor: colors.primary_bg,
-    alignSelf: "flex-start",
-  },
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  primaryText: {
-    color: colors.white,
-  },
-  secondary: {
-    backgroundColor: colors.white,
-  },
-  secondaryText: {
-    color: colors.primary,
-  },
-  inlineText: {
-    color: colors.primary,
-  },
-  SubText: {
-    color: colors.primary,
-  },
+    button: {
+        padding: 15,
+        borderRadius: 7,
+        alignItems: 'center',
+    },
+    sub_button: {
+        padding: 12,
+        borderRadius: 22,
+        alignItems: 'center',
+        backgroundColor: colors.primary_bg,
+        alignSelf: "flex-start",
+    },
+    primary: {
+        backgroundColor: colors.primary,
+    },
+    primaryText: {
+        color: colors.white,
+    },
+    secondary: {
+        backgroundColor: colors.white,
+    },
+    secondaryText: {
+        color: colors.primary,
+    },
+    inlineText: {
+        color: colors.primary,
+    },
+    SubText: {
+        color: colors.primary,
+    },
 });

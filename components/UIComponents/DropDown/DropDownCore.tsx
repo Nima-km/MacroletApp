@@ -20,7 +20,7 @@ interface DropdownSelectProps {
     options: DropdownOption[];
     placeholder?: string;
     extraButtonText?: string;
-    onSelect?: (value: any) => void;
+    onSelect?: (option: DropdownOption) => void;
     extraButton?: (value: any) => void;
     style?: any;
 }
@@ -56,7 +56,9 @@ export default function DropdownCore({
             useNativeDriver: false,
         }).start();
         */
-        onSelect?.(option.value);
+        toggle()
+        console.log('i got pressed', option.value)
+        onSelect?.(option);
     };
 
     return (
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
         padding: 14,
        // height: 50,
         paddingHorizontal: 24,
-        backgroundColor: colors.light_gray,
+        backgroundColor: colors.white,
         borderRadius: 10,
         flexDirection: 'row',
         justifyContent: 'space-between'
@@ -115,9 +117,8 @@ const styles = StyleSheet.create({
     dropdown: {
         overflow: "hidden",
         borderRadius: 8,
-        marginTop: 1,
-        
-        backgroundColor: colors.light_gray,
+        marginTop: 1, 
+        backgroundColor: colors.white,
     },
     option: {
         paddingVertical: 14,

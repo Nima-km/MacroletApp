@@ -7,10 +7,10 @@ export const food = sqliteTable('food', {
     name: text('name').notNull(),
     nickname: text('nickname'),
     // Macronutrients per 100g (or standard unit)
-    protein: integer('protein').default(0).notNull(),
-    fat: integer('fat').default(0).notNull(),
-    carbs: integer('carbs').default(0).notNull(),
-    fiber: integer('fiber').default(0).notNull(),
+    protein: integer('protein').notNull(),
+    fat: integer('fat').notNull(),
+    carbs: integer('carbs').notNull(),
+    fiber: integer('fiber').notNull(),
 
     barcode: integer('barcode').default(0),
     serving_100g: integer('serving_100g').default(1).notNull(),
@@ -65,6 +65,8 @@ export const ingredientItem = sqliteTable ('IngredientItem', {
     ingredient_id: integer('ingredient_id')
     .notNull()
     .references(() => food.id),
+    prep_notes: text('prep_notes'),
+    display_name: text('display_name'),
     servings: integer('servings').notNull(),
     serving_mult: integer('serving_mult').default(1).notNull(),
     serving_type: text('serving_type').notNull(),

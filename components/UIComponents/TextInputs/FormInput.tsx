@@ -1,13 +1,14 @@
 import SearchIcon from '@/assets/svg/search.svg';
 import { colors, typography } from "@/theme";
 import React, { FC, useRef } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, TextStyle, View } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { H5, H6 } from "../Typography";
 const iconWidth = 24
 interface FormInputProps {
     label?: string;
     value: string;
+    style?: TextStyle | TextStyle[];
     onChangeText: (text: string) => void;
     placeholder?: string;
     unit?: string;
@@ -23,6 +24,7 @@ export function FormInput({
     value,
     onChangeText,
     placeholder,
+    style,
     error,
     secureTextEntry,
     Icon,
@@ -52,6 +54,7 @@ export function FormInput({
                     style={[
                         {padding: 0},
                         typography.h5,
+                        style,
                         // apply red border when error exists
                     ]}
                     placeholderTextColor="#999"
@@ -82,6 +85,15 @@ export function FormInputMacro({
 }: FormInputProps) {
     return (
         <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} error={error} unit='g'/>
+    )
+}
+export function FormInputNumber({
+    value,
+    onChangeText,
+}: FormInputProps) {
+
+    return (
+        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} style={typography.h3}/>
     )
 }
 const styles = StyleSheet.create({

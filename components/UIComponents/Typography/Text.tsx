@@ -47,7 +47,7 @@ export function H4(props: TextProps) {
         <RNText
             {...props}
             style={[
-                typography.h4_Bold,
+                typography.h4,
                 props.style,
             ]}
         />

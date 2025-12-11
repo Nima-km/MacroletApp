@@ -3,12 +3,12 @@ import { IngredientItemInsert, RecipeData } from "@/types/recipe";
 
 
 export const TestFood1: FoodInsert = {
-    name: "TESTFOOD1",
+    name: "TEST FOOD WITH A REALLY LONG NAME FOR NO REASON",
     nickname: "TESTFOOD1",
-    protein: 1,
-    fat: 1,
-    carbs: 1,
-    fiber: 0,
+    protein: 30,
+    fat: 15,
+    carbs: 55,
+    fiber: 8,
     barcode: 1,
     serving_100g: 1,
     volume_100ml: 1,
@@ -82,19 +82,19 @@ export const TestFoodItem3: Omit<FoodItemInsert, 'food_id'> = {
     serving_mult: 1,
 }
 export const TestIngredientItem1: Omit<IngredientItemInsert, 'recipe_id'> = {
-    serving_type: "g",
+    serving_type: "Grams",
     ingredient_id: 1,
-    servings: 1,
+    servings: 40,
     serving_mult: 1,
 }
 export const TestIngredientItem2: Omit<IngredientItemInsert, 'recipe_id'> = {
-    serving_type: "g",
+    serving_type: "Grams",
     ingredient_id: 2,
     servings: 1,
     serving_mult: 1,
 }
 export const TestIngredientItem3: Omit<IngredientItemInsert, 'recipe_id'> = {
-    serving_type: "g",
+    serving_type: "Grams",
     ingredient_id: 3,
     servings: 1,
     serving_mult: 1,

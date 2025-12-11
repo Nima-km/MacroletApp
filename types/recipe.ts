@@ -11,6 +11,7 @@ export type RecipeType = Omit<RecipeInsert, 'id'>
 
 
 export type IngredientItemType = Omit<IngredientItemInsert, 'id'>
+export type IngredientItemDetails = Omit<IngredientItemInsert, 'id' | 'recipe_id' | 'ingredient_id'>
 export type RecipeBookType = Omit<RecipeBookInsert, 'id'>
 
 export type RecipeBookItemType = Omit<RecipeBookItemInsert, 'id'>

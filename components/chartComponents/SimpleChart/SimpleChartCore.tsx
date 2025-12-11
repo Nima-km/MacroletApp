@@ -1,8 +1,8 @@
 import { H4 } from '@/components/UIComponents/Typography';
 import { useSkiaFonts } from '@/context/FontProvider';
 import { Canvas, RoundedRect, Text as SKText } from '@shopify/react-native-skia';
-import React, { FC, useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import React, { FC, useEffect, useState } from 'react';
+import { AppState, Dimensions, StyleSheet, View } from 'react-native';
 import { Easing, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SvgProps } from "react-native-svg";
 
@@ -24,6 +24,8 @@ type SimpleChartProps = {
 const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mode, Icon, topText} : SimpleChartProps) => {
     const { h5 } = useSkiaFonts();
     const animatedBar = useSharedValue(0)
+    const [appState, setAppState] = useState(AppState.currentState);
+
     const animateChart = () => {
         animatedBar.value = withTiming(progress,  {
         duration: 1250,
@@ -33,7 +35,22 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
     useEffect(() => {
         animateChart()
         console.log("width", swidth, height)
+        console.log("i rendered")
+
     }, [target, progress])
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+        console.log('App State changed to', nextAppState);
+        setAppState(nextAppState);      if (nextAppState === 'active') {
+            animatedBar.value = progress - 0.01
+            animateChart()
+        } else if (nextAppState === 'background') {
+            // The app is in the background, save state or pause tasks
+        }
+        });    return () => {
+        subscription.remove();
+        };
+    }, []);
     const end = useDerivedValue(() => (target ? Math.min(((animatedBar.value / target) * (width - 2 * margin)), (width - 2 * margin)) : 0));
     const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
     const widthGoal = useDerivedValue(() => (width - (h5.measureText(goalText.value).width)) / 2);
