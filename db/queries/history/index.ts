@@ -16,14 +16,16 @@ export const getFoodItemHistory = async (from: Date, to: Date) => {
 // for retreving recently logged foods
 
 export const getFoodItemRecent = async () => {
+    console.log("getFoodItemRecent got hit")
     const latest = db.select({
         food_id: foodItem.food_id,
-        timestamp: max(foodItem.timestamp)
+        max_imestamp: max(foodItem.timestamp).as("max_imestamp") 
     })
     .from(foodItem)
     .groupBy(foodItem.food_id)
-    .as("latest");
+    .as("latests");
 
+    console.log("getFoodItemRecent, latest")
     const result = db.select({
         food: food,
         foodItem: foodItem
@@ -33,12 +35,12 @@ export const getFoodItemRecent = async () => {
     .innerJoin(
         foodItem,
         and(
-        eq(foodItem.food_id, latest.food_id),
-        eq(foodItem.timestamp, latest.timestamp)
+            eq(foodItem.food_id, latest.food_id),
+            eq(foodItem.timestamp, latest.max_imestamp)
         )
     )
     .orderBy(foodItem.timestamp)
-
+    console.log("getFoodItemRecent, result")
     return result
 };
 

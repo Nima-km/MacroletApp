@@ -43,8 +43,8 @@ export const foodItem = sqliteTable ('foodItem', {
     food_id: integer('food_id')
     .notNull()
     .references(() => food.id),
-    servings: integer('servings').default(0).notNull(),
-    serving_mult: integer('serving_mult').default(1).notNull(),
+    servings: integer('servings').notNull(),
+    serving_mult: integer('serving_mult').notNull(),
     serving_type: text('serving_type').notNull(),
     
 })
@@ -68,7 +68,7 @@ export const ingredientItem = sqliteTable ('IngredientItem', {
     prep_notes: text('prep_notes'),
     display_name: text('display_name'),
     servings: integer('servings').notNull(),
-    serving_mult: integer('serving_mult').default(1).notNull(),
+    serving_mult: integer('serving_mult').notNull(),
     serving_type: text('serving_type').notNull(),
 }
 )

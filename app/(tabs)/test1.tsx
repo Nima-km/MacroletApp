@@ -1,3 +1,4 @@
+import FoodCardFull from '@/components/chartComponents/FoodCards/FoodCardFull'
 import { PrimaryButton } from '@/components/UIComponents/Buttons/Button'
 import PrepCookButton from '@/components/UIComponents/Buttons/PrepCookButton'
 import DropdownCore from '@/components/UIComponents/DropDown/DropDownCore'
@@ -38,7 +39,7 @@ const test1 = () => {
         setPrepMinute(Number(mins))
     }
     return (
-        <View>
+        <View style={{paddingHorizontal: 20}}>
             <DropdownCore options={options} />
             <DropdownCore options={options} extraButton={() => console.log('pressed boah')} extraButtonText='Add New'/>
             <PrepCookButton prepHour={prepHour} cookHour={cookHour} prepMinute={prepMinute} cookMinute={cookMinute} setCookHourMinute={setCookHourMinute} setPrepHourMinute={setPrepHourMinute}/>
@@ -116,6 +117,8 @@ const test1 = () => {
                     selectedOption={0}          
                     />
             </Modal>
+            <FoodCardFull/>
+            <View style={{padding: 20}}/>
         </View>
     )
 }

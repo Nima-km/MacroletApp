@@ -1,4 +1,4 @@
-import { getFoodItemHistory, getFoodItemSum } from "@/db/queries/history";
+import { getFoodItemHistory, getFoodItemRecent, getFoodItemSum } from "@/db/queries/history";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetFoodItemSum = (from: Date, to: Date) => {
@@ -13,6 +13,13 @@ export const useGetFoodItemList = (from: Date, to: Date) => {
   return useQuery({
     queryKey: ["food-history", from.toISOString(), to.toISOString()],
     queryFn: () => getFoodItemHistory(from, to),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+export const useGetFoodItemRecent = () => {
+  return useQuery({
+    queryKey: ["food-history", "recent"],
+    queryFn: () => getFoodItemRecent(),
     staleTime: 1000 * 60 * 5,
   });
 };

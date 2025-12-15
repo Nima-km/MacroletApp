@@ -1,5 +1,6 @@
 import { FontProvider } from '@/context/FontProvider';
 import migrations from '@/drizzle/migrations';
+import { colors } from '@/theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
@@ -9,6 +10,7 @@ import { Stack } from 'expo-router';
 import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export const DATABASE_NAME = 'database';
 
 
@@ -45,7 +47,15 @@ export default function RootLayout() {
                     useSuspense
                 >
                     <FontProvider>
-                        <Stack />
+                        <GestureHandlerRootView >
+                            <Stack 
+                                screenOptions={{ headerShown: false,
+                                    contentStyle: {
+                                        backgroundColor: colors.error,
+                                    },
+                                }}
+                            />
+                        </GestureHandlerRootView>
                     </FontProvider>
                 </SQLiteProvider>
             </Suspense>
