@@ -65,6 +65,17 @@ export const TestFood4: FoodInsert = {
         testmacro2: 41,
     }
 };
+export const FoodDefault: FoodInsert = {
+    name: "",
+    nickname: "",
+    protein: 0,
+    fat: 0,
+    carbs: 0,
+    fiber: 0,
+    barcode: 0,
+    serving_100g: 1,
+    volume_100ml: 1,
+};
 
 export const TestFoodItem1: Omit<FoodItemInsert, 'food_id'> = {
     serving_type: "g",
@@ -79,6 +90,11 @@ export const TestFoodItem2: Omit<FoodItemInsert, 'food_id'> = {
 export const TestFoodItem3: Omit<FoodItemInsert, 'food_id'> = {
     serving_type: "g",
     servings: 2,
+    serving_mult: 1,
+}
+export const FoodItemDefault: Omit<FoodItemInsert, 'food_id'> = {
+    serving_type: "g",
+    servings: 1,
     serving_mult: 1,
 }
 export const TestIngredientItem1: Omit<IngredientItemInsert, 'recipe_id'> = {

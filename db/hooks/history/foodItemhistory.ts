@@ -1,6 +1,8 @@
 import { getFoodItemHistory, getFoodItemRecent, getFoodItemSum } from "@/db/queries/history";
 import { useQuery } from "@tanstack/react-query";
 
+
+// for retrieving the total sum of macros logged in foodItem from-to date
 export const useGetFoodItemSum = (from: Date, to: Date) => {
   
   return useQuery({
@@ -9,6 +11,7 @@ export const useGetFoodItemSum = (from: Date, to: Date) => {
   });
 };
 
+// for retreving the history of foods ate from-to date
 export const useGetFoodItemList = (from: Date, to: Date) => {
   return useQuery({
     queryKey: ["food-history", from.toISOString(), to.toISOString()],
@@ -16,6 +19,8 @@ export const useGetFoodItemList = (from: Date, to: Date) => {
     staleTime: 1000 * 60 * 5,
   });
 };
+
+// for retreving recently logged foods
 export const useGetFoodItemRecent = () => {
   return useQuery({
     queryKey: ["food-history", "recent"],

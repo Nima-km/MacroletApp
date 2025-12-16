@@ -11,4 +11,5 @@ export type MacroType = {
   carbs: number,
   fat: number,
   fiber: number,
+  calories?: number
 }

@@ -6,8 +6,8 @@ import React from 'react'
 import SimpleChartCore from './SimpleChartCore'
 const width = 105
 type SimpleChartProps = {
-    target: number,
-    progress: number,
+    target?: number,
+    progress?: number,
     backgroundColor: string,
 }
 

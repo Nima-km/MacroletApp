@@ -11,8 +11,8 @@ const strokeWidth = 16
 const margin = 2
 const iconWidth = 25
 type SimpleChartProps = {
-    target: number,
-    progress: number,
+    target?: number,
+    progress?: number,
     mode: boolean,
     width: number,
     topText: string,
@@ -25,7 +25,12 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
     const { h5 } = useSkiaFonts();
     const animatedBar = useSharedValue(0)
     const [appState, setAppState] = useState(AppState.currentState);
-
+    if (!target) {
+        target = 1
+    }
+    if (!progress) {
+        progress = 0
+    }
     const animateChart = () => {
         animatedBar.value = withTiming(progress,  {
         duration: 1250,

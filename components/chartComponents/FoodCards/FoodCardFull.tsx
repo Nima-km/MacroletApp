@@ -1,4 +1,8 @@
 import { H4, H5, H5_SemiBold, H6 } from '@/components/UIComponents/Typography'
+import { calculateCalories } from '@/helper/calculateCalories'
+import { calculateMacro } from '@/helper/calculateMacro'
+
+import { formatTime } from '@/helper/formatTime'
 import { colors } from '@/theme'
 import { FoodInsert, FoodItemInsert } from '@/types/food'
 import React from 'react'
@@ -6,45 +10,43 @@ import { StyleSheet, View } from 'react-native'
 
 
 interface FoodCardProps {
-    foodData: FoodInsert,
-    foodItemData: FoodItemInsert,
+    food: FoodInsert;
+    foodItem: FoodItemInsert & Required<Pick<FoodItemInsert, "timestamp">>;
 }
 
-const FoodCardFull = () => {
-    const protein = 52
-    const fat = 28
-    const carbs = 10
+const FoodCardFull = ({food, foodItem} : FoodCardProps) => {
 
+    const foodData = calculateMacro(food, foodItem.serving_mult * foodItem.servings)
     return (
         <View style={styles.container}>
             <View style={styles.rowContainer}>
-                <H4>Steak and Eggs</H4>
-                <H4>764 cal</H4>
+                <H4>{food.name}</H4>
+                <H4>{calculateCalories(foodData)} cals</H4>
             </View>
             <View style={styles.rowContainer}>
-                <H5>1 serving</H5>
-                <H5>9:32 AM</H5>
+                <H5>{foodItem.servings} serving{foodItem.servings > 1 && 's'}</H5>
+                <H5>{formatTime(foodItem.timestamp)}</H5>
             </View>
             <View style={[{flexDirection: 'row'}]}>
-                <View style={[styles.progressBar, {backgroundColor: colors.protein, borderTopLeftRadius: 8, borderBottomLeftRadius: 8, flex: protein}]}/>
-                <View style={[styles.progressBar, {backgroundColor: colors.carbs, flex: carbs}]}/>
-                <View style={[styles.progressBar, {backgroundColor: colors.fat, borderTopRightRadius: 8, borderBottomRightRadius: 8, flex: fat}]}/>
+                <View style={[styles.progressBar, {backgroundColor: colors.protein, borderTopLeftRadius: 8, borderBottomLeftRadius: 8, flex: food.protein}]}/>
+                <View style={[styles.progressBar, {backgroundColor: colors.carbs, flex: food.carbs}]}/>
+                <View style={[styles.progressBar, {backgroundColor: colors.fat, borderTopRightRadius: 8, borderBottomRightRadius: 8, flex: food.fat}]}/>
             </View>
             <View style={styles.macroInfo}>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.protein}]}/>
                     <H5_SemiBold>P</H5_SemiBold>
-                    <H6>{protein} g</H6>
+                    <H6>{foodData.protein} g</H6>
                 </View>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.carbs}]}/>
                     <H5_SemiBold>C</H5_SemiBold>
-                    <H6>{carbs} g</H6>
+                    <H6>{foodData.carbs} g</H6>
                 </View>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.fat}]}/>
                     <H5_SemiBold>F</H5_SemiBold>
-                    <H6>{fat} g</H6>
+                    <H6>{foodData.fat} g</H6>
                 </View>
             </View>
         </View>
