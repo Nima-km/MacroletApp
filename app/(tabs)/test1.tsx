@@ -1,4 +1,3 @@
-import FoodCardFull from '@/components/chartComponents/FoodCards/FoodCardFull'
 import { PrimaryButton } from '@/components/UIComponents/Buttons/Button'
 import PrepCookButton from '@/components/UIComponents/Buttons/PrepCookButton'
 import DropdownCore from '@/components/UIComponents/DropDown/DropDownCore'
@@ -117,7 +116,6 @@ const test1 = () => {
                     selectedOption={0}          
                     />
             </Modal>
-            <FoodCardFull/>
             <View style={{padding: 20}}/>
         </View>
     )

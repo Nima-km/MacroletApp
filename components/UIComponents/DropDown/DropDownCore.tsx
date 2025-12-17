@@ -15,7 +15,7 @@ export interface DropdownOption {
 }
 
 
-const iconWidth = 25
+
 interface DropdownSelectProps {
     options: DropdownOption[];
     placeholder?: string;
@@ -24,7 +24,7 @@ interface DropdownSelectProps {
     extraButton?: (value: any) => void;
     style?: any;
 }
-
+const iconWidth = 25
 export default function DropdownCore({
     options,
     placeholder = "Dropdown",

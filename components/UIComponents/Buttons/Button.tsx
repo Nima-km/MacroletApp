@@ -1,7 +1,7 @@
 import { colors } from "@/theme";
 import { PropsWithChildren } from "react";
 import { StyleSheet, TouchableOpacity, TouchableOpacityProps } from "react-native";
-import { H4, H5 } from "../Typography";
+import { H3, H4, H5 } from "../Typography";
 
 type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
     style?: any; // or StyleProp<ViewStyle>
@@ -36,6 +36,13 @@ export function SubButton({ children, style, ...props }: ButtonProps) {
         </TouchableOpacity>
     );
 }
+export function DateButton({ children, style, ...props }: ButtonProps) {
+    return (
+        <TouchableOpacity {...props} style={[style, styles.date_button]}>
+            <H3 style={styles.secondaryText}>{children}</H3>
+        </TouchableOpacity>
+    );
+}
 
 
 const styles = StyleSheet.create({
@@ -47,6 +54,13 @@ const styles = StyleSheet.create({
     sub_button: {
         padding: 12,
         borderRadius: 22,
+        alignItems: 'center',
+        backgroundColor: colors.primary_bg,
+        alignSelf: "flex-start",
+    },
+    date_button: {
+        padding: 12,
+        borderRadius: 8,
         alignItems: 'center',
         backgroundColor: colors.primary_bg,
         alignSelf: "flex-start",

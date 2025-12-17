@@ -50,7 +50,7 @@ export const foodItem = sqliteTable ('foodItem', {
 })
 export const servingSize = sqliteTable ('servingSize', {
     id: integer('id').primaryKey({autoIncrement: true}),
-    serving_mult: integer('serving_mult').default(1).notNull(),
+    serving_mult: integer('serving_mult').notNull(),
     serving_type: text('serving_type').notNull(),
     food_id: integer('food_id')
     .notNull()

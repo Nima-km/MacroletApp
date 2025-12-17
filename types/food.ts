@@ -4,6 +4,7 @@ export type FoodInsert = typeof food.$inferInsert;
 export type FoodItemInsert = typeof foodItem.$inferInsert
 export type FoodType = Omit<FoodInsert, 'id'>
 export type FoodItemType = Omit<FoodItemInsert, 'id'>
+export type FoodItemData = Omit<FoodItemType, 'food_id'>
 
 
 export type MacroType = {

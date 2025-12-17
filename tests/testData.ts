@@ -93,7 +93,7 @@ export const TestFoodItem3: Omit<FoodItemInsert, 'food_id'> = {
     serving_mult: 1,
 }
 export const FoodItemDefault: Omit<FoodItemInsert, 'food_id'> = {
-    serving_type: "g",
+    serving_type: "Servings",
     servings: 1,
     serving_mult: 1,
 }

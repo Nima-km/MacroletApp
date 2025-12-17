@@ -33,6 +33,11 @@ const logs = () => {
                     <Text>NAVIGATE</Text>
                 </TouchableOpacity>
             </Link>
+            <Link href={"/(tabs)/(logs)/food"} asChild>
+                <TouchableOpacity>
+                    <Text>NAVIGATE food</Text>
+                </TouchableOpacity>
+            </Link>
             <View style={{backgroundColor: colors.white, padding: 20, gap: 20}}>
                 <H1>Calorie Intake</H1>
                 <BarChart 

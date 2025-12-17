@@ -67,8 +67,8 @@ const test = () => {
                 <H3>charts</H3>
                 <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                     <SimpleChartProteinGoal target={150} progress={90} backgroundColor={'black'}/>
-                    
-                    <SimpleChartCarbsGoal target={150} progress={90} backgroundColor={'black'}/><SimpleChartFatGoal target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartCarbsGoal target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartFatGoal target={150} progress={90} backgroundColor={'black'}/>
                 </View>
                 <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                     <SimpleChartProteinMacro target={150} progress={90} backgroundColor={'black'}/>
