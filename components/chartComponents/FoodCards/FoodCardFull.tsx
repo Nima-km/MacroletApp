@@ -24,7 +24,7 @@ const FoodCardFull = ({food, foodItem} : FoodCardProps) => {
                 <H4>{calculateCalories(foodData)} cals</H4>
             </View>
             <View style={styles.rowContainer}>
-                <H5>{foodItem.servings} serving{foodItem.servings > 1 && 's'}</H5>
+                <H5>{foodItem.servings} {foodItem.serving_type}{foodItem.servings > 1 && 's'}</H5>
                 <H5>{formatTime(foodItem.timestamp)}</H5>
             </View>
             <View style={[{flexDirection: 'row'}]}>

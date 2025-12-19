@@ -3,7 +3,7 @@ import { colors, typography } from "@/theme";
 import React, { FC, useRef } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TextStyle, View } from "react-native";
 import { SvgProps } from "react-native-svg";
-import { H5, H6 } from "../Typography";
+import { H6 } from "../Typography";
 const iconWidth = 24
 interface FormInputProps {
     label?: string;
@@ -45,7 +45,9 @@ export function FormInput({
                     ref={inputRef}
                     onChangeText={(text) =>{
                         if (numeric) {
-                            text = text.replace(/[^0-9]/g, "");
+                            text = text
+                                //.replace(/[^0-9.]/g, "")   // allow digits and dots
+                              //  .replace(/(\..*)\./g, "$1"); // keep only the first dot
                         }
                         onChangeText(text);
                     }}
@@ -61,7 +63,7 @@ export function FormInput({
                 />
                 
             </View>
-            {unit && <H5 style={{marginLeft: 2}}>{unit}</H5>}
+            {unit && <Text style={[{marginLeft: 2}, style]}>{unit}</Text>}
         </View>
         {hasError && <H6 style={styles.errorText}>{error}</H6>}
         </Pressable>
@@ -82,9 +84,10 @@ export function FormInputMacro({
     value,
     onChangeText,
     error,
+    style,
 }: FormInputProps) {
     return (
-        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} error={error} unit='g'/>
+        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} error={error} unit='g' style={style}/>
     )
 }
 export function FormInputNumber({

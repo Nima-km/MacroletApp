@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
-import { FoodInsert, FoodItemInsert, FoodItemType, FoodType } from "@/types/food";
+import { FoodInsert, FoodItemData, FoodItemInsert, FoodType } from "@/types/food";
 import { eq } from 'drizzle-orm';
 
 export const getFood = async (foodID: number) => {
@@ -30,7 +30,7 @@ export const insertFoodItems = async (foodItemObject: FoodItemInsert[]) => {
   return db.insert(foodItem).values(foodItemObject).returning();
 };
 
-export const updateFoodItem = async (foodItemID: number, foodItemObject: FoodItemType) => {
+export const updateFoodItem = async (foodItemID: number, foodItemObject: FoodItemData) => {
   return db.update(foodItem).set(foodItemObject).where(eq(foodItem.id, foodItemID)).returning();
 };
 

@@ -14,10 +14,11 @@ export default function Index() {
         new Date(date.getFullYear(), date.getMonth(), date.getDate(), 24)
     )
     const {data: currentGoal, isLoading: currentGoalLoading, error: currentGoalError} = useGetNutriGoals()
+    
+    console.log('the number is', Number('.2'))
     if (liveFoodLoading || currentGoalLoading) {
         return <H1>loading</H1>
     }
-
     return (
         <View
             style={styles.container}

@@ -1,24 +1,23 @@
 import { FontProvider } from '@/context/FontProvider';
+import { DATABASE_NAME, db } from '@/db/client';
 import migrations from '@/drizzle/migrations';
 import { colors } from '@/theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
+import { openDatabaseSync } from 'expo-sqlite';
 import React, { Suspense, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-export const DATABASE_NAME = 'database';
+
 
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
     const expoDb = openDatabaseSync(DATABASE_NAME);
-    const db = drizzle(expoDb);
     useDrizzleStudio(expoDb)
     const { success, error } = useMigrations(db, migrations);
     const [loaded, fontError] = useFonts({
@@ -41,23 +40,17 @@ export default function RootLayout() {
     return (
         <QueryClientProvider client={queryClient}>
             <Suspense fallback={<ActivityIndicator size="large" />}>
-                <SQLiteProvider
-                    databaseName={DATABASE_NAME}
-                    options={{ enableChangeListener: true }}
-                    useSuspense
-                >
-                    <FontProvider>
-                        <GestureHandlerRootView >
-                            <Stack 
-                                screenOptions={{ headerShown: false,
-                                    contentStyle: {
-                                        backgroundColor: colors.error,
-                                    },
-                                }}
-                            />
-                        </GestureHandlerRootView>
-                    </FontProvider>
-                </SQLiteProvider>
+                <FontProvider>
+                    <GestureHandlerRootView >
+                        <Stack 
+                            screenOptions={{ headerShown: false,
+                                contentStyle: {
+                                    backgroundColor: colors.error,
+                                },
+                            }}
+                        />
+                    </GestureHandlerRootView>
+                </FontProvider>
             </Suspense>
         </QueryClientProvider>
     );

@@ -8,10 +8,14 @@ const width = 105
 type SimpleChartProps = {
     target: number,
     progress: number,
+    
     backgroundColor: string,
+    edit?: boolean,
+    value?: string,
+    onChangeText?: (inp: string) => void
 }
 
-export const SimpleChartProteinMacro = ({target, progress, backgroundColor} : SimpleChartProps) => {
+export const SimpleChartProteinMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
     return (
         <SimpleChartCore 
             target={target}
@@ -22,11 +26,14 @@ export const SimpleChartProteinMacro = ({target, progress, backgroundColor} : Si
             barColor={colors.protein} 
             backgroundColor={backgroundColor}
             Icon={Protein}
+            edit={edit}
+            value={value}
+            onChangeText={onChangeText}
         />
     )
 }
 
-export const SimpleChartFatMacro = ({target, progress, backgroundColor} : SimpleChartProps) => {
+export const SimpleChartFatMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
     return (
         <SimpleChartCore 
             target={target}
@@ -37,12 +44,15 @@ export const SimpleChartFatMacro = ({target, progress, backgroundColor} : Simple
             barColor={colors.fat}
             backgroundColor={backgroundColor}
             Icon={Fat}
+            edit={edit}
+            value={value}
+            onChangeText={onChangeText}
         />
     )
 }
 
 
-export const SimpleChartCarbsMacro = ({target, progress, backgroundColor} : SimpleChartProps) => {
+export const SimpleChartCarbsMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
     return (
         <SimpleChartCore 
             target={target}
@@ -53,6 +63,9 @@ export const SimpleChartCarbsMacro = ({target, progress, backgroundColor} : Simp
             barColor={colors.carbs}
             backgroundColor={backgroundColor}
             Icon={Carbs}
+            edit={edit}
+            value={value}
+            onChangeText={onChangeText}
         />
     )
 }

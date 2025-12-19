@@ -1,5 +1,7 @@
+import { FormInputMacro } from '@/components/UIComponents/TextInputs/FormInput';
 import { H4 } from '@/components/UIComponents/Typography';
 import { useSkiaFonts } from '@/context/FontProvider';
+import { typography } from '@/theme';
 import { Canvas, RoundedRect, Text as SKText } from '@shopify/react-native-skia';
 import React, { FC, useEffect, useState } from 'react';
 import { AppState, Dimensions, StyleSheet, View } from 'react-native';
@@ -13,18 +15,22 @@ const iconWidth = 25
 type SimpleChartProps = {
     target?: number,
     progress?: number,
+    edit?: boolean,
     mode: boolean,
     width: number,
     topText: string,
     barColor: string,
     backgroundColor: string,
-    Icon?: FC<SvgProps>;
+    Icon?: FC<SvgProps>
+    value?: string
+    onChangeText?: (text: string) => void
 }
 
-const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mode, Icon, topText} : SimpleChartProps) => {
+const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mode, edit = false, Icon, topText, value, onChangeText} : SimpleChartProps) => {
     const { h5 } = useSkiaFonts();
     const animatedBar = useSharedValue(0)
     const [appState, setAppState] = useState(AppState.currentState);
+    const editMode = edit && value != undefined && onChangeText != undefined
     if (!target) {
         target = 1
     }
@@ -39,11 +45,13 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
     };
     useEffect(() => {
         animateChart()
-        console.log("width", swidth, height)
-        console.log("i rendered")
 
     }, [target, progress])
+    const end = useDerivedValue(() => (target ? Math.min(((animatedBar.value / target) * (width - 2 * margin)), (width - 2 * margin)) : 0));
+    const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
+    const widthGoal = useDerivedValue(() => (width - (h5.measureText(goalText.value).width)) / 2);
     useEffect(() => {
+        console.log('edit value onChange', editMode)
         const subscription = AppState.addEventListener('change', nextAppState => {
         console.log('App State changed to', nextAppState);
         setAppState(nextAppState);      if (nextAppState === 'active') {
@@ -56,9 +64,7 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
         subscription.remove();
         };
     }, []);
-    const end = useDerivedValue(() => (target ? Math.min(((animatedBar.value / target) * (width - 2 * margin)), (width - 2 * margin)) : 0));
-    const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
-    const widthGoal = useDerivedValue(() => (width - (h5.measureText(goalText.value).width)) / 2);
+    
     return (
         <View style={{alignSelf: "flex-start", alignItems: 'center'}}>
             <View style={{flexDirection: 'row', marginBottom: 4, justifyContent: 'center'}}>
@@ -67,30 +73,35 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
                 </H4>
                 {Icon && <Icon width={iconWidth} height={iconWidth} style={{marginLeft: 2}} />}
             </View>
-            <Canvas style={{ width: width, height: 35 }}> 
-                <RoundedRect
-                    x={0}
-                    y={0}
-                    width={width}
-                    height={strokeWidth}
-                    r={20}
-                    color={backgroundColor}
-                />
-                <RoundedRect
-                    x={2}
-                    y={2}
-                    width={end}
-                    height={strokeWidth - 2 * margin}
-                    r={20}
-                    color={barColor}
-                />
-                <SKText
-                x={widthGoal}
-                y={strokeWidth + h5.getSize()}
-                font={h5}
-                text={goalText}
-                />
-            </Canvas>
+            {editMode
+            ?   <View style={{ width: width, height: 50 }}>
+                    <FormInputMacro value={value} onChangeText={onChangeText} style={typography.h3}/>
+                </View>
+            :   <Canvas style={{ width: width, height: 35 }}> 
+                    <RoundedRect
+                        x={0}
+                        y={0}
+                        width={width}
+                        height={strokeWidth}
+                        r={20}
+                        color={backgroundColor}
+                    />
+                    <RoundedRect
+                        x={2}
+                        y={2}
+                        width={end}
+                        height={strokeWidth - 2 * margin}
+                        r={20}
+                        color={barColor}
+                    />
+                    <SKText
+                    x={widthGoal}
+                    y={strokeWidth + h5.getSize()}
+                    font={h5}
+                    text={goalText}
+                    />
+                </Canvas>
+            }
         </View>
     )
 }

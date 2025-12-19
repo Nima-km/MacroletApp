@@ -5,7 +5,9 @@ import { desc } from 'drizzle-orm';
 
 
 export const getNutriGoals = async () => {
-  return db.select().from(nutritionGoal).orderBy(desc(nutritionGoal.timestamp)).limit(1)
+  const result = db.select().from(nutritionGoal).orderBy(desc(nutritionGoal.timestamp)).limit(1)
+
+  return result
 };
 
 export const insertNutritionGoal = async (sumNutrition : nutritionGoalInsert) => {

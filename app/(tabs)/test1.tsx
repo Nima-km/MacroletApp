@@ -1,5 +1,6 @@
 import { PrimaryButton } from '@/components/UIComponents/Buttons/Button'
 import PrepCookButton from '@/components/UIComponents/Buttons/PrepCookButton'
+import TimeDateSelector from '@/components/UIComponents/Calendar/TimeDateSelector'
 import DropdownCore from '@/components/UIComponents/DropDown/DropDownCore'
 import CustomServingModal from '@/components/UIComponents/Modals/CustomServingModal'
 import IngredientModal from '@/components/UIComponents/Modals/IngredientModal'
@@ -10,6 +11,7 @@ import React, { useState } from 'react'
 import { Modal, StyleSheet, View } from 'react-native'
 
 const test1 = () => {
+    const [date, setDate] = useState(new Date())
     const options = [
         { label: "JavaScript", value: "js" },
         { label: "Python", value: "py" },
@@ -117,6 +119,9 @@ const test1 = () => {
                     />
             </Modal>
             <View style={{padding: 20}}/>
+            <View style={{width: 320, height: 408}}>
+                <TimeDateSelector value={date} onChange={setDate}/>
+            </View>
         </View>
     )
 }

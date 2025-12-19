@@ -75,7 +75,7 @@ export default function DropdownCore({
         <Animated.View style={[styles.dropdown, { height }]}>
             <FlatList
                 data={options}
-                keyExtractor={(item) => item.value.toString()}
+                keyExtractor={(item) => item.label}
                 renderItem={({ item }) => (
                     <Pressable
                         style={[
