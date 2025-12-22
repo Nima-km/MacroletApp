@@ -33,13 +33,13 @@ const DropDownServings = ({
     }
     return (
         <View style={{flexDirection: 'row', gap: 8}}>
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, height: 50}}>
                 <FormInputNumber
                     onChangeText={(inp) => {setServings(Number(inp)), setText(inp)}}
                     value={text}
                 />
             </View>
-            <View style={{flex: 4}}>
+            <View style={{flex: 4, height: 50}}>
                 <DropdownCore options={processedOption} onSelect={onSelectProcessed} extraButton={extraButton} extraButtonText='Add New' placeholder={placeholder}/>
             </View>
             

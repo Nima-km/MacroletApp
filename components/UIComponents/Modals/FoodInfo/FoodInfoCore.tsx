@@ -1,12 +1,14 @@
 import { SimpleChartCarbsMacro, SimpleChartFatMacro, SimpleChartProteinMacro } from '@/components/chartComponents/SimpleChart/SimpleChartMacro';
 import { calculateCalories } from '@/helper/calculateCalories';
 import { macroSum } from '@/helper/calculateMacro';
+import formatDateTime from '@/helper/formatDateTime';
 import { DefaultServings, TestFood2, TestFoodItem1 } from '@/tests/testData';
 import { FoodInsert, FoodItemData } from '@/types/food';
 import { ServingSizeType } from '@/types/servingSize';
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import { DateButton, PrimaryButton, SecondaryButton } from '../../Buttons/Button';
+import TimeDateSelector from '../../Calendar/TimeDateSelector';
 import DropDownServings from '../../DropDown/DropDownServings';
 import { FormInput } from '../../TextInputs/FormInput';
 import { H1 } from '../../Typography';
@@ -27,11 +29,11 @@ interface FoodInfoProps {
 
 const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, secondaryText, primaryButton, secondaryButton, edit = false, setEdit = () => {}}: FoodInfoProps) => {
     const [food, setFood] = useState(foodData ?? TestFood2)
+    const [calendarVisible, setCalendarVisible] = useState(false)
     const [servingTypes, setServingTypes] = useState([...DefaultServings, ...(servingsData ?? [])])
     const [foodItem, setFoodItem] = useState(
-        foodItemData ?? TestFoodItem1
+        foodItemData ?? {...TestFoodItem1, timestamp: new Date()}
     )
-    console.log('serving', foodItem.serving_type)
     function onCancelEdit() {
         setEdit(false)
 
@@ -48,8 +50,9 @@ const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, second
             }
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                 <H1>{calculateCalories(food) * foodItem.serving_mult * foodItem.servings}</H1>
-                <DateButton>
-                    Today, 9:32 PM
+                <DateButton onPress={() => setCalendarVisible(true)}>
+                    {formatDateTime(foodItem.timestamp)
+                    }
                 </DateButton>
             </View>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -60,35 +63,50 @@ const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, second
                 <SimpleChartFatMacro target={multiplyServing(macroSum(food))} progress={multiplyServing(food.fat)} backgroundColor={'black'} edit={edit}
                     value={food.fat.toString()} onChangeText={(val) => setFood((prev) => ({ ...prev, fat: Number(val)}))}/>
             </View>
-            <DropDownServings 
-                options={servingTypes}
-                placeholder={foodItem.serving_type}
-                servings={foodItem.servings} 
-                extraButton={() => console.log('extra button pressed')}
-                setServings={(servings) => setFoodItem(prev => ({ ...prev, servings: servings }))}
-                onSelect={(value) => setFoodItem(prev => ({ ...prev, serving_type: value.serving_type, serving_mult: value.serving_mult }))}
-            />
-            {edit
-                ?   <View style={{flexDirection: 'row', gap: 8}}>
-                        <SecondaryButton style={{flex: 1,}} onPress={() => onCancelEdit()}>
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton style={{flex: 1,}} onPress={() => primaryButton(food, foodItem)}>
-                            Save
-                        </PrimaryButton>
-                    </View>
-                :   <View style={{flexDirection: 'row', gap: 8}}>
-                        { secondaryButton &&
-                            <SecondaryButton style={{flex: 1,}} onPress={() => secondaryButton(food, foodItem)}>
-                                {secondaryText}
+            <View style={{flexDirection: 'column-reverse', gap: 20}}>
+                {edit
+                    ?   <View style={{flexDirection: 'row', gap: 8}}>
+                            <SecondaryButton style={{flex: 1,}} onPress={() => onCancelEdit()}>
+                                Cancel
                             </SecondaryButton>
-                        }
-                        <PrimaryButton style={{flex: 1,}} onPress={() => primaryButton(food, foodItem)}>
-                            {primaryText}
-                        </PrimaryButton>
-                    </View>
+                            <PrimaryButton style={{flex: 1,}} onPress={() => primaryButton(food, foodItem)}>
+                                Save
+                            </PrimaryButton>
+                        </View>
+                    :   <View style={{flexDirection: 'row', gap: 8}}>
+                            { secondaryButton &&
+                                <SecondaryButton style={{flex: 1,}} onPress={() => secondaryButton(food, foodItem)}>
+                                    {secondaryText}
+                                </SecondaryButton>
+                            }
+                            <PrimaryButton style={{flex: 1,}} onPress={() => primaryButton(food, foodItem)}>
+                                {primaryText}
+                            </PrimaryButton>
+                        </View>
 
-            }
+                }
+                <DropDownServings 
+                    options={servingTypes}
+                    placeholder={foodItem.serving_type}
+                    servings={foodItem.servings} 
+                    extraButton={() => console.log('extra button pressed')}
+                    setServings={(servings) => setFoodItem(prev => ({ ...prev, servings: servings }))}
+                    onSelect={(value) => setFoodItem(prev => ({ ...prev, serving_type: value.serving_type, serving_mult: value.serving_mult }))}
+                />
+                
+            </View>
+            <Modal
+                visible={calendarVisible}
+                transparent
+                // animationType='fade'
+                onRequestClose={() =>{
+                    setCalendarVisible(false)
+                }}
+            >
+                <View style={{flex: 1}}>
+                    <TimeDateSelector value={foodItem.timestamp} onChange={(newDate) => setFoodItem(prev => ({ ...prev, timestamp: newDate }))} isTime={false}/>
+                </View>
+            </Modal>
         </View>
     )
 }

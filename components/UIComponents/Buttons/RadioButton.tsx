@@ -5,16 +5,17 @@ import { H5_SemiBold } from '../Typography';
 
 interface Option {
     label: string;
-    value: number;
+    value: any;
 }
 
 interface SelectionComponentProps {
     options: Option[];
-    onSelect: (value: number) => void;
+    defaultOption? : number;
+    onSelect: (value: any) => void;
 }
 
-const StyledRadioButton = ({ options, onSelect }: SelectionComponentProps) => {
-    const [selectedValue, setSelectedValue] = useState<number>(options[0].value);
+const StyledRadioButton = ({ options, defaultOption = 0, onSelect }: SelectionComponentProps) => {
+    const [selectedValue, setSelectedValue] = useState<any>(options[defaultOption].value);
 
     const handleSelect = (value: number) => {
         setSelectedValue(value);
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: colors.primary_bg,
         borderRadius: 10,
-        padding: 4,
+        padding: 6,
     },
     styled_optionButton: {
         padding: 5,

@@ -1,4 +1,4 @@
-import HeaderSimple from '@/components/navComponents/HeaderSimple'
+import HeaderFood from '@/components/navComponents/HeaderFood'
 import FoodInfoCore from '@/components/UIComponents/Modals/FoodInfo/FoodInfoCore'
 import { H1 } from '@/components/UIComponents/Typography'
 import { useGetFood } from '@/db/hooks/food/useFood'
@@ -42,7 +42,7 @@ const food = () => {
     }
     return (
         <View style={{flex: 1}}>
-            <HeaderSimple title={'View Meal'}/>
+            <HeaderFood title={'View Meal'} isEdit={edit} onEdit={(value) => setEdit(value)} onBack={() => console.log('back pressed')}/>
             <FoodInfoCore
                 foodData={foodData[0]}
                 servingsData={servingData}

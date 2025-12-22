@@ -15,15 +15,15 @@ type Props = {
 };
 function HeaderCore({ title, LeftButton, RightButton }: Props) {
     return (
-        <SafeAreaView style={[styles.container, {paddingHorizontal: 25}]} edges={['top', 'right', 'left']}>
+        <SafeAreaView style={[styles.container, {paddingHorizontal: 20}]} edges={['top', 'right', 'left']}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View style={styles.backButton}>
+                <View style={styles.leftButton}>
                     {LeftButton}
                 </View>
                 <View style={[{flex: 1, alignItems: 'center', justifyContent: 'center'}]}>
                     <H1>{title}</H1>
                 </View>
-                <View style={styles.backButton}>      
+                <View style={styles.rightButton}>      
                     {RightButton}
                 </View>
             </View>
@@ -41,7 +41,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         
     },
-    backButton: {
-        width: 40,
+    leftButton: {
+        width: 70,
+    },
+    rightButton: {
+        width: 70,
+        
     },
 });

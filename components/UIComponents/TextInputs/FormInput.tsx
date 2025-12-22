@@ -12,10 +12,13 @@ interface FormInputProps {
     onChangeText: (text: string) => void;
     placeholder?: string;
     unit?: string;
+    selectTextOnFocus? : boolean;
     error?: string | null;
     secureTextEntry?: boolean;
     Icon?: FC<SvgProps>;
     numeric?: boolean;
+    upperLimit?: number;
+    lowerLimit?: number;
     center?: boolean;
 }
 
@@ -27,10 +30,13 @@ export function FormInput({
     style,
     error,
     secureTextEntry,
+    selectTextOnFocus = false,
     Icon,
     numeric,
     unit,
     center,
+    upperLimit,
+    lowerLimit,
 }: FormInputProps) {
     const hasError = Boolean(error);
     const inputRef = useRef<TextInput>(null);
@@ -43,11 +49,17 @@ export function FormInput({
                 <TextInput
                     value={value}
                     ref={inputRef}
+                    selectTextOnFocus = {selectTextOnFocus}
                     onChangeText={(text) =>{
                         if (numeric) {
                             text = text
-                                //.replace(/[^0-9.]/g, "")   // allow digits and dots
-                              //  .replace(/(\..*)\./g, "$1"); // keep only the first dot
+                                .replace(/[^0-9.]/g, "")   // allow digits and dots
+                                .replace(/(\..*)\./g, "$1"); // keep only the first dot
+                            if (upperLimit != undefined)
+                                text = (Number(text) > upperLimit ? upperLimit : text).toString()
+                            if (lowerLimit != undefined)
+                                text = (Number(text) < lowerLimit ? lowerLimit : text).toString()
+                            
                         }
                         onChangeText(text);
                     }}
@@ -60,6 +72,9 @@ export function FormInput({
                         // apply red border when error exists
                     ]}
                     placeholderTextColor="#999"
+                   /* onBlur={() => {
+                        onChangeText(value.padStart(2, "0"))
+                    }}*/
                 />
                 
             </View>
@@ -87,16 +102,19 @@ export function FormInputMacro({
     style,
 }: FormInputProps) {
     return (
-        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} error={error} unit='g' style={style}/>
+        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} error={error} unit='g' style={style} selectTextOnFocus/>
     )
 }
 export function FormInputNumber({
     value,
+    style,
+    upperLimit,
+    lowerLimit,
     onChangeText,
 }: FormInputProps) {
 
     return (
-        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} style={typography.h3}/>
+        <FormInput value={value} onChangeText={onChangeText} numeric center placeholder={'0'} style={style ?? typography.h3} upperLimit= {upperLimit} lowerLimit={lowerLimit} selectTextOnFocus/>
     )
 }
 const styles = StyleSheet.create({

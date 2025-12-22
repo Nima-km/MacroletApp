@@ -31,6 +31,7 @@ const test1 = () => {
     const [textModalVisible, setTextModalVisible] = useState(false)
     const [addIngredientModalVisible, setAddIngredientModalVisible] = useState(false)
     const [IngredientModalVisible, setIngredientModalVisible] = useState(false)
+    const [calendarVisible, setCalendarVisible] = useState(false)
     function setCookHourMinute (hour: string, mins: string) {
         setCookHour(Number(hour))
         setCookMinute(Number(mins))
@@ -55,6 +56,12 @@ const test1 = () => {
             </PrimaryButton>
             <PrimaryButton onPress={() => setIngredientModalVisible(true)}>
                 open setIngredientModalVisible
+            </PrimaryButton>
+            <PrimaryButton onPress={() => setCalendarVisible(true)}>
+                open calendarVisible
+            </PrimaryButton>
+            <PrimaryButton onPress={() => console.log('date time is', date.toLocaleString())}>
+                ShowDate
             </PrimaryButton>
             <Modal
                 visible={textModalVisible}
@@ -118,10 +125,20 @@ const test1 = () => {
                     selectedOption={0}          
                     />
             </Modal>
-            <View style={{padding: 20}}/>
-            <View style={{width: 320, height: 408}}>
-                <TimeDateSelector value={date} onChange={setDate}/>
-            </View>
+            <View style={{padding: 0}}/>
+            <Modal
+                visible={calendarVisible}
+                transparent
+               // animationType='fade'
+                onRequestClose={() =>{
+                    setCalendarVisible(false)
+                }}
+            >
+                <View style={{flex: 1}}>
+                    <TimeDateSelector value={date} onChange={setDate} isTime={false}/>
+                </View>
+            </Modal>
+            
         </View>
     )
 }
