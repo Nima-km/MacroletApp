@@ -1,4 +1,4 @@
-import { FoodInsert, FoodItemInsert } from '@/types/food';
+import { FoodFullData, FoodInsert, FoodItemInsert } from '@/types/food';
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import FoodCardSmall from '../chartComponents/FoodCards/FoodCardSmall';
@@ -7,16 +7,18 @@ import { H1 } from '../UIComponents/Typography';
 
 
 interface FoodData {
-  food: FoodInsert & {id: number};
-  foodItem: FoodItemInsert;
+    food: FoodInsert & {id: number};
+    foodItem: FoodItemInsert;
 }
 
 interface RecentComponentProps {
-  filteredData?: FoodData[];
-  onFoodCardID: (id: number) => void
+    filteredData?: FoodFullData[];
+    onFoodCardID: (id: number) => void
+    onAddFood: (foodObject: FoodFullData) => void
+  
 }
 
-const RecentComponent = ({filteredData, onFoodCardID}: RecentComponentProps) => {
+const RecentComponent = ({filteredData, onFoodCardID, onAddFood}: RecentComponentProps) => {
 
     return (
         <View style={styles.container} /*showsVerticalScrollIndicator={false}*/>
@@ -24,7 +26,7 @@ const RecentComponent = ({filteredData, onFoodCardID}: RecentComponentProps) => 
             <FlatList
                 data={filteredData}
                 renderItem={({item}) => 
-                    <SwipeableAdd onPress={() => console.log('hi')}>
+                    <SwipeableAdd onSwipe={() => onAddFood(item)}>
                         <Pressable onPress={() => onFoodCardID(item.food.id)}>
                             <FoodCardSmall 
                                 food={item.food}

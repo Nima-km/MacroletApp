@@ -1,16 +1,14 @@
 import { H4, H5_SemiBold, H6 } from '@/components/UIComponents/Typography'
+import { calculateCalories } from '@/helper/calculateCalories'
+import { calculateMacro } from '@/helper/calculateMacro'
 import { colors } from '@/theme'
-import { FoodInsert, FoodItemInsert } from '@/types/food'
+import { FoodFullData } from '@/types/food'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-interface FoodCardProps {
-    food: FoodInsert;
-    foodItem: FoodItemInsert;
-}
 
-const FoodCardSmall = ({food, foodItem} : FoodCardProps) => {
-
+const FoodCardSmall = ({food, foodItem} : FoodFullData) => {
+    const foodData = calculateMacro(food, foodItem.serving_mult * foodItem.servings)
     return (
         <View style={styles.container}>
             <View style={styles.rowContainer}>
@@ -24,22 +22,22 @@ const FoodCardSmall = ({food, foodItem} : FoodCardProps) => {
             </View>
             <View style={styles.macroInfo}>
                 <View style={styles.macroInfoSub}>
-                    <H5_SemiBold>544 cal</H5_SemiBold>
+                    <H5_SemiBold>{calculateCalories(foodData)} cal</H5_SemiBold>
                 </View>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.protein}]}/>
                     <H5_SemiBold>P</H5_SemiBold>
-                    <H6>{food.protein} g</H6>
+                    <H6>{foodData.protein} g</H6>
                 </View>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.carbs}]}/>
                     <H5_SemiBold>C</H5_SemiBold>
-                    <H6>{food.carbs} g</H6>
+                    <H6>{foodData.carbs} g</H6>
                 </View>
                 <View style={styles.macroInfoSub}>
                     <View style={[styles.macroBall, {backgroundColor: colors.fat}]}/>
                     <H5_SemiBold>F</H5_SemiBold>
-                    <H6>{food.fat} g</H6>
+                    <H6>{foodData.fat} g</H6>
                 </View>
             </View>
         </View>

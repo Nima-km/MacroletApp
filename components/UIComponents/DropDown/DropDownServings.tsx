@@ -1,6 +1,7 @@
 import { ServingSizeType } from '@/types/servingSize';
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
+import CustomServingModal from '../Modals/CustomServingModal';
 import { FormInputNumber } from '../TextInputs/FormInput';
 import DropdownCore, { DropdownOption } from './DropDownCore';
 
@@ -12,7 +13,7 @@ interface DropdownSelectProps {
     servings: number
     setServings: (inp: number) => void
     onSelect?: (option: Omit<ServingSizeType, 'food_id'>) => void;
-    extraButton?: (value: any) => void
+    setNewServing?: (newServing: Omit<ServingSizeType, 'food_id'>) => void
 }
 
 
@@ -22,12 +23,13 @@ const DropDownServings = ({
     placeholder,
     setServings,
     onSelect = (option: Omit<ServingSizeType, 'food_id'>) => {},
-    extraButton,
+    setNewServing, 
 }: DropdownSelectProps) => {
     const processedOption = options.map((item) => {
         return {label: item.serving_type, value: item}
     })
     const [text, setText] = useState(servings.toString())
+    const [customServingModalVisible, setCustomServingModalVisible] = useState(false)
     function onSelectProcessed(value: DropdownOption) {
         onSelect(value.value)
     }
@@ -40,9 +42,29 @@ const DropDownServings = ({
                 />
             </View>
             <View style={{flex: 4, height: 50}}>
-                <DropdownCore options={processedOption} onSelect={onSelectProcessed} extraButton={extraButton} extraButtonText='Add New' placeholder={placeholder}/>
+                <DropdownCore options={processedOption} onSelect={onSelectProcessed} extraButton={() => setCustomServingModalVisible(true)} extraButtonText='Add New' placeholder={placeholder}/>
             </View>
-            
+            <Modal
+                visible={customServingModalVisible}
+                transparent
+                animationType='fade'
+                onRequestClose={() =>{
+                    setCustomServingModalVisible(false)
+                }}
+            >
+                <CustomServingModal 
+                    options={processedOption} 
+                    setNewServing={(servingName, servingMultiplyer) => {
+                        if (setNewServing) {
+                            setNewServing({serving_type: servingName, serving_mult: servingMultiplyer});
+                        }
+                        else {
+                            console.log('serving went wrong')
+                        }
+                    }} 
+                    onClose={() => setCustomServingModalVisible(false)}
+                />
+            </Modal>
         </View>
     )
 }

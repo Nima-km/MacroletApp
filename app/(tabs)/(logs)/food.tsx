@@ -3,8 +3,9 @@ import FoodInfoCore from '@/components/UIComponents/Modals/FoodInfo/FoodInfoCore
 import { H1 } from '@/components/UIComponents/Typography'
 import { useGetFood } from '@/db/hooks/food/useFood'
 import { useInsertFoodItem } from '@/db/hooks/food/useFoodItem'
-import { useGetFoodServingSize } from '@/db/hooks/servings/useServings'
+import { useGetFoodServingSize, useInsertServingSize } from '@/db/hooks/servings/useServings'
 import { FoodInsert, FoodItemData } from '@/types/food'
+import { ServingSizeType } from '@/types/servingSize'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -15,6 +16,7 @@ const food = () => {
     const { data: foodData, isLoading: foodDataLoading, error: errorfoodData } = useGetFood(Number(food_id));
     const { data: servingData, isLoading: servingDataLoading, error: errorservingData } = useGetFoodServingSize(Number(food_id));
     const { mutate: logFoodItem, isPending: logFoodItemPending, error : logFoodItemError, isSuccess: logFoodItemSuccess} = useInsertFoodItem()
+    const { mutate: logServing, isPending: logServingPending, error : logServingError, isSuccess: logServingSuccess} = useInsertServingSize()
     const [edit, setEdit] = useState(false)
 
     function LogNewFood(food: FoodInsert, foodItem: FoodItemData) {
@@ -34,6 +36,16 @@ const food = () => {
             console.log(`something went wrong`)
         }
     }
+    function AddNewServing(newServing: Omit<ServingSizeType, 'food_id'>) {
+
+        if (newServing) {
+            console.log('the new serving is', newServing)
+            logServing({...newServing, food_id: Number(food_id)})
+        }
+        else {
+            console.log(`something went wrong`)
+        }
+    }
     if (foodDataLoading) {
         return <H1>loading</H1>
     }
@@ -46,6 +58,7 @@ const food = () => {
             <FoodInfoCore
                 foodData={foodData[0]}
                 servingsData={servingData}
+                setNewServing={AddNewServing}
                 primaryText={'Log'} primaryButton={LogNewFood}
                 edit={edit}
                 setEdit={setEdit}

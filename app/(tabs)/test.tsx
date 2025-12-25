@@ -19,6 +19,7 @@ const test = () => {
         
     ];
     const [note, setNote] = useState("");
+    const [chartval, setChartval] = useState(50);
     const [input, setInput] = useState("")
     const [searchInput, setSearchInput] = useState("")
     const [macroInput, setMacroInput] = useState("")
@@ -39,7 +40,7 @@ const test = () => {
                 <H5>H5</H5>
                 <H5_SemiBold>H5_SemiBold*</H5_SemiBold>
                 <H6>H6</H6>
-                <PrimaryButton>
+                <PrimaryButton onPress={() => setChartval((prev) => prev + 10)}>
                     Primary Button
                 </PrimaryButton>
                 <SecondaryButton>
@@ -76,10 +77,10 @@ const test = () => {
                     <SimpleChartFatMacro target={150} progress={90} backgroundColor={'black'}/>
                 </View>
                 <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                    <SimpleChartProteinSmall target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartProteinSmall target={150} progress={chartval} backgroundColor={'black'}/>
                     
-                    <SimpleChartCarbsSmall target={150} progress={90} backgroundColor={'black'}/>
-                    <SimpleChartFatSmall target={150} progress={90} backgroundColor={'black'}/>
+                    <SimpleChartCarbsSmall target={150} progress={chartval} backgroundColor={'black'}/>
+                    <SimpleChartFatSmall target={150} progress={chartval} backgroundColor={'black'}/>
                 </View>
                 <H3>Inputs</H3>
                 <View style={{gap: 20}}>

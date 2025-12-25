@@ -6,11 +6,12 @@ import SwipeableCore from './SwipeableCore';
 
 type SwipeableCoreProps = {
     children: ReactNode;
-    onPress: () => void;
+    onPress?: () => void;
+    onSwipe?: () => void;
 };
 
 
-const SwipeableAdd = ({ children, onPress}: Omit<SwipeableCoreProps, 'underChildren' | 'backgroundColor'>) => {
+const SwipeableAdd = ({ children, onPress = () => {}, onSwipe }: Omit<SwipeableCoreProps, 'underChildren' | 'backgroundColor'>) => {
     return (
         <SwipeableCore 
             underChildren={
@@ -19,7 +20,7 @@ const SwipeableAdd = ({ children, onPress}: Omit<SwipeableCoreProps, 'underChild
                 </View>
             } 
             onPress={onPress} 
-            onSwipe={() => console.log('swipped')}
+            onSwipe={onSwipe}
             backgroundColor={colors.primary}
             autoClose
         >

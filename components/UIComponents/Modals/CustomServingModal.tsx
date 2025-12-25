@@ -24,7 +24,7 @@ const CustomServingModal = ({setNewServing, onClose, options}: CustomServingProp
     
     function onSave() {
         console.log(selectedServing.value)
-        const servingMultiplyer = Number(newServingRatio) * Number(selectedServing.value)
+        const servingMultiplyer = Number(newServingRatio) * Number(selectedServing.value.serving_mult)
         setNewServing(newServingName, servingMultiplyer)
     }
     return (

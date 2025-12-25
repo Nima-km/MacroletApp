@@ -1,10 +1,10 @@
 import { colors } from '@/theme'
 import React from 'react'
 import SimpleChartCore from './SimpleChartCore'
-const width = 64
+const width = 78
 type SimpleChartProps = {
     target: number,
-    progress: number,
+    progress?: number,
     backgroundColor: string,
 }
 

@@ -1,4 +1,4 @@
-import { FoodType, MacroType } from "@/types/food";
+import { FoodFullData, FoodType, MacroType } from "@/types/food";
 import { IngredientItemType } from "@/types/recipe";
 
 
@@ -12,7 +12,7 @@ const Macro_sum = (a: MacroType, b: MacroType) => {
     return result
 }
 
-export const CalculateMacroSum = (
+export const CalculateMacroSumIngredient = (
     ingredientItemsData: Array<IngredientFoodData>
 ) => {
     const macros = ingredientItemsData.map((item) => {
@@ -26,5 +26,24 @@ export const CalculateMacroSum = (
         )
     })
     const total_macros = macros.reduce((a, b) => Macro_sum(a, b))
+    return total_macros
+}
+export const CalculateMacroSum = (
+    foodItemsData?: Array<FoodFullData>
+) => {
+    if (foodItemsData == undefined || foodItemsData.length === 0) {
+        return {protein: 0, carbs: 0, fat: 0, fiber: 0}
+    }
+    const macros = foodItemsData.map((item) => {
+        return  (
+            {
+                protein: item.food.protein * item.foodItem.serving_mult * item.foodItem.servings,
+                carbs: item.food.carbs * item.foodItem.serving_mult * item.foodItem.servings,
+                fiber: item.food.fiber * item.foodItem.serving_mult * item.foodItem.servings,
+                fat: item.food.fat * item.foodItem.serving_mult * item.foodItem.servings,
+            }
+        )
+    })
+    const total_macros = macros.reduce((a, b) => Macro_sum(a, b), {protein: 0, carbs: 0, fat: 0, fiber: 0})
     return total_macros
 }

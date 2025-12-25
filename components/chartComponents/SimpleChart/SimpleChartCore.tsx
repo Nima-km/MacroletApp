@@ -51,7 +51,7 @@ const SimpleChartCore = ({target, progress, barColor, backgroundColor, width, mo
     const goalText = useDerivedValue(() => (Math.round(animatedBar.value).toString() + (mode ? ('/' + target.toString()) : '') + " g"));
     const widthGoal = useDerivedValue(() => (width - (h5.measureText(goalText.value).width)) / 2);
     useEffect(() => {
-        console.log('edit value onChange', editMode)
+        console.log('SimpleChartCore got rerednered')
         const subscription = AppState.addEventListener('change', nextAppState => {
         console.log('App State changed to', nextAppState);
         setAppState(nextAppState);      if (nextAppState === 'active') {

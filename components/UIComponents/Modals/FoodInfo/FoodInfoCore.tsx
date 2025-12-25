@@ -24,10 +24,10 @@ interface FoodInfoProps {
     setEdit?: (edit: boolean) => void,
     primaryButton: (food: FoodInsert, foodItem: FoodItemData) => void
     secondaryButton?: (food: FoodInsert, foodItem: FoodItemData) => void
-
+    setNewServing?: (newServing: Omit<ServingSizeType, 'food_id'>) => void
 }
 
-const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, secondaryText, primaryButton, secondaryButton, edit = false, setEdit = () => {}}: FoodInfoProps) => {
+const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, secondaryText, primaryButton, secondaryButton, setNewServing, edit = false, setEdit = () => {}}: FoodInfoProps) => {
     const [food, setFood] = useState(foodData ?? TestFood2)
     const [calendarVisible, setCalendarVisible] = useState(false)
     const [servingTypes, setServingTypes] = useState([...DefaultServings, ...(servingsData ?? [])])
@@ -89,7 +89,7 @@ const FoodInfoCore = ({foodData, foodItemData, servingsData, primaryText, second
                     options={servingTypes}
                     placeholder={foodItem.serving_type}
                     servings={foodItem.servings} 
-                    extraButton={() => console.log('extra button pressed')}
+                    setNewServing={setNewServing}
                     setServings={(servings) => setFoodItem(prev => ({ ...prev, servings: servings }))}
                     onSelect={(value) => setFoodItem(prev => ({ ...prev, serving_type: value.serving_type, serving_mult: value.serving_mult }))}
                 />

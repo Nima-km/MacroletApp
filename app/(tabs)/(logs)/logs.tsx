@@ -129,18 +129,18 @@ const logs = () => {
                         keyExtractor={item => item.foodItem.id.toString()}
                         scrollEnabled={false}
                         renderSectionHeader={({section: {title}}) => (
-                        <View style={[ {alignItems: 'center', flexDirection: 'row'}]}>
-                            <H4>{formatAMPM(title)}</H4>
-                            <View
-                                style={{
-                                    backgroundColor: colors.light_gray,
-                                    height: 1,
-                                    flex: 1,
-                                    marginLeft: 20,
-                                    
-                                }}
-                            />
-                        </View>
+                            <View style={[ {alignItems: 'center', flexDirection: 'row'}]}>
+                                <H4>{formatAMPM(title)}</H4>
+                                <View
+                                    style={{
+                                        backgroundColor: colors.light_gray,
+                                        height: 1,
+                                        flex: 1,
+                                        marginLeft: 20,
+                                        
+                                    }}
+                                />
+                            </View>
                         )}
                     />
                     {slData.length == 0 &&

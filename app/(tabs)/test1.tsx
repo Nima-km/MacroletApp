@@ -7,11 +7,13 @@ import IngredientModal from '@/components/UIComponents/Modals/IngredientModal'
 import QuickAddIngredientModal from '@/components/UIComponents/Modals/QuickAddIngredientModal'
 import TextModal from '@/components/UIComponents/Modals/TextModal'
 import { TestFood1, TestIngredientItem1 } from '@/tests/testData'
-import React, { useState } from 'react'
+import BottomSheet from '@gorhom/bottom-sheet'
+import React, { useRef, useState } from 'react'
 import { Modal, StyleSheet, View } from 'react-native'
 
 const test1 = () => {
     const [date, setDate] = useState(new Date())
+    const sheetRef = useRef<BottomSheet>(null);
     const options = [
         { label: "JavaScript", value: "js" },
         { label: "Python", value: "py" },
@@ -63,6 +65,7 @@ const test1 = () => {
             <PrimaryButton onPress={() => console.log('date time is', date.toLocaleString())}>
                 ShowDate
             </PrimaryButton>
+            
             <Modal
                 visible={textModalVisible}
                 transparent
