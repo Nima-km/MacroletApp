@@ -1,10 +1,11 @@
+import { DirectionStep } from '@/types/recipe';
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 
 export const food = sqliteTable('food', {
     id: integer('id').primaryKey({autoIncrement: true}),
-    name: text('name').notNull(),
+    name: text('name', { length: 250 }).notNull(),
     nickname: text('nickname'),
     // Macronutrients per 100g (or standard unit)
     protein: integer('protein').notNull(),
@@ -28,8 +29,10 @@ export const food = sqliteTable('food', {
 export const recipe = sqliteTable('recipe', {
     id: integer('id').primaryKey({autoIncrement: true}),
     servings_yield: integer('servings_yield').default(0).notNull(),
-    recipe_slug: text('recipe_slug'),
-    directions: text('directions', { mode: 'json' }),
+    recipe_slug: text('recipe_slug', { length: 50 }),
+    description: text('description', { length: 250 }),
+    note: text('description', { length: 2000 }),
+    directions: text('directions', { mode: 'json' },).$type<DirectionStep[]>().notNull(),
     prep_time: integer('prep_time').default(0).notNull(),
     cook_time: integer('cook_time').default(0).notNull(),
     
@@ -45,13 +48,13 @@ export const foodItem = sqliteTable ('foodItem', {
     .references(() => food.id),
     servings: integer('servings').notNull(),
     serving_mult: integer('serving_mult').notNull(),
-    serving_type: text('serving_type').notNull(),
+    serving_type: text('serving_type', { length: 20 }).notNull(),
     
 })
 export const servingSize = sqliteTable ('servingSize', {
     id: integer('id').primaryKey({autoIncrement: true}),
     serving_mult: integer('serving_mult').notNull(),
-    serving_type: text('serving_type').notNull(),
+    serving_type: text('serving_type', { length: 20 }).notNull(),
     food_id: integer('food_id')
     .notNull()
     .references(() => food.id),
@@ -65,11 +68,11 @@ export const ingredientItem = sqliteTable ('IngredientItem', {
     ingredient_id: integer('ingredient_id')
     .notNull()
     .references(() => food.id),
-    prep_notes: text('prep_notes'),
-    display_name: text('display_name'),
+    prep_notes: text('prep_notes', { length: 250 }),
+    display_name: text('display_name', { length: 20 }),
     servings: integer('servings').notNull(),
     serving_mult: integer('serving_mult').notNull(),
-    serving_type: text('serving_type').notNull(),
+    serving_type: text('serving_type', { length: 20 }).notNull(),
 }
 )
 
@@ -87,7 +90,7 @@ export const nutritionGoal = sqliteTable('nutritionGoal', {
 
 export const macroSplit = sqliteTable('macroSplit', {
     id: integer('id').primaryKey({autoIncrement: true}),
-    name: text('name').notNull(),
+    name: text('name', { length: 20 }).notNull(),
 })
 
 export const macroGoal = sqliteTable('macroGoal', {
@@ -104,7 +107,7 @@ export const macroGoal = sqliteTable('macroGoal', {
 
 export const recipeBook = sqliteTable('recipeBook', {
     id: integer('id').primaryKey({autoIncrement: true}),
-    name: text('name').notNull(),
+    name: text('name', { length: 20 }).notNull(),
     pictures: text('pictures', { mode: 'json' }),
 })
 export const recipeBookItem = sqliteTable ('recipeBookItem', {

@@ -1,39 +1,39 @@
 import { SimpleChartCarbsSmall, SimpleChartFatSmall, SimpleChartProteinSmall } from '@/components/chartComponents/SimpleChart/SimpleChartSmall';
 import { colors } from '@/theme';
-import { FoodType } from '@/types/food';
-import { IngredientItemDetails } from '@/types/recipe';
+import { FoodGet } from '@/types/food';
+import { IngredientFullData } from '@/types/recipe';
+import { ServingSizeType } from '@/types/servingSize';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { InlineButton, PrimaryButton, SecondaryButton } from '../Buttons/Button';
-import DropdownCore, { DropdownOption } from '../DropDown/DropDownCore';
+import DropDownServings from '../DropDown/DropDownServings';
 import ExpandableTextInput from '../TextInputs/ExpandableTextInput';
-import { FormInputNumber } from '../TextInputs/FormInput';
 import { H1, H4, H5_SemiBold } from '../Typography';
 import ModalCore from './ModalCore';
 
 interface AddIngredientProps {
-    foodData: FoodType;
-    options: DropdownOption[];
-    setIngredient: (ingredientItem: IngredientItemDetails) => void;
+    foodData: FoodGet;
+    options: Omit<ServingSizeType, 'food_id'>[]
+    setIngredient: (ingredientItem: IngredientFullData) => void;
     onClose: () => void
 }
 
 
 const QuickAddIngredientModal = ({foodData, options, onClose, setIngredient}: AddIngredientProps) => {
-    const [servingAmount, setServingAmount] = useState('1')
+    const [servingAmount, setServingAmount] = useState(1)
     const [selectedServing, setSelectedServing] = useState(options[0])
     
-    const total_macro = (foodData.carbs + foodData.fat + foodData.protein) * Number(servingAmount) * selectedServing.value
+    const total_macro = (foodData.carbs + foodData.fat + foodData.protein) * Number(servingAmount) * selectedServing.serving_mult
     const [display_name, setDisplay_name] = useState('')
     const [prep_notes, setPrep_notes] = useState('')
     function onSave() {
         
-        setIngredient({serving_mult: selectedServing.value, serving_type: selectedServing.label, servings: Number(servingAmount), prep_notes, display_name})
+        setIngredient({food: foodData, ingredientItem: {serving_mult: selectedServing.serving_mult, serving_type: selectedServing.serving_type, servings: Number(servingAmount), prep_notes, display_name}})
     }
     const calories = calculate_final((foodData.carbs + foodData.protein) * 4 + foodData.fat * 9 - foodData.fiber * 2)
 
     function calculate_final(inp: number) {
-        return inp * Number(servingAmount) * selectedServing.value
+        return inp * Number(servingAmount) * selectedServing.serving_mult
     }
     return (
         <ModalCore title={foodData.name}>
@@ -76,7 +76,7 @@ const QuickAddIngredientModal = ({foodData, options, onClose, setIngredient}: Ad
                             </H5_SemiBold>
                         </InlineButton>
                     </View>
-                    <View style={[styles.rowContainer, {marginBottom: 20}]}>
+                    <View style={[styles.rowContainer, {marginBottom: 20, gap: 10}]}>
                         <View style={{justifyContent: 'center', alignItems: 'center'}}>
                             <H1>
                                 {Math.floor(calories)}
@@ -85,24 +85,22 @@ const QuickAddIngredientModal = ({foodData, options, onClose, setIngredient}: Ad
                                 Calories
                             </H4>
                         </View>
-                        <View style={styles.chartsContainer}>
+                        <View style={[styles.chartsContainer, {flex: 1}]}>
                             <SimpleChartProteinSmall target={total_macro} progress={calculate_final(foodData.protein)} backgroundColor={colors.white} />
                             <SimpleChartCarbsSmall target={total_macro} progress={calculate_final(foodData.carbs)} backgroundColor={colors.white} />
                             <SimpleChartFatSmall target={total_macro} progress={calculate_final(foodData.fat)} backgroundColor={colors.white} />
                         </View>
                     </View>
                     
-                    <View style={[styles.rowContainer, {marginBottom: 20}]}>
-
-                        <View style={styles.ratioTextContainer}>
-                            <FormInputNumber
-                                onChangeText={setServingAmount}
-                                value={servingAmount}
-                            />
-                        </View>
-                        <View style={styles.referenceServingContainer}>
-                            <DropdownCore options={options} placeholder={options[0].label} onSelect={setSelectedServing}/>
-                        </View>
+                    <View style={[{marginBottom: 20}]}>
+                        <DropDownServings 
+                            options={options}
+                            placeholder={options[0].serving_type}
+                            servings={(servingAmount)} 
+                            setNewServing={setSelectedServing}
+                            setServings={(servings) => setServingAmount(servings)}
+                            onSelect={(value) => setSelectedServing({serving_type: value.serving_type, serving_mult: value.serving_mult })}
+                        />
                     </View>
                 </View>
             </View>
@@ -126,13 +124,12 @@ const styles = StyleSheet.create({
     rowContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        //gap: 8,
     },
     chartsContainer: {
         flexDirection: 'row',
-        marginLeft: 20,
         alignItems: 'center',
-        gap: 20,
+        justifyContent: 'space-between'
     },
     nameTextContainer: {
         flex: 1

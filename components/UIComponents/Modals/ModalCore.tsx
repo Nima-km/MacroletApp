@@ -1,6 +1,7 @@
 import { colors } from '@/theme';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import KeyboardAware from '../KeyboardAware/KeyboardAware';
 import { H3 } from '../Typography';
 
 
@@ -11,12 +12,14 @@ interface ModalProps {
 
 const ModalCore = ({ children, title }: ModalProps) => {
     return (
-        <View style={styles.container}>
-            <View style={styles.subContainer}>
-                <H3>{title}</H3>
-                {children}
+        <KeyboardAware scrollEnabled={false}>
+            <View style={styles.container}>
+                <View style={styles.subContainer}>
+                    <H3>{title}</H3>
+                    {children}
+                </View>
             </View>
-        </View>
+        </KeyboardAware>
     )
 }
 

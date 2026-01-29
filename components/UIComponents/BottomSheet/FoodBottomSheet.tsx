@@ -1,4 +1,5 @@
-import FoodCardQuick from '@/components/chartComponents/FoodCards/FoodCardQuick'
+import FoodCardQuick from '@/components/chartComponents/Cards/FoodCardQuick'
+
 import { useFoodBottomSheetStore } from '@/store/useStore'
 import { colors } from '@/theme'
 import { FoodFullData } from '@/types/food'
@@ -14,7 +15,7 @@ import FoodBottomSheetFooter from './FoodBottomSheetFooter'
 
 interface FoodBottomSheetProps {
     foodFullData: FoodFullData[]
-    onLogAll: (foodObject: FoodFullData[]) => void
+    onLogAll: () => void
     onRemove: (index: number) => void
 }
 
@@ -32,6 +33,9 @@ const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(({foodFull
     }, [foodFullData])
     if (foodFullData.length == 0) {
         return <View></View>
+    }
+    function Dummy() {
+
     }
     return (
         <BottomSheetCore ref={ref} 

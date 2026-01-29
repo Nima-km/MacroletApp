@@ -1,7 +1,7 @@
 import { colors } from "@/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet, TouchableOpacity, TouchableOpacityProps } from "react-native";
-import { H3, H4, H5 } from "../Typography";
+import { StyleSheet, TouchableOpacity, TouchableOpacityProps, View } from "react-native";
+import { H2, H3, H4, H5 } from "../Typography";
 
 type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
     style?: any; // or StyleProp<ViewStyle>
@@ -19,6 +19,16 @@ export function SecondaryButton({ children, style, ...props }: ButtonProps) {
     return (
         <TouchableOpacity {...props} style={[style, styles.button, styles.secondary]}>
             <H4 style={styles.secondaryText}>{children}</H4>
+        </TouchableOpacity>
+    );
+}
+export function SecondaryAddButton({ children, style, ...props }: ButtonProps) {
+    return (
+        <TouchableOpacity {...props} style={[style, styles.button, styles.secondary, {alignItems: 'flex-start'}]}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <H2 style={{color: colors.primary}}>+ </H2> 
+                <H4 style={[styles.secondaryText]}>{children}</H4>
+            </View>
         </TouchableOpacity>
     );
 }

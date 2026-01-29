@@ -1,4 +1,4 @@
-import { useCounterStore } from '@/store/useStore';
+import { useCounterStore } from '@/store/recipeStore/useRecipeStore';
 import React, { memo, ReactNode, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SimpleChartCarbsSmall } from '../chartComponents/SimpleChart/SimpleChartSmall';

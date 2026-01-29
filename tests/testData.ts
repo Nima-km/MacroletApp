@@ -1,5 +1,5 @@
 import { FoodInsert, FoodItemInsert } from "@/types/food";
-import { IngredientItemInsert, RecipeData } from "@/types/recipe";
+import { IngredientItemInsert } from "@/types/recipe";
 import { ServingSizeType } from "@/types/servingSize";
 
 
@@ -94,7 +94,7 @@ export const TestFoodItem3: Omit<FoodItemInsert, 'food_id'> = {
     serving_mult: 1,
 }
 export const FoodItemDefault: Omit<FoodItemInsert, 'food_id'> = {
-    serving_type: "Servings",
+    serving_type: "Serving",
     servings: 1,
     serving_mult: 1,
 }
@@ -118,11 +118,6 @@ export const TestIngredientItem3: Omit<IngredientItemInsert, 'recipe_id'> = {
 }
 
 
-export const TestRecipe1: RecipeData = {
-    recipeData: {servings_yield: 2, },
-    foodData: TestFood1,
-    ingredientItemsData: [TestIngredientItem1, TestIngredientItem2]
-}
 
 export const DefaultServings: Omit<ServingSizeType, 'food_id'>[] = [
     { serving_type: "Gram", serving_mult: 0.01 },

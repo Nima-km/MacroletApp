@@ -2,13 +2,14 @@ import FindFood from '@/components/findFoodTabs/FindFood';
 import { useInsertFoodItems } from '@/db/hooks/food/useFoodItem';
 import { FoodFullData } from '@/types/food';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 const logFood = () => {
     
     const { mutate: logFoodItems, isPending: logFoodItemsPending, error : logFoodItemsError, isSuccess: logFoodItemsSuccess} = useInsertFoodItems()
     const router = useRouter();
+    const [foodList, setFoodList] = useState<FoodFullData[]>([]);
     function onFoodCardID(food_id: number) {
         console.log('onFoodCardID id is', food_id)
         router.push({
@@ -16,12 +17,12 @@ const logFood = () => {
             params: { food_id: food_id },
         })
     }
-    function onLogFoodList(foodObject: FoodFullData[]) {
+    const onLogFoodList = useCallback( () => {
         
-        const toLog = foodObject.map((item) => {
+        const toLog = foodList.map((item) => {
             return {...item.foodItem, food_id: item.food.id, timestamp: new Date(), id: undefined}
         })
-        console.log('FoodFullData', foodObject)
+        console.log('FoodFullData', foodList)
         logFoodItems(toLog, {
             onSuccess: () => {
                 console.log('great successs on Log ALl')
@@ -31,11 +32,14 @@ const logFood = () => {
                 console.log('error on Log ALl', e)
             }
         })
-    }
+            
+    }, [])
     return (
         <View style={{flex: 1,}}>
             <FindFood 
                 onFoodCardID={onFoodCardID}
+                foodList={foodList}
+                setFoodList={setFoodList}
                 onLogFoodList={onLogFoodList}
             />
             {/*BottomFoodList*/}

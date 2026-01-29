@@ -8,6 +8,7 @@ import {
     StyleSheet,
     View
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { H3 } from "../Typography";
 export interface DropdownOption {
     label: string;
@@ -63,43 +64,51 @@ export default function DropdownCore({
 
     return (
         <View style={[{ width: "100%" }, style]}>
-        {/* Selector button */}
-        <Pressable style={styles.selector} onPress={toggle}>
-            <H3>
-                {selected ? selected.label : placeholder}
-            </H3>
-            <ArrowDown width={iconWidth + 5} height={iconWidth - 5} style={{marginLeft: 0, marginRight: -18}}/>
-        </Pressable>
+            {/* Selector button */}
+            <Pressable style={styles.selector} onPress={toggle}>
+                <H3>
+                    {selected ? selected.label : placeholder}
+                </H3>
+                <ArrowDown width={iconWidth + 5} height={iconWidth - 5} style={{marginLeft: 0, marginRight: -18}}/>
+            </Pressable>
 
-        {/* Dropdown list */}
-        <Animated.View style={[styles.dropdown, { height }]}>
-            <FlatList
-                data={options}
-                keyExtractor={(item) => item.label}
-                renderItem={({ item }) => (
-                    <Pressable
-                        style={[
-                            styles.option,
-                            selected?.value === item.value && styles.selectedOption
-                        ]}
-                        onPress={() => handleSelect(item)}
-                    >
-                        <H3 style={[
-                            styles.optionText,
-                            selected?.value === item.value && styles.selectedOptionText
-                        ]}>
-                            {item.label}
-                        </H3>
+            {/* Dropdown list */}
+            <Animated.View style={[styles.dropdown, { height }]}>
+                <ScrollView>
+                    <FlatList
+                        data={options}
+                        keyExtractor={(item) => item.label}
+                        nestedScrollEnabled
+                        renderItem={({ item }) => (
+                            <Pressable
+                                style={[
+                                    styles.option,
+                                    selected?.value === item.value && styles.selectedOption
+                                ]}
+                                onPress={() => handleSelect(item)}
+                            >
+                                <H3 style={[
+                                    styles.optionText,
+                                    selected?.value === item.value && styles.selectedOptionText
+                                ]}>
+                                    {item.label}
+                                </H3>
+                            </Pressable>
+                        )}
+                        removeClippedSubviews={false}
+                        windowSize={options.length}
+                        initialNumToRender={options.length}
+                        scrollEnabled={false}
+                        style={{marginTop: 12, marginHorizontal: 12,}}
+                    />
+                </ScrollView>
+                {extraButton &&
+                    <Pressable onPress={extraButton} style={styles.extraButton}>
+                        <H3 style={{color: colors.primary}}>{extraButtonText}</H3>
                     </Pressable>
-                )}
-                style={{marginTop: 12, marginHorizontal: 12,}}
-            />
-            {extraButton &&
-                <Pressable onPress={extraButton} style={styles.extraButton}>
-                    <H3 style={{color: colors.primary}}>{extraButtonText}</H3>
-                </Pressable>
-            }
-        </Animated.View>
+                }
+                
+            </Animated.View>
         </View>
     );
 }

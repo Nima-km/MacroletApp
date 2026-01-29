@@ -11,7 +11,7 @@ const RecipeComponent = () => {
 				<Text>NAVIGATE to recipe</Text>
 			</TouchableOpacity>
 		</Link>
-		<Link href={"/(tabs)/(logs)/handleCreateRecipe/createRecipe"} asChild>
+		<Link href={"/(tabs)/(logs)/HandleCreateRecipe/createRecipeInfo"} asChild>
 			<TouchableOpacity>
 				<Text>NAVIGATE to create recipe</Text>
 			</TouchableOpacity>

@@ -11,12 +11,12 @@ import React, { Suspense, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
+ //import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-   // const expoDb = openDatabaseSync(DATABASE_NAME);
+    //const expoDb = openDatabaseSync(DATABASE_NAME);
    // useDrizzleStudio(expoDb)
     const { success, error } = useMigrations(db, migrations);
     const [loaded, fontError] = useFonts({
@@ -54,3 +54,4 @@ export default function RootLayout() {
         </QueryClientProvider>
     );
 }
+

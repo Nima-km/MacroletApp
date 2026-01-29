@@ -1,10 +1,8 @@
 import { PrimaryButton } from '@/components/UIComponents/Buttons/Button'
-import PrepCookButton from '@/components/UIComponents/Buttons/PrepCookButton'
 import TimeDateSelector from '@/components/UIComponents/Calendar/TimeDateSelector'
 import DropdownCore from '@/components/UIComponents/DropDown/DropDownCore'
 import CustomServingModal from '@/components/UIComponents/Modals/CustomServingModal'
 import IngredientModal from '@/components/UIComponents/Modals/IngredientModal'
-import QuickAddIngredientModal from '@/components/UIComponents/Modals/QuickAddIngredientModal'
 import TextModal from '@/components/UIComponents/Modals/TextModal'
 import { TestFood1, TestIngredientItem1 } from '@/tests/testData'
 import BottomSheet from '@gorhom/bottom-sheet'
@@ -46,7 +44,7 @@ const test1 = () => {
         <View style={{paddingHorizontal: 20}}>
             <DropdownCore options={options} />
             <DropdownCore options={options} extraButton={() => console.log('pressed boah')} extraButtonText='Add New'/>
-            <PrepCookButton prepHour={prepHour} cookHour={cookHour} prepMinute={prepMinute} cookMinute={cookMinute} setCookHourMinute={setCookHourMinute} setPrepHourMinute={setPrepHourMinute}/>
+            
             <PrimaryButton onPress={() => setCustomServingModalVisible(true)}>
                 open customServingModal
             </PrimaryButton>
@@ -102,12 +100,7 @@ const test1 = () => {
                     setAddIngredientModalVisible(false)
                 }}
             >
-                <QuickAddIngredientModal
-                    foodData={TestFood1}
-                    options={servingOptions}
-                    onClose={() => setAddIngredientModalVisible(false)} 
-                    setIngredient={(ingredientDetails) => console.log("servingSize is", ingredientDetails)}
-                />
+                
             </Modal>
             <Modal
                 visible={IngredientModalVisible}

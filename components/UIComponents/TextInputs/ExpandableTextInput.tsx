@@ -1,5 +1,5 @@
 import { colors } from "@/theme";
-import React, { useRef, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import {
     Animated,
     StyleSheet,
@@ -14,6 +14,7 @@ interface ExpandableTextInputProps {
     onChangeText: (text: string) => void;
     placeholder?: string;
     collapsedPlaceholder?: string;
+    children?: ReactNode
     expandedHeight?: number;
 }
 
@@ -23,6 +24,7 @@ export default function ExpandableTextInput({
     placeholder = "Type something...",
     collapsedPlaceholder = "Add note",
     expandedHeight = 60,
+    children,
 }: ExpandableTextInputProps) {
     const [expanded, setExpanded] = useState(false);
     const animatedHeight = useRef(new Animated.Value(0)).current;
@@ -80,6 +82,7 @@ export default function ExpandableTextInput({
                 autoFocus={expanded}
                 placeholderTextColor={colors.inactive}
             />
+            {children}
         </Animated.View>
     </View>
   );

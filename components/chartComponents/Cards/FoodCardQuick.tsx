@@ -4,16 +4,17 @@ import { calculateMacro } from '@/helper/calculateMacro'
 import { colors } from '@/theme'
 import { FoodFullData } from '@/types/food'
 import React from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View, ViewStyle } from 'react-native'
 
 interface FoodCardQuickProps {
-    onRemove: () => void
+    onRemove?: () => void
+    style?: ViewStyle
 }
 
-const FoodCardQuick = ({food, foodItem, onRemove} : FoodFullData & FoodCardQuickProps) => {
+const FoodCardQuick = ({food, style, foodItem, onRemove} : FoodFullData & FoodCardQuickProps) => {
     const foodData = calculateMacro(food, foodItem.serving_mult * foodItem.servings)
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={{flex: 1}}>
                 <View style={styles.rowContainer}>
                     <H4>{food.name}</H4>
@@ -40,13 +41,15 @@ const FoodCardQuick = ({food, foodItem, onRemove} : FoodFullData & FoodCardQuick
                     </View>
                 </View>
             </View>
-            <Pressable onPress={onRemove}>
-                <View style={{paddingLeft: 13}}>
-                    
-                    <H1 style={{color: colors.primary}}>x</H1>
-                    
-                </View>
-            </Pressable>
+            { onRemove &&
+                <Pressable onPress={onRemove}>
+                    <View style={{paddingLeft: 13}}>
+                        
+                        <H1 style={{color: colors.primary}}>x</H1>
+                        
+                    </View>
+                </Pressable>
+            }
         </View>
     )
 }
@@ -55,8 +58,7 @@ export default FoodCardQuick
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
-        padding: 16,
+        paddingVertical: 16,
         flexDirection: 'row',
         gap: 8
     },

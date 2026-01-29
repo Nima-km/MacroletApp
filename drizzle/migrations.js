@@ -6,6 +6,8 @@ import m0001 from './0001_workable_lifeguard.sql';
 import m0002 from './0002_many_psynapse.sql';
 import m0003 from './0003_flimsy_mandroid.sql';
 import m0004 from './0004_tan_post.sql';
+import m0005 from './0005_medical_nextwave.sql';
+import m0006 from './0006_futuristic_jack_flag.sql';
 
   export default {
     journal,
@@ -14,7 +16,9 @@ import m0004 from './0004_tan_post.sql';
 m0001,
 m0002,
 m0003,
-m0004
+m0004,
+m0005,
+m0006
     }
   }
   

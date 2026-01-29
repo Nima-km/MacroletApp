@@ -10,6 +10,7 @@ export default function Layout() {
                 },
             }}
         >
+            
             <Stack.Screen name="logs" options={{ title: 'logs' }}/>
             <Stack.Screen name="logFood" options={{ title: 'LogFood' }}/>
             <Stack.Screen name="food" options={{ title: 'Food' }}/>

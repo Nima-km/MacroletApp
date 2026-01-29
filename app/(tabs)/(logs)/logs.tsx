@@ -1,5 +1,5 @@
 import FoodSVG from "@/assets/svg/foods.svg"
-import FoodCardFull from '@/components/chartComponents/FoodCards/FoodCardFull'
+import FoodCardFull from '@/components/chartComponents/Cards/FoodCardFull'
 import BarChart from '@/components/chartComponents/MacroCharts/BarChart'
 import HeaderSimple from "@/components/navComponents/HeaderSimple"
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button"

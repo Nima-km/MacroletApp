@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 
-export const useGetFood = (foodID: number, enabled = true) => {
+export const useGetFood = (foodID?: number, enabled = true) => {
+  
   return useQuery({
     queryKey: ['food', foodID],
-    queryFn: () => getFood(foodID),
+    queryFn: () => getFood(foodID!),
     enabled: enabled && !!foodID,
   });
 };

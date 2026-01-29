@@ -19,6 +19,7 @@ interface FormInputProps {
     numeric?: boolean;
     upperLimit?: number;
     lowerLimit?: number;
+    multiline?: boolean
     center?: boolean;
 }
 
@@ -31,6 +32,7 @@ export function FormInput({
     error,
     secureTextEntry,
     selectTextOnFocus = false,
+    multiline = false,
     Icon,
     numeric,
     unit,
@@ -43,10 +45,11 @@ export function FormInput({
     return (
         <Pressable onPress={() => {inputRef.current?.focus()}}>
         {label && <Text style={styles.label}>{label}</Text>}
-        <View style={[styles.inputContainer, hasError && styles.inputError, center && styles.centerText]}>
+        <View style={[styles.inputContainer, hasError && styles.inputError, center && styles.centerText, {paddingHorizontal: 10, paddingVertical: 10}]}>
             {Icon && <Icon width={iconWidth} height={iconWidth} style={{marginLeft: 0, marginRight: 8}} />}
             <View style={[styles.input, !center && {flex: 1}]}>
                 <TextInput
+                    multiline
                     value={value}
                     ref={inputRef}
                     selectTextOnFocus = {selectTextOnFocus}
@@ -83,6 +86,18 @@ export function FormInput({
         {hasError && <H6 style={styles.errorText}>{error}</H6>}
         </Pressable>
     );
+}
+
+
+export function FormInputLong({
+    value,
+    onChangeText,
+    placeholder,
+    error,
+}: FormInputProps) {
+    return (
+        <FormInput style={{height: 100, textAlignVertical: "top"}} value={value} onChangeText={onChangeText} placeholder={placeholder} error={error} multiline/>
+    )
 }
 
 export function FormInputSearch({
@@ -122,10 +137,12 @@ const styles = StyleSheet.create({
        flexDirection: 'row',
         alignItems: 'center',
         borderRadius: 8,
-        paddingHorizontal: 12,
+        
         backgroundColor: colors.white,
-        paddingTop: 14,
-        paddingBottom: 14,
+        minWidth: 50, 
+        minHeight: 50
+      //  paddingTop: 14,
+       // paddingBottom: 14,
     },
     label: {
         marginBottom: 6,

@@ -28,7 +28,7 @@ const test = () => {
         <KeyboardAvoidingView 
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
-            keyboardVerticalOffset={100} // adjust if header is present
+            keyboardVerticalOffset={0} // adjust if header is present
         >
             <ScrollView>
             
