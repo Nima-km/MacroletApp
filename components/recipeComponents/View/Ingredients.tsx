@@ -24,7 +24,7 @@ type Props = {
     setServings: (newServing: number) => void;
     addIngredient: () => void;
 };
-const Ingredients = ({ servings, setServings }: Props) => {
+const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
     const foodData = useRecipeStateStore((state) => state.data.foodData);
     const recipeData = useRecipeStateStore((state) => state.data.recipeData);
     const ingredientItemsData = useRecipeStateStore(
@@ -124,7 +124,7 @@ const Ingredients = ({ servings, setServings }: Props) => {
                 extraData={showIngredientModal}
             />
             <View>
-                <SecondaryAddButton onPress={() => {}}>
+                <SecondaryAddButton onPress={addIngredient}>
                     Add Ingredient
                 </SecondaryAddButton>
             </View>

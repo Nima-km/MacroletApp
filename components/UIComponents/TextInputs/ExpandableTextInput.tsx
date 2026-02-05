@@ -1,26 +1,30 @@
+import Bin from "@/assets/svg/bin.svg";
 import { colors } from "@/theme";
-import React, { ReactNode, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import {
     Animated,
+    Pressable,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import { H4 } from "../Typography";
 
 interface ExpandableTextInputProps {
     value: string;
     onChangeText: (text: string) => void;
+    onDelete?: () => void;
     placeholder?: string;
     collapsedPlaceholder?: string;
-    children?: ReactNode
+    children?: ReactNode;
     expandedHeight?: number;
 }
 
 export default function ExpandableTextInput({
     value,
     onChangeText,
+    onDelete,
     placeholder = "Type something...",
     collapsedPlaceholder = "Add note",
     expandedHeight = 60,
@@ -53,39 +57,63 @@ export default function ExpandableTextInput({
         inputRange: [0, 1],
         outputRange: ["0deg", "45deg"], // + rotated 45deg becomes an X
     });
-
+    useEffect(() => {
+        Animated.timing(animatedHeight, {
+            toValue: expandedHeight,
+            duration: 200,
+            useNativeDriver: false,
+        }).start();
+    }, [expandedHeight]);
     return (
-    <View style={styles.mainContainer}>
-        {/* COLLAPSED HEADER */}
-        <TouchableOpacity style={styles.header} onPress={toggle}>
-            <View style={styles.headerContent}>
-                <Animated.Text style={[styles.icon, { transform: [{ rotate: rotation }] }]}>
-                    +
-                </Animated.Text>
-                <H4 style={styles.headerText}>
-                    {collapsedPlaceholder}
-                </H4>
+        <View style={styles.mainContainer}>
+            {/* COLLAPSED HEADER */}
+            <TouchableOpacity style={styles.header} onPress={toggle}>
+                <View
+                    style={[
+                        styles.headerContent,
+                        { justifyContent: "space-between" },
+                    ]}
+                >
+                    <View style={styles.headerContent}>
+                        <Animated.Text
+                            style={[
+                                styles.icon,
+                                { transform: [{ rotate: rotation }] },
+                            ]}
+                        >
+                            +
+                        </Animated.Text>
+                        <H4 style={styles.headerText}>
+                            {collapsedPlaceholder}
+                        </H4>
+                    </View>
+                    {onDelete && (
+                        <Pressable onPress={onDelete}>
+                            <Bin style={{ color: colors.primary }} />
+                        </Pressable>
+                    )}
 
-            {/* + → X icon */}
-            
-            </View>
-        </TouchableOpacity>
+                    {/* + → X icon */}
+                </View>
+            </TouchableOpacity>
 
-        {/* EXPANDING INPUT */}
-        <Animated.View style={[styles.animatedContainer, { height: animatedHeight }]}>
-            <TextInput
-                style={styles.input}
-                value={value}
-                onChangeText={onChangeText}
-                multiline
-                placeholder={placeholder}
-                autoFocus={expanded}
-                placeholderTextColor={colors.inactive}
-            />
-            {children}
-        </Animated.View>
-    </View>
-  );
+            {/* EXPANDING INPUT */}
+            <Animated.View
+                style={[styles.animatedContainer, { height: animatedHeight }]}
+            >
+                <TextInput
+                    style={styles.input}
+                    value={value}
+                    onChangeText={onChangeText}
+                    multiline
+                    placeholder={placeholder}
+                    autoFocus={expanded}
+                    placeholderTextColor={colors.inactive}
+                />
+                {children}
+            </Animated.View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -98,7 +126,7 @@ const styles = StyleSheet.create({
     },
     headerContent: {
         flexDirection: "row",
-    // justifyContent: "space-between",
+        // justifyContent: "space-between",
         alignItems: "center",
     },
     headerText: {

@@ -52,7 +52,12 @@ const FoodView = ({
             });
             setFood((prev) => ({ ...prev, ...foodData }));
         }
-    }, [ingredientItemsData]);
+        console.log(
+            "FoodView, recipeData && ingredientItemsData : ",
+            ingredientItemsData,
+            recipeData,
+        );
+    }, [ingredientItemsData, recipeData]);
     useEffect(() => {
         if (recipeData && ingredientItemsData) {
             console.log("food got updated, foodView");

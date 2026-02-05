@@ -7,9 +7,7 @@ import {
     SubButton,
 } from "@/components/UIComponents/Buttons/Button";
 import { H2, H5 } from "@/components/UIComponents/Typography";
-import {
-    useRecipeStateStore
-} from "@/store/recipeStore/useRecipeStore";
+import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -40,7 +38,11 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                     <Ingredients
                         servings={servings}
                         setServings={setServings}
-                        addIngredient={() => {}}
+                        addIngredient={() =>
+                            router.push(
+                                "/(tabs)/(logs)/HandleModifyRecipe/AddIngredientModify",
+                            )
+                        }
                     />
                 );
             case 2:

@@ -4,6 +4,7 @@ import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
 import { H1 } from "@/components/UIComponents/Typography";
 import { useGetFood } from "@/db/hooks/food/useFood";
 import {
+    useDeleteFoodItem,
     useGetFoodItem,
     useInsertFoodItem,
     useUpdateFoodItem,
@@ -82,6 +83,7 @@ const foodItem = () => {
         error: logServingError,
         isSuccess: logServingSuccess,
     } = useInsertServingSize();
+    const { mutate: deleteFoodItem } = useDeleteFoodItem();
     const [edit, setEdit] = useState(false);
     const [servings, setServings] = useState(1);
 
@@ -124,18 +126,39 @@ const foodItem = () => {
     }
     function LogUpdateFoodItem(food: FoodInsert, foodItem: FoodItemData) {
         if (foodItem)
-            updateFoodItem(
-                { data: foodItem, id: Number(foodItem_id) },
-                {
-                    onSuccess: () => {
-                        console.log(`${food.name} has been logged`);
-                        router.replace("/(tabs)/(logs)/logs");
+            if (
+                recipeData?.[0]?.recipe &&
+                ingredients != recipeStoreData.ingredientItemsData
+            ) {
+                if (isValidRecipeDraft(recipeStoreData)) {
+                    logAndCreateRecipe({
+                        recipeData: { ...recipeStoreData },
+                        foodItem,
+                    });
+                    deleteFoodItem(Number(foodItem_id), {
+                        onSuccess: (item) => {
+                            console.log(`Removed from history`);
+                            //  context.setDate(new Date(context.date.getDate() + 1)) FOR DEBUGGING
+                        },
+                        onError: (item) => {
+                            console.log(`Something Went Wrong`, item);
+                        },
+                    });
+                }
+            } else {
+                updateFoodItem(
+                    { data: foodItem, id: Number(foodItem_id) },
+                    {
+                        onSuccess: () => {
+                            console.log(`${food.name} has been logged`);
+                            router.replace("/(tabs)/(logs)/logs");
+                        },
+                        onError: (err) => {
+                            console.error("Insert failed:", err);
+                        },
                     },
-                    onError: (err) => {
-                        console.error("Insert failed:", err);
-                    },
-                },
-            );
+                );
+            }
         else {
             console.log(`something went wrong`);
         }

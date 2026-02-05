@@ -1,6 +1,11 @@
 import { colors } from "@/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet, TouchableOpacity, TouchableOpacityProps, View } from "react-native";
+import {
+    StyleSheet,
+    TouchableOpacity,
+    TouchableOpacityProps,
+    View,
+} from "react-native";
 import { H2, H3, H4, H5 } from "../Typography";
 
 type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
@@ -9,7 +14,10 @@ type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
 
 export function PrimaryButton({ children, style, ...props }: ButtonProps) {
     return (
-        <TouchableOpacity {...props} style={[style, styles.button, styles.primary]}>
+        <TouchableOpacity
+            {...props}
+            style={[style, styles.button, styles.primary]}
+        >
             <H4 style={styles.primaryText}>{children}</H4>
         </TouchableOpacity>
     );
@@ -17,16 +25,27 @@ export function PrimaryButton({ children, style, ...props }: ButtonProps) {
 
 export function SecondaryButton({ children, style, ...props }: ButtonProps) {
     return (
-        <TouchableOpacity {...props} style={[style, styles.button, styles.secondary]}>
+        <TouchableOpacity
+            {...props}
+            style={[styles.button, styles.secondary, style]}
+        >
             <H4 style={styles.secondaryText}>{children}</H4>
         </TouchableOpacity>
     );
 }
 export function SecondaryAddButton({ children, style, ...props }: ButtonProps) {
     return (
-        <TouchableOpacity {...props} style={[style, styles.button, styles.secondary, {alignItems: 'flex-start'}]}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <H2 style={{color: colors.primary}}>+ </H2> 
+        <TouchableOpacity
+            {...props}
+            style={[
+                style,
+                styles.button,
+                styles.secondary,
+                { alignItems: "flex-start" },
+            ]}
+        >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <H2 style={{ color: colors.primary }}>+ </H2>
                 <H4 style={[styles.secondaryText]}>{children}</H4>
             </View>
         </TouchableOpacity>
@@ -35,13 +54,23 @@ export function SecondaryAddButton({ children, style, ...props }: ButtonProps) {
 export function InlineButton({ children, style, ...props }: ButtonProps) {
     return (
         <TouchableOpacity {...props} style={[style]}>
-            <H5 style={[styles.secondaryText, {textDecorationLine: 'underline'}]}>{children}</H5>
+            <H5
+                style={[
+                    styles.secondaryText,
+                    { textDecorationLine: "underline" },
+                ]}
+            >
+                {children}
+            </H5>
         </TouchableOpacity>
     );
 }
 export function SubButton({ children, style, ...props }: ButtonProps) {
     return (
-        <TouchableOpacity {...props} style={[style, styles.sub_button]}>
+        <TouchableOpacity
+            {...props}
+            style={[style, styles.sub_button, { padding: 7 }]}
+        >
             <H5 style={styles.secondaryText}>{children}</H5>
         </TouchableOpacity>
     );
@@ -54,24 +83,23 @@ export function DateButton({ children, style, ...props }: ButtonProps) {
     );
 }
 
-
 const styles = StyleSheet.create({
     button: {
         padding: 15,
         borderRadius: 7,
-        alignItems: 'center',
+        alignItems: "center",
     },
     sub_button: {
         padding: 12,
         borderRadius: 22,
-        alignItems: 'center',
+        alignItems: "center",
         backgroundColor: colors.primary_bg,
         alignSelf: "flex-start",
     },
     date_button: {
         padding: 12,
         borderRadius: 8,
-        alignItems: 'center',
+        alignItems: "center",
         backgroundColor: colors.primary_bg,
         alignSelf: "flex-start",
     },

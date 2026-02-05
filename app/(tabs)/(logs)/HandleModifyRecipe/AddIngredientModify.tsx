@@ -26,7 +26,7 @@ const AddIngredientModify = () => {
         setIngredientModalVisible(true);
     }
     const onLogFoodList = () => {
-        router.push("/(tabs)/(logs)/HandleCreateRecipe/createRecipe");
+        router.back();
     };
     useEffect(() => {
         if (foodData) {

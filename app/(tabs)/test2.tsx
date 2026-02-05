@@ -1,82 +1,66 @@
-
-
-import { SimpleChartCarbsSmall, SimpleChartFatSmall, SimpleChartProteinSmall } from '@/components/chartComponents/SimpleChart/SimpleChartSmall'
-import HeaderSimple from '@/components/navComponents/HeaderSimple'
-import TestComponent from '@/components/testComponents/TestComponent'
-import { PrimaryButton, SecondaryButton } from '@/components/UIComponents/Buttons/Button'
-import { H1, H3, H4 } from '@/components/UIComponents/Typography'
-import { colors } from '@/theme'
-import React, { useCallback, useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
-
+import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
+import ExpandableFlatlist from "@/components/UIComponents/CustomFlatlist/ExpandableFlatlist";
+import { DropdownOption } from "@/components/UIComponents/DropDown/DropDownCore";
+import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
+import ControlledTextInput from "@/components/UIComponents/TextInputs/ControlledTextInput";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 const test2 = () => {
-    const AutoCalorie = [
-        { label: 'Auto-calculate', value: 1 },
-        { label: 'Manual', value: 0 },
-        
+    const options = [
+        { label: "Chicken", value: 0 },
+        { label: "Chinese", value: 1 },
+        { label: "Milk", value: 2 },
+        { label: "High Calorie", value: 3 },
+        { label: "Low Calorie", value: 4 },
+        { label: "Low Protein", value: 5 },
+        { label: "High Protein", value: 6 },
     ];
-    const [note, setNote] = useState("");
-    const [chartval, setChartval] = useState(50);
-    const [input, setInput] = useState("")
-    const [searchInput, setSearchInput] = useState("")
-    const [macroInput, setMacroInput] = useState("")
-    const renderChart = useCallback(() => {
-        return (<View style={{backgroundColor: colors.off_white, padding: 16, gap: 20, height: 180}}>
-                            <H3>Nutrition Details</H3>
-                        
-                            <View style={[{marginBottom: 20}]}>
-                                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                                    <H1>
-                                        {Math.floor(1500)}
-                                    </H1>
-                                    <H4>
-                                        Calories
-                                    </H4>
-                                </View>
-                                <View style={{}}>
-                                    <SimpleChartProteinSmall target={150} progress={chartval} backgroundColor={colors.white} />
-                                    <SimpleChartCarbsSmall target={150} progress={chartval} backgroundColor={colors.white} />
-                                    <SimpleChartFatSmall target={150} progress={chartval} backgroundColor={colors.white} />
-                                </View>
-                            </View>
-                        </View>)
-    }, [chartval])
-    
+    const data = [
+        { text: "Chicken", id: "Chicken" },
+        { text: "Chinese", id: "Chinese" },
+        { text: "Milk", id: "Milk" },
+        { text: "High Calorie", id: "High Calorie" },
+        { text: "Low Calorie", id: "Low Calorie" },
+        { text: "Low Protein", id: "Low Protein" },
+        { text: "High Protein", id: "High Protein" },
+    ];
+    const [filteredData, setFilteredData] = useState<DropdownOption[]>(options);
+    const [text, setText] = useState("");
+    useEffect(() => {
+        setFilteredData(
+            options
+                ?.filter((item) =>
+                    item.label.toLowerCase().includes(`${text}`.toLowerCase()),
+                )
+                .slice(0, 4),
+        );
+        //console.log("recent history", errorSectionList, loadingSectionList);
+    }, [text]);
+
     return (
-        <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={100} // adjust if header is present
-        >
-            <ScrollView style={{}}>
-                <HeaderSimple title='DEEZ'/>
-                <PrimaryButton onPress={() => setChartval((prev) => prev + 10)}>
-                    Primary Button
-                </PrimaryButton>
-                <SecondaryButton onPress={() => setChartval((prev) => prev - 10)}>
-                    Secondary Button
-                </SecondaryButton>
-                
-                <H3>charts</H3>
-                <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                    <SimpleChartProteinSmall target={150} progress={chartval} backgroundColor={'black'}/>
-                    
-                    <SimpleChartCarbsSmall target={150} progress={chartval} backgroundColor={'black'}/>
-                    <SimpleChartFatSmall target={150} progress={chartval} backgroundColor={'black'}/>
+        <KeyboardAware>
+            <View style={{ marginTop: 50 }}>
+                <ControlledTextInput
+                    value={text}
+                    options={filteredData}
+                    onChangeText={setText}
+                    onSelect={(selected) => console.log(selected)}
+                />
+                <PrimaryButton>Hi</PrimaryButton>
+                <View
+                    style={{
+                        flexDirection: "row",
+                        backgroundColor: "red",
+                    }}
+                >
+                    <ExpandableFlatlist data={data} />
                 </View>
-                <H3>Test charts</H3>
-                {renderChart()}
-                <TestComponent footer={renderChart()}>
-                    
-                </TestComponent>
-                <View style={{padding: 20,}}/>
-            
-            </ScrollView>
-        </KeyboardAvoidingView>
-    )
-}
+            </View>
+        </KeyboardAware>
+    );
+};
 
-export default test2
+export default test2;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
