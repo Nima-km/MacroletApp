@@ -10,7 +10,7 @@ import {
     View,
 } from "react-native";
 import { SvgProps } from "react-native-svg";
-import { H6 } from "../Typography";
+import { H5_SemiBold, H6 } from "../Typography";
 const iconWidth = 24;
 interface FormInputProps {
     label?: string;
@@ -186,6 +186,7 @@ export function FormInputNumber({
     value,
     style,
     upperLimit,
+    unit,
     lowerLimit,
     onChangeText,
 }: FormInputProps) {
@@ -195,12 +196,66 @@ export function FormInputNumber({
             onChangeText={onChangeText}
             numeric
             center
+            unit={unit}
             placeholder={"0"}
             style={style ?? typography.h3}
             upperLimit={upperLimit}
             lowerLimit={lowerLimit}
             selectTextOnFocus
         />
+    );
+}
+type FormInputNumberStyledProps = FormInputProps & { leftText: string };
+export function FormInputNumberStyled({
+    value,
+    leftText,
+    unit,
+    style,
+    upperLimit,
+    lowerLimit,
+    onChangeText,
+}: FormInputNumberStyledProps) {
+    return (
+        <View
+            style={{
+                flexDirection: "row",
+                width: 140,
+                height: 50,
+                borderRadius: 8,
+                backgroundColor: "white",
+            }}
+        >
+            <View
+                style={{
+                    width: 50,
+                    borderTopLeftRadius: 8,
+                    borderBottomLeftRadius: 8,
+                    backgroundColor: colors.primary_bg,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <H5_SemiBold style={{ color: colors.primary }}>
+                    {leftText}
+                </H5_SemiBold>
+            </View>
+            <View
+                style={{
+                    borderRadius: 8,
+                    flex: 1,
+                    //justifyContent: "center",
+                    alignItems: "center",
+                    // backgroundColor: "blue",
+                }}
+            >
+                <FormInputNumber
+                    value={value}
+                    style={typography.h5}
+                    unit={unit}
+                    onChangeText={onChangeText}
+                />
+            </View>
+        </View>
     );
 }
 const styles = StyleSheet.create({

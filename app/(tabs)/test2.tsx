@@ -1,8 +1,10 @@
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
 import ExpandableFlatlist from "@/components/UIComponents/CustomFlatlist/ExpandableFlatlist";
 import { DropdownOption } from "@/components/UIComponents/DropDown/DropDownCore";
+import DropDownFilterCore from "@/components/UIComponents/DropDown/DropDownFilterCore";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import ControlledTextInput from "@/components/UIComponents/TextInputs/ControlledTextInput";
+import { FormInputNumberStyled } from "@/components/UIComponents/TextInputs/FormInput";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -40,7 +42,9 @@ const test2 = () => {
 
     return (
         <KeyboardAware>
-            <View style={{ marginTop: 50 }}>
+            <View
+                style={{ marginTop: 50, padding: 20, backgroundColor: "grey" }}
+            >
                 <ControlledTextInput
                     value={text}
                     options={filteredData}
@@ -56,6 +60,26 @@ const test2 = () => {
                 >
                     <ExpandableFlatlist data={data} />
                 </View>
+                <View style={{ marginTop: 50 }}></View>
+                <DropDownFilterCore
+                    placeholder="test"
+                    minValue={""}
+                    maxValue={""}
+                    setMinValue={function (newVal: string): void {
+                        throw new Error("Function not implemented.");
+                    }}
+                    setMaxValue={function (newVal: string): void {
+                        throw new Error("Function not implemented.");
+                    }}
+                />
+                <FormInputNumberStyled
+                    value={"20"}
+                    unit="g"
+                    leftText="Min"
+                    onChangeText={function (text: string): void {
+                        throw new Error("Function not implemented.");
+                    }}
+                />
             </View>
         </KeyboardAware>
     );

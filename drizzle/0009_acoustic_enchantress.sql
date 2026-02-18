@@ -1,0 +1,1 @@
+ALTER TABLE `recipeBook` DROP COLUMN `pictures`;

@@ -1,0 +1,1 @@
+ALTER TABLE `recipeBook` ADD `pictures` text;

@@ -1,5 +1,5 @@
 import { colors } from "@/theme";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 import {
     StyleSheet,
     TouchableOpacity,
@@ -10,6 +10,7 @@ import { H2, H3, H4, H5 } from "../Typography";
 
 type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
     style?: any; // or StyleProp<ViewStyle>
+    icon?: ReactNode; // or StyleProp<ViewStyle>
 };
 
 export function PrimaryButton({ children, style, ...props }: ButtonProps) {
@@ -23,13 +24,19 @@ export function PrimaryButton({ children, style, ...props }: ButtonProps) {
     );
 }
 
-export function SecondaryButton({ children, style, ...props }: ButtonProps) {
+export function SecondaryButton({
+    children,
+    style,
+    icon,
+    ...props
+}: ButtonProps) {
     return (
         <TouchableOpacity
             {...props}
-            style={[styles.button, styles.secondary, style]}
+            style={[style, styles.button, styles.secondary]}
         >
-            <H4 style={styles.secondaryText}>{children}</H4>
+            <H4 style={[styles.secondaryText]}>{children}</H4>
+            {icon}
         </TouchableOpacity>
     );
 }
@@ -86,8 +93,12 @@ export function DateButton({ children, style, ...props }: ButtonProps) {
 const styles = StyleSheet.create({
     button: {
         padding: 15,
+
         borderRadius: 7,
+        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
     },
     sub_button: {
         padding: 12,

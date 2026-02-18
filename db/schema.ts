@@ -1,5 +1,5 @@
 import { DirectionStep, RecipeTags } from "@/types/recipe";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
     integer,
     sqliteTable,
@@ -39,7 +39,7 @@ export const recipe = sqliteTable("recipe", {
     directions: text("directions", { mode: "json" })
         .$type<DirectionStep[]>()
         .notNull(),
-    bannerImage: text("bannerImage", { mode: "json" }),
+    bannerImage: text("bannerImage", { mode: "json" }).$type<string>(),
     tags: text("tags", { mode: "json" }).$type<RecipeTags[]>(),
     prep_time: integer("prep_time").default(0).notNull(),
     cook_time: integer("cook_time").default(0).notNull(),
@@ -111,7 +111,7 @@ export const macroGoal = sqliteTable("macroGoal", {
 export const recipeBook = sqliteTable("recipeBook", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name", { length: 20 }).notNull(),
-    pictures: text("pictures", { mode: "json" }),
+    pictures: text("pictures", { mode: "json" }).$type<string[]>(),
 });
 export const recipeBookItem = sqliteTable("recipeBookItem", {
     id: integer("id").primaryKey({ autoIncrement: true }),
@@ -122,3 +122,13 @@ export const recipeBookItem = sqliteTable("recipeBookItem", {
         .notNull()
         .references(() => recipeBook.id),
 });
+
+export const recipeBookRelations = relations(recipeBook, ({ many }) => ({
+    items: many(recipeBookItem),
+}));
+export const recipeBookItemRelations = relations(recipeBookItem, ({ one }) => ({
+    book: one(recipeBook, {
+        fields: [recipeBookItem.recipeBook_id],
+        references: [recipeBook.id],
+    }),
+}));

@@ -1,10 +1,10 @@
 import { db } from "@/db/client";
-import { recipeBook, recipeBookItem } from "@/db/schema";
+import { food, recipe, recipeBook, recipeBookItem } from "@/db/schema";
 import {
-  RecipeBookInsert,
-  RecipeBookItemInsert,
-  RecipeBookItemType,
-  RecipeBookType,
+    RecipeBookInsert,
+    RecipeBookItemInsert,
+    RecipeBookItemType,
+    RecipeBookType,
 } from "@/types/recipe";
 import { eq } from "drizzle-orm";
 
@@ -15,18 +15,27 @@ export const getRecipeBook = async (recipeBookID: number) => {
 };
 */
 export const getRecipeBookList = async () => {
-    const res = db.select().from(recipeBook);
+    const res = await db.query.recipeBook.findMany({
+        with: {
+            items: true,
+        },
+    });
+    return res;
+};
+export const getRecipeBook = async (recipeBookID: number) => {
+    const res = await db.query.recipeBook.findFirst({});
     return res;
 };
 export const getRecipeBookData = async (recipeBookID: number) => {
-    const res = db
-        .select()
-        .from(recipeBook)
-        .innerJoin(
-            recipeBookItem,
-            eq(recipeBook.id, recipeBookItem.recipeBook_id),
-        )
-        .where(eq(recipeBook.id, recipeBookID));
+    const res = await db
+        .select({
+            recipeData: recipe,
+            foodData: food,
+        })
+        .from(recipeBookItem)
+        .innerJoin(recipe, eq(recipe.id, recipeBookItem.recipe_id))
+        .innerJoin(food, eq(food.recipe_id, recipe.id))
+        .where(eq(recipeBookItem.recipeBook_id, recipeBookID));
     return res;
 };
 export const insertRecipeBook = async (recipeBookObject: RecipeBookInsert) => {

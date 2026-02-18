@@ -1,3 +1,4 @@
+import Bookmark from "@/assets/svg/bookmark.svg";
 import RecipeNav from "@/components/recipeComponents/RecipeNav";
 import Directions from "@/components/recipeComponents/View/Directions";
 import Ingredients from "@/components/recipeComponents/View/Ingredients";
@@ -7,12 +8,19 @@ import {
     SubButton,
 } from "@/components/UIComponents/Buttons/Button";
 import { H2, H5 } from "@/components/UIComponents/Typography";
+import { useGetRecipeBookList } from "@/db/hooks/recipeBook/getRecipeBookList";
+import {
+    useInsertRecipeBook,
+    useInsertRecipeBookItem,
+} from "@/db/hooks/recipeBook/useRecipeBook";
 import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { View } from "react-native";
-
+import { Modal, View } from "react-native";
+import IconButton from "../UIComponents/Buttons/IconButton";
+import CreateRecipeBook from "../UIComponents/Modals/CreateRecipeBook";
+import SelectRecipeBook from "../UIComponents/Modals/SelectRecipeBook";
 interface Props {
     servings: number;
     setServings: (newServing: number) => void;
@@ -23,10 +31,34 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
     const ingredientItemsData = useRecipeStateStore(
         (state) => state.data.ingredientItemsData,
     );
+    const [showCreateRecipe, setShowCreateRecipe] = useState(false);
+    const [showSelectRecipe, setShowSelectRecipe] = useState(false);
+    const {
+        data: recipeBookList,
+        isLoading: recipeBookLoading,
+        error: recipeBookError,
+    } = useGetRecipeBookList();
+    const { mutate: insertRecipeBook } = useInsertRecipeBook();
+    const { mutate: insertRecipeBookItem } = useInsertRecipeBookItem();
+
     const foodData = useRecipeStateStore((state) => state.data.foodData);
     const recipeData = useRecipeStateStore((state) => state.data.recipeData);
     const router = useRouter();
     const [selectedPage, setSelectedPage] = useState(0);
+    function createRecipeBook(newName: string) {
+        insertRecipeBook(
+            { name: newName },
+            { onSuccess: () => console.log("logged") },
+        );
+    }
+    function AddRecipeBookItem(selectedBookID?: number) {
+        if (recipeData.id && selectedBookID)
+            insertRecipeBookItem(
+                { recipe_id: recipeData.id, recipeBook_id: selectedBookID },
+                { onSuccess: () => console.log("logged") },
+            );
+        else console.log("something went wrong");
+    }
     const renderPage = useMemo(() => {
         switch (selectedPage) {
             case 0:
@@ -83,10 +115,23 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                         {recipeData.description}
                     </H5>
                     {onLogRecipe && (
-                        <View style={{ paddingVertical: 12 }}>
-                            <PrimaryButton onPress={onLogRecipe}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                paddingVertical: 12,
+                                gap: 8,
+                            }}
+                        >
+                            <PrimaryButton
+                                style={{ flex: 1 }}
+                                onPress={onLogRecipe}
+                            >
                                 Log
                             </PrimaryButton>
+                            <IconButton
+                                onPress={() => setShowSelectRecipe(true)}
+                                icon={<Bookmark />}
+                            />
                         </View>
                     )}
                     <View style={{ flex: 1, gap: 20 }}>
@@ -98,6 +143,35 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                     </View>
                 </View>
             </View>
+            <Modal
+                visible={showSelectRecipe}
+                transparent
+                animationType="fade"
+                onRequestClose={() => {
+                    setShowSelectRecipe(false);
+                }}
+            >
+                <SelectRecipeBook
+                    onSelect={(selected) => AddRecipeBookItem(selected?.id)}
+                    onCreateNew={() => setShowCreateRecipe(true)}
+                    recipeBookList={recipeBookList}
+                    onClose={() => setShowSelectRecipe(false)}
+                />
+            </Modal>
+            <Modal
+                visible={showCreateRecipe}
+                transparent
+                animationType="fade"
+                onRequestClose={() => {
+                    setShowCreateRecipe(false);
+                }}
+            >
+                <CreateRecipeBook
+                    setText={(newName) => createRecipeBook(newName)}
+                    onClose={() => setShowCreateRecipe(false)}
+                    error={""}
+                />
+            </Modal>
         </View>
     );
 };

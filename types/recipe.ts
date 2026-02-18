@@ -1,3 +1,4 @@
+import { getRecipeBookList } from "@/db/queries/recipeBook";
 import {
     ingredientItem,
     recipe,
@@ -19,7 +20,9 @@ export type IngredientItemDetails = Omit<
     "id" | "recipe_id" | "ingredient_id"
 >;
 export type RecipeBookType = Omit<RecipeBookInsert, "id">;
-
+export type RecipeBookWithItems = Awaited<
+    ReturnType<typeof getRecipeBookList>
+>[number];
 export type RecipeBookItemType = Omit<RecipeBookItemInsert, "id">;
 
 export type RecipeData = {

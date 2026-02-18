@@ -10,6 +10,8 @@ import m0005 from './0005_medical_nextwave.sql';
 import m0006 from './0006_futuristic_jack_flag.sql';
 import m0007 from './0007_neat_tag.sql';
 import m0008 from './0008_cultured_gressill.sql';
+import m0009 from './0009_acoustic_enchantress.sql';
+import m0010 from './0010_certain_wrecking_crew.sql';
 
   export default {
     journal,
@@ -22,7 +24,9 @@ m0004,
 m0005,
 m0006,
 m0007,
-m0008
+m0008,
+m0009,
+m0010
     }
   }
   
