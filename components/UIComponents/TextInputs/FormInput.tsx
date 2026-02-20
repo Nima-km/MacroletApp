@@ -2,6 +2,7 @@ import SearchIcon from "@/assets/svg/search.svg";
 import { colors, typography } from "@/theme";
 import React, { FC, useEffect, useRef } from "react";
 import {
+    KeyboardTypeOptions,
     Pressable,
     StyleSheet,
     Text,
@@ -16,6 +17,7 @@ interface FormInputProps {
     label?: string;
     value: string;
     style?: TextStyle | TextStyle[];
+    keyboardType?: KeyboardTypeOptions;
     onChangeText: (text: string) => void;
     onFocus?: () => void;
     onUnFocus?: () => void;
@@ -39,6 +41,7 @@ export function FormInput({
     onFocus,
     onUnFocus,
     placeholder,
+    keyboardType,
     style,
     error,
     secureTextEntry,
@@ -60,6 +63,7 @@ export function FormInput({
         <Pressable
             onPress={() => {
                 inputRef.current?.focus();
+                inputRef.current?.setSelection(0, 10);
                 onFocus?.();
             }}
         >
@@ -84,7 +88,7 @@ export function FormInput({
                         multiline
                         value={value}
                         ref={inputRef}
-                        selectTextOnFocus={selectTextOnFocus}
+                        // selectTextOnFocus={selectTextOnFocus}
                         onChangeText={(text) => {
                             if (numeric) {
                                 text = text
@@ -106,9 +110,13 @@ export function FormInput({
                             onChangeText(text);
                         }}
                         placeholder={placeholder}
+                        keyboardType={keyboardType}
                         secureTextEntry={secureTextEntry}
                         style={[
-                            { padding: 0 },
+                            {
+                                padding: 0,
+                                // backgroundColor: "red",
+                            },
                             typography.h5,
                             style,
                             // apply red border when error exists
@@ -173,6 +181,7 @@ export function FormInputMacro({
             value={value}
             onChangeText={onChangeText}
             numeric
+            keyboardType="numeric"
             center
             placeholder={"0"}
             error={error}
@@ -196,6 +205,7 @@ export function FormInputNumber({
             onChangeText={onChangeText}
             numeric
             center
+            keyboardType="numeric"
             unit={unit}
             placeholder={"0"}
             style={style ?? typography.h3}

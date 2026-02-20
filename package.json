@@ -11,6 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.19.24",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@react-navigation/bottom-tabs": "^7.4.0",
@@ -31,6 +32,7 @@
     "expo-image-picker": "^17.0.10",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.14",
+    "expo-secure-store": "^15.0.8",
     "expo-splash-screen": "~31.0.10",
     "expo-sqlite": "~16.0.9",
     "expo-status-bar": "~3.0.8",
@@ -50,9 +52,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "drizzle-kit": "^0.31.6",
-    "eslint": "^9.25.0",
-    "eslint-config-expo": "~10.0.0",
+    "drizzle-kit": "^0.31.9",
+    "eslint": "^10.0.0",
+    "eslint-config-expo": "^10.0.0",
     "react-native-svg-transformer": "^1.5.2",
     "typescript": "~5.9.2"
   },

@@ -7,12 +7,19 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 //import { openDatabaseSync } from "expo-sqlite";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import React, { Suspense, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 //import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+if (!publishableKey) {
+    throw new Error(
+        "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable",
+    );
+}
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
@@ -39,14 +46,19 @@ export default function RootLayout() {
             <Suspense fallback={<ActivityIndicator size="large" />}>
                 <FontProvider>
                     <GestureHandlerRootView>
-                        <Stack
-                            screenOptions={{
-                                headerShown: false,
-                                contentStyle: {
-                                    backgroundColor: colors.error,
-                                },
-                            }}
-                        />
+                        <ClerkProvider
+                            publishableKey={publishableKey}
+                            tokenCache={tokenCache}
+                        >
+                            <Stack
+                                screenOptions={{
+                                    headerShown: false,
+                                    contentStyle: {
+                                        backgroundColor: colors.error,
+                                    },
+                                }}
+                            />
+                        </ClerkProvider>
                     </GestureHandlerRootView>
                 </FontProvider>
             </Suspense>

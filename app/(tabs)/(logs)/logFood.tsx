@@ -41,7 +41,7 @@ const logFood = () => {
                 console.log("error on Log ALl", e);
             },
         });
-    }, []);
+    }, [foodList]);
     return (
         <View style={{ flex: 1 }}>
             <HeaderSimple title="Log Food" />
