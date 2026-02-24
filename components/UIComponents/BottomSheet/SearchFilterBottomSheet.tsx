@@ -7,7 +7,9 @@ import DropDownFilterCore from "../DropDown/DropDownFilterCore";
 import { H2 } from "../Typography";
 import { BottomSheetCore } from "./BottomSheetCore";
 
-interface SearchFilterBottomSheet {}
+interface SearchFilterBottomSheet {
+    onApply: (filters: Record<string, string>) => void;
+}
 interface MinMax {
     min: string;
     max: string;
@@ -15,7 +17,7 @@ interface MinMax {
 const SearchFilterBottomSheet = forwardRef<
     BottomSheet,
     SearchFilterBottomSheet
->(({}, ref) => {
+>(({ onApply }, ref) => {
     const [calorieRange, setCalorieRange] = useState<MinMax>({
         min: "0",
         max: "0",
@@ -30,13 +32,40 @@ const SearchFilterBottomSheet = forwardRef<
         min: "0",
         max: "0",
     });
+    const handleApply = () => {
+        const filters: Record<string, string> = {};
+
+        if (calorieRange.min !== "0") filters.min_calories = calorieRange.min;
+        if (calorieRange.max !== "0") filters.max_calories = calorieRange.max;
+
+        if (proteinRange.min !== "0") filters.min_protein = proteinRange.min;
+        if (proteinRange.max !== "0") filters.max_protein = proteinRange.max;
+
+        if (carbRange.min !== "0") filters.min_carbs = carbRange.min;
+        if (carbRange.max !== "0") filters.max_carbs = carbRange.max;
+
+        if (fatRange.min !== "0") filters.min_fat = fatRange.min;
+        if (fatRange.max !== "0") filters.max_fat = fatRange.max;
+
+        if (servingsYieldRange.min !== "0")
+            filters.min_servings = servingsYieldRange.min;
+        if (servingsYieldRange.max !== "0")
+            filters.max_servings = servingsYieldRange.max;
+
+        // Call the callback
+        onApply(filters);
+    };
     return (
         <BottomSheetCore
             ref={ref}
             snapPoints={["3%", "50%", "70%", "90%"]}
             enablePanDownToClose
             style={{ backgroundColor: colors.off_white }}
-            footer={<PrimaryButton>Apply</PrimaryButton>}
+            footer={
+                <PrimaryButton onPress={() => handleApply()}>
+                    Apply
+                </PrimaryButton>
+            }
             header={<View></View>}
         >
             <View

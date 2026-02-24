@@ -9,11 +9,12 @@ import { H1 } from "@/components/UIComponents/Typography";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
 import { calculateCalories } from "@/helper/calculateCalories";
+import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
 import { StyleSheet, View } from "react-native";
 
 export default function Index() {
-    const date = new Date();
+    const date = useDateStore((state) => state.date);
     const {
         data: LiveFood,
         isLoading: liveFoodLoading,

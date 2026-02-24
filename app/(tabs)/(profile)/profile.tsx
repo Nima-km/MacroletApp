@@ -1,28 +1,28 @@
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
-import GoogleSignInButton from "@/components/UIComponents/Buttons/authButtons/GoogleSignInButton";
-import SignOutButton from "@/components/UIComponents/Buttons/authButtons/SignOutButton";
 import { SecondaryButton } from "@/components/UIComponents/Buttons/Button";
-import { useAuth } from "@clerk/clerk-expo";
+import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
 const profile = () => {
     const router = useRouter();
-    const { isSignedIn, isLoaded } = useAuth();
-
     return (
-        <View style={{ flex: 1 }}>
+        <KeyboardAware>
             <HeaderSimple title="Profile" />
             <View style={{ flex: 1, padding: 20, gap: 8 }}>
-                {isSignedIn ? <SignOutButton /> : <GoogleSignInButton />}
+                <SecondaryButton
+                    onPress={() => router.push("/(tabs)/(profile)/account")}
+                >
+                    Account
+                </SecondaryButton>
                 <SecondaryButton
                     onPress={() => router.push("/(tabs)/(profile)/goals")}
                 >
-                    goals
+                    Goals
                 </SecondaryButton>
             </View>
-        </View>
+        </KeyboardAware>
     );
 };
 

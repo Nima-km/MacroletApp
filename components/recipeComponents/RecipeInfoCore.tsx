@@ -1,3 +1,4 @@
+import { updloadRecipe } from "@/api/uploadRecipe";
 import Bookmark from "@/assets/svg/bookmark.svg";
 import RecipeNav from "@/components/recipeComponents/RecipeNav";
 import Directions from "@/components/recipeComponents/View/Directions";
@@ -15,6 +16,8 @@ import {
 } from "@/db/hooks/recipeBook/useRecipeBook";
 import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
+import { RecipeData } from "@/types/recipe";
+import { useAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Modal, View } from "react-native";
@@ -28,9 +31,11 @@ interface Props {
 }
 
 const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
+    const { getToken, has } = useAuth();
     const ingredientItemsData = useRecipeStateStore(
         (state) => state.data.ingredientItemsData,
     );
+    const recipeFullData = useRecipeStateStore((state) => state.data);
     const [showCreateRecipe, setShowCreateRecipe] = useState(false);
     const [showSelectRecipe, setShowSelectRecipe] = useState(false);
     const {
@@ -45,6 +50,20 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
     const recipeData = useRecipeStateStore((state) => state.data.recipeData);
     const router = useRouter();
     const [selectedPage, setSelectedPage] = useState(0);
+    async function onUpload() {
+        const clerk_token = await getToken();
+        const recipeDataWithDirections = {
+            ...recipeFullData,
+            recipeData: {
+                ...recipeFullData.recipeData,
+                directions: recipeFullData.recipeData.directions || [],
+            },
+        };
+        updloadRecipe(
+            recipeDataWithDirections as RecipeData,
+            clerk_token ?? "",
+        ).catch((e) => console.log(e));
+    }
     function createRecipeBook(newName: string) {
         insertRecipeBook(
             { name: newName },
@@ -130,6 +149,10 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                             </PrimaryButton>
                             <IconButton
                                 onPress={() => setShowSelectRecipe(true)}
+                                icon={<Bookmark />}
+                            />
+                            <IconButton
+                                onPress={onUpload}
                                 icon={<Bookmark />}
                             />
                         </View>

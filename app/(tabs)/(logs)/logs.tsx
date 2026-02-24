@@ -11,6 +11,7 @@ import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
 import { useFoodItemSectionList } from "@/db/hooks/history/sectionListFoodItemHistory";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { formatAMPM } from "@/helper/formatTime";
+import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -23,7 +24,7 @@ import {
 } from "react-native";
 
 const logs = () => {
-    const date = new Date();
+    const date = useDateStore((state) => state.date);
     const router = useRouter();
     const {
         data: nutriGoals,

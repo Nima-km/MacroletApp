@@ -24,16 +24,16 @@ export type RecipeBookWithItems = Awaited<
     ReturnType<typeof getRecipeBookList>
 >[number];
 export type RecipeBookItemType = Omit<RecipeBookItemInsert, "id">;
-
+export type IngredientFullData = {
+    food: FoodGet;
+    ingredientItem: IngredientItemDetails;
+};
 export type RecipeData = {
     recipeData: RecipeInsert;
     foodData: Omit<FoodInsert, "recipe_id">;
     ingredientItemsData: Array<IngredientFullData>;
 };
-export type IngredientFullData = {
-    food: FoodGet;
-    ingredientItem: IngredientItemDetails;
-};
+
 export type RecipeDraft = {
     recipeData: Partial<RecipeInsert>;
     foodData: Partial<Omit<FoodInsert, "recipe_id">>;
