@@ -71,7 +71,7 @@ const FoodInfoCore = ({
     }
     // console.log("mounted foodInfoCore", foodItemData);
     return (
-        <View style={{ flex: 1, padding: 20, gap: 20 }}>
+        <View style={{ flex: 1, gap: 20 }}>
             {edit ? (
                 <FormInput
                     value={food.name}
@@ -146,7 +146,7 @@ const FoodInfoCore = ({
                         </SecondaryButton>
                         <PrimaryButton
                             style={{ flex: 1 }}
-                            onPress={() => primaryButton(food, foodItem)}
+                            onPress={() => setEdit(false)}
                         >
                             Save
                         </PrimaryButton>

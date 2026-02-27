@@ -1,3 +1,6 @@
+import Calorie from "@/assets/svg/calorie.svg";
+import Clock from "@/assets/svg/clock.svg";
+import Star from "@/assets/svg/star.svg";
 import ImageView from "@/components/UIComponents/Image/ImageView";
 import { H5, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
 import { calculateCalories } from "@/helper/calculateCalories";
@@ -9,6 +12,7 @@ interface Props {
     recipe: Omit<RecipeData, "ingredientItemsData">;
 }
 const RecipeCard = ({ recipe }: Props) => {
+    console.log("recipe card: ", recipe);
     return (
         <View
             style={{
@@ -32,19 +36,45 @@ const RecipeCard = ({ recipe }: Props) => {
                     />
                 </View>
                 <View style={{ flex: 1, gap: 4 }}>
-                    <View style={{ flexDirection: "row" }}>
-                        <H6>
-                            {(recipe.recipeData.cook_time ?? 0) +
-                                (recipe.recipeData.prep_time ?? 0)}
-                        </H6>
-                        <H6 style={{ color: colors.primary }}>
-                            {calculateCalories(recipe.foodData)}
-                        </H6>
+                    <View style={{ flexDirection: "row", gap: 12 }}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 4,
+                            }}
+                        >
+                            <Clock
+                                width={18}
+                                height={18}
+                                style={{ color: colors.primary }}
+                            />
+                            <H6 style={{ color: colors.primary }}>
+                                {(recipe.recipeData.cook_time ?? 0) +
+                                    (recipe.recipeData.prep_time ?? 0)}{" "}
+                                min
+                            </H6>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 4,
+                            }}
+                        >
+                            <Calorie />
+                            <H6 style={{ color: colors.primary }}>
+                                {calculateCalories(recipe.foodData)}
+                            </H6>
+                        </View>
                     </View>
                     <H5_SemiBold>{recipe.foodData.name}</H5_SemiBold>
                     <H5>{recipe.recipeData.recipe_slug ?? "by You"}</H5>
-                    <View style={{ flexDirection: "row" }}>
-                        <H6>X</H6>
+
+                    <View style={{ flexDirection: "row", gap: 4 }}>
+                        <Star />
                         <H6>4.5 (1,437)</H6>
                     </View>
                 </View>

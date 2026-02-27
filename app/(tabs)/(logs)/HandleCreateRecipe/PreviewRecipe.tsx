@@ -35,7 +35,6 @@ const PreviewRecipe = () => {
                     ...draft,
                     foodData: {
                         ...draft.foodData,
-                        ...foodData,
                     },
                 },
                 {
@@ -62,7 +61,13 @@ const PreviewRecipe = () => {
         <KeyboardAware>
             <HeaderSimple title="Preview Recipe" />
             <View
-                style={{ flex: 1, paddingTop: 12, gap: 20, paddingBottom: 20 }}
+                style={{
+                    flex: 1,
+                    paddingTop: 12,
+                    gap: 20,
+                    paddingBottom: 20,
+                    paddingHorizontal: 20,
+                }}
             >
                 <RecipeInfoCore
                     onLogRecipe={() => console.log()}

@@ -78,6 +78,13 @@
       "when": 1770399646094,
       "tag": "0010_certain_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1772042802620,
+      "tag": "0011_abnormal_kinsey_walden",
+      "breakpoints": true
     }
   ]
 }

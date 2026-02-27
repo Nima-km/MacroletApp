@@ -71,7 +71,7 @@ const logs = () => {
     }
     return (
         <View style={{ flex: 1 }}>
-            <HeaderSimple title="MACROLET" />
+            <HeaderSimple title="MACROLET" dateSelector />
             <ScrollView>
                 <View
                     style={{
@@ -117,27 +117,29 @@ const logs = () => {
                         </View>
                     </View>
                 </View>
-                <View style={{ paddingHorizontal: 20 }}>
+                <View style={{ paddingHorizontal: 20, paddingBottom: 40 }}>
                     <SectionList
                         sections={slData}
                         renderItem={({ item }) => (
-                            <SwipeableDelete
-                                onPress={() => onDelete(item.foodItem.id)}
-                            >
-                                <Pressable
-                                    onPress={() =>
-                                        onPressCard(
-                                            item.food.id,
-                                            item.foodItem.id,
-                                        )
-                                    }
+                            <View style={{ paddingVertical: 10 }}>
+                                <SwipeableDelete
+                                    onPress={() => onDelete(item.foodItem.id)}
                                 >
-                                    <FoodCardFull
-                                        food={item.food}
-                                        foodItem={item.foodItem}
-                                    />
-                                </Pressable>
-                            </SwipeableDelete>
+                                    <Pressable
+                                        onPress={() =>
+                                            onPressCard(
+                                                item.food.id,
+                                                item.foodItem.id,
+                                            )
+                                        }
+                                    >
+                                        <FoodCardFull
+                                            food={item.food}
+                                            foodItem={item.foodItem}
+                                        />
+                                    </Pressable>
+                                </SwipeableDelete>
+                            </View>
                         )}
                         style={[{ paddingVertical: 30 }]}
                         keyExtractor={(item) => item.foodItem.id.toString()}

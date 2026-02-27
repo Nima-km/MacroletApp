@@ -29,10 +29,11 @@ const Overview = ({ servings, setServings }: Props) => {
     const foodData = CalculateMacroSumIngredient(ingredientItemsData);
     const options = [];
     function calculate_final(inp: number) {
-        return inp * servings;
+        const mult = recipeData.servings_yield ?? 1;
+        return (inp * servings) / mult;
     }
     useEffect(() => {
-        //console.log("recipe changed. Overview", foodData, ingredientItemsData);
+        console.log("recipe changed. Overview", ingredientItemsData);
     }, [foodData]);
 
     const calories = calculateCalories(foodData);

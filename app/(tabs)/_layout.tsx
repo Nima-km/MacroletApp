@@ -1,3 +1,4 @@
+import MyTabBar from "@/components/navComponents/MyTabBar";
 import { colors } from "@/theme";
 import { Tabs } from "expo-router";
 
@@ -10,7 +11,7 @@ export default function Layout() {
                     backgroundColor: colors.off_white,
                 },
             }}
-            // tabBar={(props) => <MyTabBar {...props} />}
+            tabBar={(props) => <MyTabBar {...props} />}
         >
             <Tabs.Screen
                 name="index"

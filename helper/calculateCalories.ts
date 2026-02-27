@@ -1,9 +1,10 @@
 import { MacroType } from "@/types/food";
+import { SimpleRound } from "./simpleRound";
 
 export function calculateCalories(food?: Partial<MacroType>) {
     return (
-        ((food?.carbs ?? 0) + (food?.protein ?? 0)) * 4 +
-        (food?.fat ?? 0) * 9 -
-        (food?.fiber ?? 0) * 2
+        (SimpleRound(food?.carbs ?? 0) + SimpleRound(food?.protein ?? 0)) * 4 +
+        SimpleRound(food?.fat ?? 0) * 9 -
+        SimpleRound(food?.fiber ?? 0) * 2
     );
 }

@@ -8,11 +8,16 @@ import { H1 } from "../UIComponents/Typography";
 
 type Props = {
     title: string | undefined;
-
+    dateSelector?: boolean;
     LeftButton?: ReactNode;
     RightButton?: ReactNode;
 };
-function HeaderCore({ title, LeftButton, RightButton }: Props) {
+function HeaderCore({
+    title,
+    LeftButton,
+    RightButton,
+    dateSelector = false,
+}: Props) {
     return (
         <SafeAreaView
             style={[styles.container, { paddingHorizontal: 20, gap: 20 }]}
@@ -33,7 +38,7 @@ function HeaderCore({ title, LeftButton, RightButton }: Props) {
                 </View>
                 <View style={styles.rightButton}>{RightButton}</View>
             </View>
-            <TopDateSelector />
+            {dateSelector && <TopDateSelector />}
         </SafeAreaView>
     );
 }

@@ -1,6 +1,7 @@
 import { H1, H4, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { calculateMacro } from "@/helper/calculateMacro";
+import { SimpleRound } from "@/helper/simpleRound";
 import { colors } from "@/theme";
 import { FoodFullData } from "@/types/food";
 import React from "react";
@@ -45,7 +46,7 @@ const FoodCardQuick = ({
                             ]}
                         />
                         <H5_SemiBold>P</H5_SemiBold>
-                        <H6>{foodData.protein} g</H6>
+                        <H6>{SimpleRound(foodData.protein)} g</H6>
                     </View>
                     <View style={styles.macroInfoSub}>
                         <View
@@ -55,7 +56,7 @@ const FoodCardQuick = ({
                             ]}
                         />
                         <H5_SemiBold>C</H5_SemiBold>
-                        <H6>{foodData.carbs} g</H6>
+                        <H6>{SimpleRound(foodData.carbs)} g</H6>
                     </View>
                     <View style={styles.macroInfoSub}>
                         <View
@@ -65,7 +66,7 @@ const FoodCardQuick = ({
                             ]}
                         />
                         <H5_SemiBold>F</H5_SemiBold>
-                        <H6>{foodData.fat} g</H6>
+                        <H6>{SimpleRound(foodData.fat)} g</H6>
                     </View>
                 </View>
             </View>

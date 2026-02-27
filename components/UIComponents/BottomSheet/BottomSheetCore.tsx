@@ -46,7 +46,7 @@ export const BottomSheetCore = forwardRef<BottomSheet, Props>(
                 snapPoints={points}
                 index={initialIndex}
                 footerComponent={renderFooter}
-                enablePanDownToClose
+                enablePanDownToClose={enablePanDownToClose}
                 backdropComponent={(props) => (
                     <BottomSheetBackdrop
                         {...props}

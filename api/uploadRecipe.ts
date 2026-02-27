@@ -6,7 +6,7 @@ export async function updloadRecipe(
     token: string,
 ): Promise<RecipeData> {
     const payload = transformRecipeForAPI(recipe);
-    console.log("this is the payload", payload);
+    console.log("this is the payload", payload.ingredients);
     const response = await fetch("http://192.168.1.239:8000/recipes/", {
         method: "POST",
         headers: {

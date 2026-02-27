@@ -2,7 +2,7 @@ import HeaderFood from "@/components/navComponents/HeaderFood";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
 import { H1 } from "@/components/UIComponents/Typography";
-import { useGetFood } from "@/db/hooks/food/useFood";
+import { useGetFood, useInsertFoodAndItem } from "@/db/hooks/food/useFood";
 import { useInsertFoodItem } from "@/db/hooks/food/useFoodItem";
 import { useCreateAndLogRecipeWithFoodAndIngredients } from "@/db/hooks/recipe/useCreateRecipe";
 import {
@@ -17,13 +17,13 @@ import {
     isValidRecipeDraft,
     useRecipeStateStore,
 } from "@/store/recipeStore/useRecipeStore";
-import { DefaultServings, FoodItemDefault } from "@/tests/testData";
+import { FoodItemDefault } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
 
 import { ServingSizeType } from "@/types/servingSize";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 const food = () => {
     const router = useRouter();
@@ -55,6 +55,12 @@ const food = () => {
         error: logFoodItemError,
         isSuccess: logFoodItemSuccess,
     } = useInsertFoodItem();
+    const {
+        mutate: logFoodAndItem,
+        isPending: logFoodAndItemPending,
+        error: logFoodAndItemError,
+        isSuccess: logFoodAndItemSuccess,
+    } = useInsertFoodAndItem();
     const {
         mutate: logAndCreateRecipe,
         isPending: logAndCreateRecipePending,
@@ -121,20 +127,22 @@ const food = () => {
                 title={"View Meal"}
                 isEdit={edit}
                 onEdit={setEdit}
-                onBack={() => console.log("back pressed")}
+                onBack={() => router.back()}
             />
-            <FoodView
-                foodData={foodData[0]}
-                foodItemData={foodItem}
-                recipeData={recipeData?.[0]?.recipe}
-                servingData={servingData ?? DefaultServings}
-                primaryText={"Log"}
-                primaryButton={LogNewFood}
-                setNewServing={AddNewServing}
-                ingredientItemsData={ingredients ?? []}
-                edit={edit}
-                setEdit={setEdit}
-            />
+            <View style={{ padding: 20 }}>
+                <FoodView
+                    foodData={foodData[0]}
+                    foodItemData={foodItem}
+                    recipeData={recipeData?.[0]?.recipe}
+                    servingData={servingData}
+                    primaryText={"Log"}
+                    primaryButton={LogNewFood}
+                    setNewServing={AddNewServing}
+                    ingredientItemsData={ingredients ?? []}
+                    edit={edit}
+                    setEdit={setEdit}
+                />
+            </View>
         </KeyboardAware>
     );
 };

@@ -5,7 +5,7 @@ export function transformRecipeForAPI(data: RecipeData) {
         title: data.foodData.name,
         slug: data.recipeData.recipe_slug,
         description: data.recipeData.description ?? "",
-        instructions: data.recipeData.directions.map((d) => d.text).join("\n"),
+        instructions: data.recipeData.directions?.map((d) => d.text).join("\n"),
         servings: data.recipeData.servings_yield ?? 1,
         prep_time: data.recipeData.prep_time ?? 0,
         cook_time: data.recipeData.cook_time ?? 0,
@@ -58,7 +58,7 @@ export function transformRecipeFromAPI(apiRecipe: any): RecipeData {
 
         // Not really needed globally but keeping structure intact
         foodData: {
-            name: apiRecipe.name,
+            name: apiRecipe.title,
             protein: apiRecipe.protein,
             fat: apiRecipe.fat,
             carbs: apiRecipe.carbs,
@@ -74,9 +74,9 @@ export function transformRecipeFromAPI(apiRecipe: any): RecipeData {
                 name: item.ingredient_name,
                 recipe_id: apiRecipe.id,
                 nickname: null,
-                protein: item.protein,
-                fat: item.fat,
-                carbs: item.carbs,
+                protein: item.protein / item.quantity / item.serving_mult,
+                fat: item.fat / item.quantity / item.serving_mult,
+                carbs: item.carbs / item.quantity / item.serving_mult,
                 fiber: 0,
                 barcode: null,
                 serving_100g: 100,

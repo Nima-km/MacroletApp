@@ -39,7 +39,8 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
     const [showIngredientModal, setShowIngredientModal] = useState(false);
     const [selectedIngredient, setSelectedIngredient] = useState(0);
     function calculate_final(inp: number) {
-        return inp * servings;
+        const mult = 1;
+        return (inp * servings) / mult;
     }
     useEffect(() => {
         //console.log("recipe changed, ingredient", foodData);

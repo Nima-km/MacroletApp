@@ -44,7 +44,7 @@ const logFood = () => {
     }, [foodList]);
     return (
         <View style={{ flex: 1 }}>
-            <HeaderSimple title="Log Food" />
+            <HeaderSimple title="Log Food" back />
             <FindFood
                 onFoodCardID={onFoodCardID}
                 foodList={foodList}

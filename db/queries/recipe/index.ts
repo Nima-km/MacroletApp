@@ -159,6 +159,80 @@ export const createAndLogRecipeWithFoodAndIngredients = async (
         };
     });
 };
+export const createAndLogOnlineRecipe = async (
+    recipeData: RecipeInsert,
+    foodData: Omit<FoodInsert, "recipe_id">,
+    foodItemData: Omit<FoodItemInsert, "food_id">,
+    ingredientItemsData: Array<Omit<IngredientFullData, "recipe_id">>,
+) => {
+    return await db.transaction(async (tx) => {
+        // 1. Insert recipe
+        const [newRecipe] = await tx
+            .insert(recipe)
+            .values({ ...recipeData, id: undefined })
+            .returning();
+
+        // 2. Insert food with the recipe_id
+        const [newFood] = await tx
+            .insert(food)
+            .values({
+                ...foodData,
+                id: undefined,
+                recipe_id: newRecipe.id,
+            })
+            .returning();
+
+        const ingredientsWithIds = ingredientItemsData.map(
+            (ingredientData) => ({
+                food: {
+                    ...ingredientData.food,
+                    id: undefined,
+                    barcode: undefined,
+                },
+                ingredientItem: {
+                    ...ingredientData.ingredientItem,
+                    id: undefined,
+                    recipe_id: newRecipe.id,
+                },
+            }),
+        );
+        const ingredientItemsWithIds: IngredientItemInsert[] = [];
+
+        for (const item of ingredientsWithIds) {
+            const result = await tx
+                .insert(food)
+                .values(item.food)
+                .returning({ id: food.id });
+
+            const insertedAId = result[0].id;
+
+            ingredientItemsWithIds.push({
+                ...item.ingredientItem,
+                ingredient_id: insertedAId,
+            });
+        }
+
+        // 4. Batch insert all ingredient items at once
+        const newIngredientItems = await tx
+            .insert(ingredientItem)
+            .values(ingredientItemsWithIds)
+            .returning();
+        const [newFoodItem] = await tx
+            .insert(foodItem)
+            .values({
+                ...foodItemData,
+                food_id: newFood.id,
+                id: undefined,
+            })
+            .returning();
+        return {
+            recipe: newRecipe,
+            food: newFood,
+            ingredientItems: newIngredientItems,
+            foodItem: newFoodItem,
+        };
+    });
+};
 
 export const updateRecipeWithFoodAndIngredients = async (
     recipeId: number,

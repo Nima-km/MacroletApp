@@ -35,7 +35,7 @@ export default function Index() {
     }
     return (
         <View style={styles.container}>
-            <HeaderSimple title={"MACROLET"} />
+            <HeaderSimple title={"MACROLET"} dateSelector />
             <View style={styles.chartContainer}>
                 <H1>Calorie Intake</H1>
                 <ArcChart

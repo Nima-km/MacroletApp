@@ -2,17 +2,17 @@ import { FontProvider } from "@/context/FontProvider";
 import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 import { colors } from "@/theme";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+//import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 //import { openDatabaseSync } from "expo-sqlite";
-import { ClerkProvider } from "@clerk/clerk-expo";
-import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import React, { Suspense, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-//import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 if (!publishableKey) {
@@ -23,7 +23,7 @@ if (!publishableKey) {
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-    /// const expoDb = openDatabaseSync(DATABASE_NAME);
+    //  const expoDb = openDatabaseSync(DATABASE_NAME);
     // useDrizzleStudio(expoDb);
     const { success, error } = useMigrations(db, migrations);
     const [loaded, fontError] = useFonts({

@@ -10,17 +10,24 @@ const TopDateSelector = () => {
     const date = useDateStore((state) => state.date);
     const setDate = useDateStore((state) => state.setDate);
     const [calendarVisible, setCalendarVisible] = useState(false);
+    const handleDateChange = (dateDelta: number) => {
+        const newDate = new Date(date);
+        newDate.setDate(newDate.getDate() + dateDelta);
+        setDate(newDate);
+    };
     return (
         <View style={{}}>
             <View
                 style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    backgroundColor: "red",
+                    // backgroundColor: "red",
                     alignItems: "center",
                 }}
             >
-                <H2>{"<"}</H2>
+                <Pressable onPress={() => handleDateChange(-1)}>
+                    <H2>{"<"}</H2>
+                </Pressable>
                 <Pressable
                     style={{
                         flexDirection: "row",
@@ -32,8 +39,9 @@ const TopDateSelector = () => {
                     <Calendar />
                     <H4>{formatDate(date)}</H4>
                 </Pressable>
-
-                <H2>{">"}</H2>
+                <Pressable onPress={() => handleDateChange(1)}>
+                    <H2>{">"}</H2>
+                </Pressable>
             </View>
             <Modal
                 visible={calendarVisible}

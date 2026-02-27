@@ -1,10 +1,10 @@
 import { FoodInsert } from "@/types/food";
 import {
-  IngredientFullData,
-  IngredientItemDetails,
-  RecipeData,
-  RecipeDraft,
-  RecipeInsert,
+    IngredientFullData,
+    IngredientItemDetails,
+    RecipeData,
+    RecipeDraft,
+    RecipeInsert,
 } from "@/types/recipe";
 import { create } from "zustand";
 
@@ -54,6 +54,13 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
                     ...state.data.recipeData,
                     [key]: value,
                 },
+                foodData: {
+                    ...state.data.foodData,
+                    ...CalculateMacroSumIngredient(
+                        [...state.data.ingredientItemsData],
+                        state.data.recipeData.servings_yield,
+                    ),
+                },
             },
         })),
 
@@ -78,10 +85,10 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
                 ],
                 foodData: {
                     ...state.data.foodData,
-                    ...CalculateMacroSumIngredient([
-                        ...state.data.ingredientItemsData,
-                        ...item,
-                    ]),
+                    ...CalculateMacroSumIngredient(
+                        [...state.data.ingredientItemsData, ...item],
+                        state.data.recipeData.servings_yield,
+                    ),
                 },
             },
         })),
@@ -143,6 +150,13 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
                     ...state.data.recipeData,
                     [key]: value,
                 },
+                foodData: {
+                    ...state.data.foodData,
+                    ...CalculateMacroSumIngredient(
+                        [...state.data.ingredientItemsData],
+                        state.data.recipeData.servings_yield,
+                    ),
+                },
             },
         })),
 
@@ -167,10 +181,10 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
                 ],
                 foodData: {
                     ...state.data.foodData,
-                    ...CalculateMacroSumIngredient([
-                        ...state.data.ingredientItemsData,
-                        ...item,
-                    ]),
+                    ...CalculateMacroSumIngredient(
+                        [...state.data.ingredientItemsData, ...item],
+                        state.data.recipeData.servings_yield,
+                    ),
                 },
             },
         })),

@@ -38,6 +38,7 @@ const RecentComponent = ({
                 )}
                 keyExtractor={(item) => item.food.id.toString()}
                 scrollEnabled={false}
+                ItemSeparatorComponent={() => <View style={{ padding: 6 }} />}
             />
         </View>
     );

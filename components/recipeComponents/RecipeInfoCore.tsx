@@ -110,7 +110,7 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
             <View
                 style={{
                     flex: 1,
-                    paddingHorizontal: 20,
+
                     paddingTop: 12,
                     gap: 20,
                 }}
