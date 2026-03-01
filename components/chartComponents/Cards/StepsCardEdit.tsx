@@ -51,7 +51,7 @@ const StepsCardEdit = ({
                         onPress={() => onAddImage()}
                         style={{ flexDirection: "row", gap: 8 }}
                     >
-                        <CameraIcon />
+                        <CameraIcon pointerEvents="none" />
                         <H4>Add Photo</H4>
                     </Pressable>
                 ) : (

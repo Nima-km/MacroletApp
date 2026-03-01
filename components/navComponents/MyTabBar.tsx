@@ -65,6 +65,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                 style={{ height: 48, alignItems: "center", width: 65 }}
             >
                 <Home
+                    pointerEvents="none"
                     style={{
                         color: isFocused(0) ? colors.primary : colors.inactive,
                     }}
@@ -76,6 +77,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                 style={{ height: 48, alignItems: "center", width: 68 }}
             >
                 <Discover
+                    pointerEvents="none"
                     style={{
                         color: isFocused(1) ? colors.primary : colors.inactive,
                     }}
@@ -151,7 +153,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                         }}
                         onPress={toggleMenu}
                     >
-                        <Plus />
+                        <Plus pointerEvents="none" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -160,6 +162,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                 style={{ height: 48, alignItems: "center", width: 68 }}
             >
                 <Logs
+                    pointerEvents="none"
                     style={{
                         color: isFocused(2) ? colors.primary : colors.inactive,
                     }}
@@ -171,6 +174,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                 style={{ height: 48, alignItems: "center", width: 65 }}
             >
                 <Profile
+                    pointerEvents="none"
                     style={{
                         color: isFocused(3) ? colors.primary : colors.inactive,
                     }}

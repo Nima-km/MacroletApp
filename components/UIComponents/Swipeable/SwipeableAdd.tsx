@@ -1,8 +1,8 @@
-import Plus from '@/assets/svg/plus.svg';
-import { colors } from '@/theme';
-import React, { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import SwipeableCore from './SwipeableCore';
+import Plus from "@/assets/svg/plus.svg";
+import { colors } from "@/theme";
+import React, { ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
+import SwipeableCore from "./SwipeableCore";
 
 type SwipeableCoreProps = {
     children: ReactNode;
@@ -10,25 +10,34 @@ type SwipeableCoreProps = {
     onSwipe?: () => void;
 };
 
-
-const SwipeableAdd = ({ children, onPress = () => {}, onSwipe }: Omit<SwipeableCoreProps, 'underChildren' | 'backgroundColor'>) => {
+const SwipeableAdd = ({
+    children,
+    onPress = () => {},
+    onSwipe,
+}: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) => {
     return (
-        <SwipeableCore 
+        <SwipeableCore
             underChildren={
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                    <Plus />
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <Plus pointerEvents="none" />
                 </View>
-            } 
-            onPress={onPress} 
+            }
+            onPress={onPress}
             onSwipe={onSwipe}
             backgroundColor={colors.primary}
             autoClose
         >
             {children}
         </SwipeableCore>
-    )
-}
+    );
+};
 
-export default SwipeableAdd
+export default SwipeableAdd;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

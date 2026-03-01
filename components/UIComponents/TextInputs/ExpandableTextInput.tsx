@@ -89,7 +89,10 @@ export default function ExpandableTextInput({
                     </View>
                     {onDelete && (
                         <Pressable onPress={onDelete}>
-                            <Bin style={{ color: colors.primary }} />
+                            <Bin
+                                style={{ color: colors.primary }}
+                                pointerEvents="none"
+                            />
                         </Pressable>
                     )}
 

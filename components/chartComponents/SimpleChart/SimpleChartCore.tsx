@@ -120,6 +120,7 @@ const SimpleChartCore = ({
                         width={iconWidth}
                         height={iconWidth}
                         style={{ marginLeft: 2 }}
+                        pointerEvents="none"
                     />
                 )}
             </View>

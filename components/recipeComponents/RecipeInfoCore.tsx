@@ -159,11 +159,11 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                             </PrimaryButton>
                             <IconButton
                                 onPress={() => setShowSelectRecipe(true)}
-                                icon={<Bookmark />}
+                                icon={<Bookmark pointerEvents="none" />}
                             />
                             <IconButton
                                 onPress={onUpload}
-                                icon={<Bookmark />}
+                                icon={<Bookmark pointerEvents="none" />}
                             />
                         </View>
                     )}

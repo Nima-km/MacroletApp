@@ -48,6 +48,7 @@ const RecipeCard = ({ recipe }: Props) => {
                             <Clock
                                 width={18}
                                 height={18}
+                                pointerEvents="none"
                                 style={{ color: colors.primary }}
                             />
                             <H6 style={{ color: colors.primary }}>
@@ -64,7 +65,7 @@ const RecipeCard = ({ recipe }: Props) => {
                                 gap: 4,
                             }}
                         >
-                            <Calorie />
+                            <Calorie pointerEvents="none" />
                             <H6 style={{ color: colors.primary }}>
                                 {calculateCalories(recipe.foodData)}
                             </H6>
@@ -74,7 +75,7 @@ const RecipeCard = ({ recipe }: Props) => {
                     <H5>{recipe.recipeData.recipe_slug ?? "by You"}</H5>
 
                     <View style={{ flexDirection: "row", gap: 4 }}>
-                        <Star />
+                        <Star pointerEvents="none" />
                         <H6>4.5 (1,437)</H6>
                     </View>
                 </View>

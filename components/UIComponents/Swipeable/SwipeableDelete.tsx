@@ -22,7 +22,7 @@ const SwipeableDelete = ({
                         alignItems: "center",
                     }}
                 >
-                    <Bin style={{ color: colors.white }} />
+                    <Bin style={{ color: colors.white }} pointerEvents="none" />
                 </View>
             }
             onPress={onPress}

@@ -60,6 +60,7 @@ export default function DropdownCore({
             <Pressable style={styles.selector} onPress={toggle}>
                 <H3>{selected ? selected.label : placeholder}</H3>
                 <ArrowDown
+                    pointerEvents="none"
                     width={iconWidth + 5}
                     height={iconWidth - 5}
                     style={{ marginLeft: 0, marginRight: -18 }}

@@ -40,6 +40,7 @@ const DropDownFilterCore = ({
             <Pressable style={styles.selector} onPress={toggle}>
                 <H3>{placeholder}</H3>
                 <ArrowDown
+                    pointerEvents="none"
                     width={iconWidth + 5}
                     height={iconWidth - 5}
                     style={{

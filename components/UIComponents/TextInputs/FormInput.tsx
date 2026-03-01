@@ -81,6 +81,7 @@ export function FormInput({
                         width={iconWidth}
                         height={iconWidth}
                         style={{ marginLeft: 0, marginRight: 8 }}
+                        pointerEvents="none"
                     />
                 )}
                 <View style={[styles.input, !center && { flex: 1 }]}>

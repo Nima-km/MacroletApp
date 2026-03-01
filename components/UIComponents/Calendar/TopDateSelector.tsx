@@ -45,7 +45,7 @@ const TopDateSelector = () => {
                     }}
                     onPress={() => setCalendarVisible(true)}
                 >
-                    <Calendar />
+                    <Calendar pointerEvents="none" />
                     <H4>{formatDate(date)}</H4>
                 </Pressable>
                 <Pressable

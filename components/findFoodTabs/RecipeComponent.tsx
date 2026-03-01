@@ -59,11 +59,14 @@ const RecipeComponent = () => {
                             )
                         }
                         style={{}}
-                        icon={<CreateRecipe />}
+                        icon={<CreateRecipe pointerEvents="none" />}
                     >
                         Create Recipe
                     </SecondaryButton>
-                    <SecondaryButton style={{ flex: 1 }} icon={<FindRecipe />}>
+                    <SecondaryButton
+                        style={{ flex: 1 }}
+                        icon={<FindRecipe pointerEvents="none" />}
+                    >
                         Find Recipe
                     </SecondaryButton>
                 </View>

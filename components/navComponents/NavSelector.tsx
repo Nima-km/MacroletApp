@@ -27,28 +27,48 @@ const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
             label: "Recent",
             value: 0,
             icon: (style) => (
-                <Recent width={width} height={height} style={style} />
+                <Recent
+                    width={width}
+                    height={height}
+                    style={style}
+                    pointerEvents="none"
+                />
             ),
         },
         {
             label: "Recipes",
             value: 1,
             icon: (style) => (
-                <Recipes width={width} height={height} style={style} />
+                <Recipes
+                    width={width}
+                    height={height}
+                    style={style}
+                    pointerEvents="none"
+                />
             ),
         },
         {
             label: "Barcode",
             value: 2,
             icon: (style) => (
-                <Barcode width={width} height={height} style={style} />
+                <Barcode
+                    width={width}
+                    height={height}
+                    style={style}
+                    pointerEvents="none"
+                />
             ),
         },
         {
             label: "Quick Add",
             value: 4,
             icon: (style) => (
-                <Quick width={width} height={height} style={style} />
+                <Quick
+                    width={width}
+                    height={height}
+                    style={style}
+                    pointerEvents="none"
+                />
             ),
         },
     ];

@@ -85,7 +85,7 @@ const IngredientModal = ({
                         style={{ justifyContent: "center" }}
                         onPress={onSwap}
                     >
-                        <Swap width={20} height={20} />
+                        <Swap width={20} height={20} pointerEvents="none" />
                         <View style={{ paddingLeft: 9 }}>
                             <H5_SemiBold
                                 style={{
@@ -102,7 +102,7 @@ const IngredientModal = ({
                             (onClose(), onDelete());
                         }}
                     >
-                        <Bin width={24} height={24} />
+                        <Bin width={24} height={24} pointerEvents="none" />
                     </Pressable>
                 </View>
                 <View style={styles.buttonsContainer}>
