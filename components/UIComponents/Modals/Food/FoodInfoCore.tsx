@@ -6,7 +6,7 @@ import {
 import { calculateCalories } from "@/helper/calculateCalories";
 import { macroSum } from "@/helper/calculateMacro";
 import formatDateTime from "@/helper/formatDateTime";
-import { DefaultServings, TestFood2, TestFoodItem1 } from "@/tests/testData";
+import { TestFood2, TestFoodItem1 } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
 import { ServingSizeType } from "@/types/servingSize";
 import React, { useState } from "react";
@@ -48,10 +48,9 @@ const FoodInfoCore = ({
 }: FoodInfoProps) => {
     const [food, setFood] = useState(foodData ?? TestFood2);
     const [calendarVisible, setCalendarVisible] = useState(false);
-    const [servingTypes, setServingTypes] = useState([
-        ...DefaultServings,
-        ...(servingsData ?? []),
-    ]);
+    const [servingTypes, setServingTypes] = useState<
+        Omit<ServingSizeType, "food_id">[]
+    >([...(servingsData ?? [{ serving_mult: 1, serving_type: "Serving" }])]);
     const [foodItem, setFoodItem] = useState(
         foodItemData ?? { ...TestFoodItem1, timestamp: new Date() },
     );
