@@ -22,7 +22,7 @@ export async function fetchFilteredRecipes({
     });
 
     const response = await fetch(
-        `http://192.168.1.239:8000/recipes/?${query.toString()}`,
+        `https://macrolet.onrender.com/recipes/?${query.toString()}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,

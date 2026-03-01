@@ -7,7 +7,7 @@ export async function updloadRecipe(
 ): Promise<RecipeData> {
     const payload = transformRecipeForAPI(recipe);
     console.log("this is the payload", payload.ingredients);
-    const response = await fetch("http://192.168.1.239:8000/recipes/", {
+    const response = await fetch("https://macrolet.onrender.com/recipes/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

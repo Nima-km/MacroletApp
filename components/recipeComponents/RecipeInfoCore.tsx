@@ -38,6 +38,7 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
     const recipeFullData = useRecipeStateStore((state) => state.data);
     const [showCreateRecipe, setShowCreateRecipe] = useState(false);
     const [showSelectRecipe, setShowSelectRecipe] = useState(false);
+
     const {
         data: recipeBookList,
         isLoading: recipeBookLoading,
@@ -50,6 +51,8 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
     const recipeData = useRecipeStateStore((state) => state.data.recipeData);
     const router = useRouter();
     const [selectedPage, setSelectedPage] = useState(0);
+    const [servingString, setServingString] = useState(servings.toString());
+
     async function onUpload() {
         const clerk_token = await getToken();
         const recipeDataWithDirections = {
@@ -78,17 +81,24 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
             );
         else console.log("something went wrong");
     }
+    function onServingChange(newServings: string) {
+        setServingString(newServings);
+        setServings(Number(newServings));
+    }
     const renderPage = useMemo(() => {
         switch (selectedPage) {
             case 0:
                 return (
-                    <Overview servings={servings} setServings={setServings} />
+                    <Overview
+                        servings={servingString}
+                        setServings={onServingChange}
+                    />
                 );
             case 1:
                 return (
                     <Ingredients
-                        servings={servings}
-                        setServings={setServings}
+                        servings={servingString}
+                        setServings={onServingChange}
                         addIngredient={() =>
                             router.push(
                                 "/(tabs)/(logs)/HandleModifyRecipe/AddIngredientModify",

@@ -25,7 +25,16 @@ const TopDateSelector = () => {
                     alignItems: "center",
                 }}
             >
-                <Pressable onPress={() => handleDateChange(-1)}>
+                <Pressable
+                    style={{
+                        height: 50,
+                        width: 50,
+                        // backgroundColor: "red",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    onPress={() => handleDateChange(-1)}
+                >
                     <H2>{"<"}</H2>
                 </Pressable>
                 <Pressable
@@ -39,7 +48,16 @@ const TopDateSelector = () => {
                     <Calendar />
                     <H4>{formatDate(date)}</H4>
                 </Pressable>
-                <Pressable onPress={() => handleDateChange(1)}>
+                <Pressable
+                    style={{
+                        height: 50,
+                        width: 50,
+                        // backgroundColor: "red",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    onPress={() => handleDateChange(1)}
+                >
                     <H2>{">"}</H2>
                 </Pressable>
             </View>

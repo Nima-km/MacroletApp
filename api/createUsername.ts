@@ -1,7 +1,7 @@
 export async function createUsername(username: string, token: string) {
     console.log(JSON.stringify(username));
     const response = await fetch(
-        "http://192.168.1.239:8000/test/set-username/",
+        "https://macrolet.onrender.com/test/set-username/",
         {
             method: "POST",
             headers: {

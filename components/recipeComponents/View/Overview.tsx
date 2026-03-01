@@ -1,9 +1,8 @@
-import DropDownServings from "@/components/UIComponents/DropDown/DropDownServings";
+import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { macroSum } from "@/helper/calculateMacro";
 import { CalculateMacroSumIngredient } from "@/helper/recipeMacroSum";
 import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
-import { DefaultServings } from "@/tests/testData";
 import { colors } from "@/theme";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
@@ -13,11 +12,11 @@ import {
     SimpleChartProteinMacro,
 } from "../../chartComponents/SimpleChart/SimpleChartMacro";
 import PrepCookButton from "../../UIComponents/Buttons/PrepCookButton";
-import { H1, H2, H4, H6 } from "../../UIComponents/Typography";
+import { H1, H2, H3, H4, H6 } from "../../UIComponents/Typography";
 
 type Props = {
-    servings: number;
-    setServings: (newServing: number) => void;
+    servings: string;
+    setServings: (newServing: string) => void;
 };
 
 const Overview = ({ servings, setServings }: Props) => {
@@ -30,7 +29,8 @@ const Overview = ({ servings, setServings }: Props) => {
     const options = [];
     function calculate_final(inp: number) {
         const mult = recipeData.servings_yield ?? 1;
-        return (inp * servings) / mult;
+        console.log("servings yield mult is:OVERVIEW", mult);
+        return (inp * Number(servings)) / mult;
     }
     useEffect(() => {
         console.log("recipe changed. Overview", ingredientItemsData);
@@ -52,15 +52,19 @@ const Overview = ({ servings, setServings }: Props) => {
                 <View style={{ justifyContent: "center", flex: 1 }}>
                     <H1>{Math.floor(calculate_final(calories))} cal</H1>
                 </View>
-                <View style={{ flex: 1 }}>
-                    <DropDownServings
-                        options={DefaultServings}
-                        placeholder={{
-                            serving_type: "Serving",
-                            serving_mult: 1,
-                        }}
-                        servings={servings}
-                        setServings={setServings}
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 8,
+                    }}
+                >
+                    <H3 style={{ color: colors.primary }}>Servings</H3>
+                    <FormInputNumber
+                        value={servings}
+                        onChangeText={setServings}
+                        //  lowerLimit={1}
                     />
                 </View>
             </View>

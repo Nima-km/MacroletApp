@@ -68,6 +68,9 @@ export const createRecipeWithFoodAndIngredients = async (
 ) => {
     return await db.transaction(async (tx) => {
         // 1. Insert recipe
+        if (recipeData.servings_yield && recipeData.servings_yield <= 0) {
+            recipeData.servings_yield = 1;
+        }
         const [newRecipe] = await tx
             .insert(recipe)
             .values(recipeData)
@@ -112,6 +115,9 @@ export const createAndLogRecipeWithFoodAndIngredients = async (
     ingredientItemsData: Array<Omit<IngredientFullData, "recipe_id">>,
 ) => {
     return await db.transaction(async (tx) => {
+        if (recipeData.servings_yield && recipeData.servings_yield <= 0) {
+            recipeData.servings_yield = 1;
+        }
         // 1. Insert recipe
         const [newRecipe] = await tx
             .insert(recipe)

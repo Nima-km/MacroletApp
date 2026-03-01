@@ -20,10 +20,16 @@ function HeaderCore({
 }: Props) {
     return (
         <SafeAreaView
-            style={[styles.container, { paddingHorizontal: 20, gap: 20 }]}
+            style={[styles.container, { gap: 20 }]}
             edges={["top", "right", "left"]}
         >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+                style={{
+                    paddingHorizontal: 20,
+                    flexDirection: "row",
+                    alignItems: "center",
+                }}
+            >
                 <View style={styles.leftButton}>{LeftButton}</View>
                 <View
                     style={[

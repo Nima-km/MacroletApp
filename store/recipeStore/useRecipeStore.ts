@@ -58,7 +58,9 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
                     ...state.data.foodData,
                     ...CalculateMacroSumIngredient(
                         [...state.data.ingredientItemsData],
-                        state.data.recipeData.servings_yield,
+                        key === "servings_yield" && typeof value === "number"
+                            ? value
+                            : state.data.recipeData.servings_yield,
                     ),
                 },
             },
@@ -154,7 +156,9 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
                     ...state.data.foodData,
                     ...CalculateMacroSumIngredient(
                         [...state.data.ingredientItemsData],
-                        state.data.recipeData.servings_yield,
+                        key === "servings_yield" && typeof value === "number"
+                            ? value
+                            : state.data.recipeData.servings_yield,
                     ),
                 },
             },
@@ -234,7 +238,9 @@ export function isValidRecipeDraft(draft: RecipeDraft): draft is {
 } {
     return (
         typeof draft.foodData.name === "string" &&
+        typeof draft.recipeData.servings_yield === "number" &&
         draft.ingredientItemsData.length > 0 &&
+        draft.recipeData.servings_yield > 0 &&
         draft.ingredientItemsData.every(
             (i) =>
                 typeof i.food.id === "number" &&

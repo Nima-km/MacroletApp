@@ -12,16 +12,16 @@ import {
     SimpleChartProteinMacro,
 } from "@/components/chartComponents/SimpleChart/SimpleChartMacro";
 import { SecondaryAddButton } from "@/components/UIComponents/Buttons/Button";
-import DropDownServings from "@/components/UIComponents/DropDown/DropDownServings";
 import IngredientModal from "@/components/UIComponents/Modals/IngredientModal";
+import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
 import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
 import { DefaultServings } from "@/tests/testData";
 import PrepCookButton from "../../UIComponents/Buttons/PrepCookButton";
-import { H1, H2, H6 } from "../../UIComponents/Typography";
+import { H1, H2, H3, H6 } from "../../UIComponents/Typography";
 
 type Props = {
-    servings: number;
-    setServings: (newServing: number) => void;
+    servings: string;
+    setServings: (newServing: string) => void;
     addIngredient: () => void;
 };
 const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
@@ -40,7 +40,7 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
     const [selectedIngredient, setSelectedIngredient] = useState(0);
     function calculate_final(inp: number) {
         const mult = 1;
-        return (inp * servings) / mult;
+        return (inp * Number(servings)) / mult;
     }
     useEffect(() => {
         //console.log("recipe changed, ingredient", foodData);
@@ -61,15 +61,19 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
                 <View style={{ justifyContent: "center", flex: 1 }}>
                     <H1>{Math.floor(calculate_final(calories))} cal</H1>
                 </View>
-                <View style={{ flex: 1 }}>
-                    <DropDownServings
-                        options={DefaultServings}
-                        placeholder={{
-                            serving_type: "Serving",
-                            serving_mult: 1,
-                        }}
-                        servings={servings}
-                        setServings={setServings}
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 8,
+                    }}
+                >
+                    <H3 style={{ color: colors.primary }}>Servings</H3>
+                    <FormInputNumber
+                        value={servings}
+                        onChangeText={setServings}
+                        //  lowerLimit={1}
                     />
                 </View>
             </View>
@@ -92,8 +96,25 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
                 />
             </View>
 
-            <View style={{ flexDirection: "row" }}>
+            <View
+                style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                }}
+            >
                 <H2>Ingredients</H2>
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 8,
+                    }}
+                >
+                    <H3 style={{ color: colors.primary }}>
+                        Servings Yield: {recipeData.servings_yield}
+                    </H3>
+                </View>
             </View>
             <FlatList
                 data={ingredientItemsData}

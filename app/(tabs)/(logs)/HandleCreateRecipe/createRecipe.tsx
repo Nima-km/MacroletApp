@@ -17,10 +17,14 @@ import { Pressable, StyleSheet, View } from "react-native";
 const createRecipe = () => {
     const router = useRouter();
     const [selectedPage, setSelectedPage] = useState(0);
+
     const { addImageFromGallery } = useImageManager();
     const draft = useRecipeDraftStore();
     const [bannerImageUri, setBannerImageUri] = useState(
         draft.data.recipeData.bannerImage ?? "",
+    );
+    const [servingsYield, setServingsYield] = useState(
+        draft.data.recipeData.servings_yield?.toString() ?? "1",
     );
     const onAddImage = async () => {
         const image = await addImageFromGallery();
@@ -98,7 +102,13 @@ const createRecipe = () => {
                                 display: selectedPage === 0 ? "flex" : "none",
                             }}
                         >
-                            {<OverviewEdit recipeObject={draft} />}
+                            {
+                                <OverviewEdit
+                                    // recipeObject={draft}
+                                    servingsYield={servingsYield}
+                                    setServingsYield={setServingsYield}
+                                />
+                            }
                         </View>
                         <View
                             style={{
@@ -107,7 +117,9 @@ const createRecipe = () => {
                         >
                             {
                                 <IngredientsEdit
-                                    recipeObject={draft}
+                                    //   recipeObject={draft}
+                                    servingsYield={servingsYield}
+                                    setServingsYield={setServingsYield}
                                     onAddIngredient={() =>
                                         router.push(
                                             "/(tabs)/(logs)/HandleCreateRecipe/AddIngredient",

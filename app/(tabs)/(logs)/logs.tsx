@@ -11,6 +11,7 @@ import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
 import { useFoodItemSectionList } from "@/db/hooks/history/sectionListFoodItemHistory";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { formatAMPM } from "@/helper/formatTime";
+import { SimpleRound } from "@/helper/simpleRound";
 import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
@@ -105,15 +106,21 @@ const logs = () => {
                         </View>
                         <View style={{ justifyContent: "flex-end", gap: 20 }}>
                             <H4>TOTAL</H4>
-                            <H4>{LiveFood?.[0]?.protein ?? 0} g</H4>
-                            <H4>{LiveFood?.[0]?.carbs ?? 0} g</H4>
-                            <H4>{LiveFood?.[0]?.fat ?? 0} g</H4>
+                            <H4>
+                                {SimpleRound(LiveFood?.[0]?.protein ?? 0)} g
+                            </H4>
+                            <H4>{SimpleRound(LiveFood?.[0]?.carbs ?? 0)} g</H4>
+                            <H4>{SimpleRound(LiveFood?.[0]?.fat ?? 0)} g</H4>
                         </View>
                         <View style={{ justifyContent: "flex-end", gap: 20 }}>
                             <H4>GOAL</H4>
-                            <H4>{nutriGoals?.[0]?.protein ?? 0} g</H4>
-                            <H4>{nutriGoals?.[0]?.carbs ?? 0} g</H4>
-                            <H4>{nutriGoals?.[0]?.fat ?? 0} g</H4>
+                            <H4>
+                                {SimpleRound(nutriGoals?.[0]?.protein ?? 0)} g
+                            </H4>
+                            <H4>
+                                {SimpleRound(nutriGoals?.[0]?.carbs ?? 0)} g
+                            </H4>
+                            <H4>{SimpleRound(nutriGoals?.[0]?.fat ?? 0)} g</H4>
                         </View>
                     </View>
                 </View>
