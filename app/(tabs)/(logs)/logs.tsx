@@ -72,7 +72,7 @@ const logs = () => {
     }
     return (
         <View style={{ flex: 1 }}>
-            <HeaderSimple title="MACROLET" dateSelector />
+            <HeaderSimple title="MACROLET" dateSelector back={false} />
             <ScrollView>
                 <View
                     style={{

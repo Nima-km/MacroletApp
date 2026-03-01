@@ -14,7 +14,7 @@ interface HeaderSimpleProps {
 
 const HeaderSimple = ({
     title,
-    back = false,
+    back = true,
     dateSelector = false,
 }: HeaderSimpleProps) => {
     const router = useRouter();

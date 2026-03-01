@@ -9,7 +9,7 @@ const profile = () => {
     const router = useRouter();
     return (
         <KeyboardAware>
-            <HeaderSimple title="Profile" />
+            <HeaderSimple title="Profile" back={false} />
             <View style={{ flex: 1, padding: 20, gap: 8 }}>
                 <SecondaryButton
                     onPress={() => router.push("/(tabs)/(profile)/account")}

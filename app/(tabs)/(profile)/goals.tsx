@@ -1,5 +1,6 @@
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
+import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
 import { H1, H2, H4 } from "@/components/UIComponents/Typography";
 import {
@@ -35,7 +36,7 @@ const goals = () => {
     }, [nutriGoals]);
     if (nutriGoalsLoading) return <H1>Loading</H1>;
     return (
-        <View style={{ flex: 1 }}>
+        <KeyboardAware>
             <HeaderSimple title="Goals" />
             <View style={{ flex: 1, padding: 20, gap: 20 }}>
                 <H2>Calorie Goal</H2>
@@ -121,7 +122,7 @@ const goals = () => {
                 </View>
                 <PrimaryButton onPress={addGoal}>Apply</PrimaryButton>
             </View>
-        </View>
+        </KeyboardAware>
     );
 };
 

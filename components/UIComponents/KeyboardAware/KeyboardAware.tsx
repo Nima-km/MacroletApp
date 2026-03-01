@@ -1,12 +1,17 @@
-import React, { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
-
-
+import React, { ReactNode } from "react";
+import {
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableWithoutFeedback,
+} from "react-native";
 
 interface KeyboardScreenProps {
-  children: ReactNode;
-  scrollEnabled?: boolean;
-  contentPadding?: number;
+    children: ReactNode;
+    scrollEnabled?: boolean;
+    contentPadding?: number;
 }
 
 const KeyboardAware = ({
@@ -15,26 +20,28 @@ const KeyboardAware = ({
     contentPadding = 16,
 }: KeyboardScreenProps) => {
     return (
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
             keyboardVerticalOffset={0} // adjust if header is present
-            
         >
-            <TouchableWithoutFeedback onPress={() => {}}>
+            <TouchableWithoutFeedback
+                onPress={Keyboard.dismiss}
+                accessible={false}
+            >
                 <ScrollView
-                    nestedScrollEnabled = {true}
+                    nestedScrollEnabled={true}
                     contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
-                    scrollEnabled = {scrollEnabled}
+                    scrollEnabled={scrollEnabled}
                 >
                     {children}
                 </ScrollView>
-            </TouchableWithoutFeedback>     
+            </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
-    )
-}
+    );
+};
 
-export default KeyboardAware
+export default KeyboardAware;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
