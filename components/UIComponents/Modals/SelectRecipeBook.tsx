@@ -19,7 +19,7 @@ const SelectRecipeBook = ({
 }: TextModalProps) => {
     const [selected, setSelected] = useState<RecipeBookInsert>();
     return (
-        <ModalCore title="Create New Recipe book">
+        <ModalCore title="Create New Recipe book" onClose={onClose}>
             <View style={{ flexDirection: "column-reverse" }}>
                 <View style={styles.buttonsContainer}>
                     <View style={{ flex: 1 }}>

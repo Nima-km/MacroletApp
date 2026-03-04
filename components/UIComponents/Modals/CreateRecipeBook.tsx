@@ -12,7 +12,7 @@ interface TextModalProps {
 const CreateRecipeBook = ({ setText, onClose, error }: TextModalProps) => {
     const [textInp, setTextInp] = useState("");
     return (
-        <ModalCore title="Create New Recipe book">
+        <ModalCore title="Create New Recipe book" onClose={onClose}>
             <View style={styles.mainContent}>
                 <View style={styles.rowContainer}>
                     <View style={styles.nameTextContainer}>

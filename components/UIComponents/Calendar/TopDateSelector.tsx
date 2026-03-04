@@ -63,19 +63,34 @@ const TopDateSelector = () => {
             </View>
             <Modal
                 visible={calendarVisible}
-                transparent
                 // animationType='fade'
+                transparent
                 onRequestClose={() => {
                     setCalendarVisible(false);
                 }}
             >
-                <View style={{ flex: 1 }}>
-                    <TimeDateSelector
-                        value={date}
-                        onChange={setDate}
-                        isTime={false}
-                    />
-                </View>
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    onPress={() => setCalendarVisible(false)}
+                >
+                    <Pressable
+                        style={{
+                            backgroundColor: "red",
+                            width: "80%",
+                        }}
+                    >
+                        <TimeDateSelector
+                            value={date}
+                            onChange={setDate}
+                            isTime={false}
+                        />
+                    </Pressable>
+                </Pressable>
             </Modal>
         </View>
     );

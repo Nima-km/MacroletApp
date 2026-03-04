@@ -63,7 +63,7 @@ const QuickAddIngredientModal = ({
         return inp * Number(servingAmount) * selectedServing.serving_mult;
     }
     return (
-        <ModalCore title={foodData.name}>
+        <ModalCore title={foodData.name} onClose={onClose}>
             <View style={{ flexDirection: "column-reverse" }}>
                 <View style={styles.buttonsContainer}>
                     <View style={{ flex: 1 }}>

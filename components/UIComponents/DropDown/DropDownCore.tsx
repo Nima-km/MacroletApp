@@ -95,7 +95,7 @@ export default function DropdownCore({
                             </Pressable>
                         )}
                         removeClippedSubviews={false}
-                        windowSize={options?.length ?? 0 + 20}
+                        windowSize={(options?.length ?? 0) + 20}
                         initialNumToRender={options?.length ?? 0}
                         scrollEnabled={false}
                         style={{ marginTop: 12, marginHorizontal: 12 }}
