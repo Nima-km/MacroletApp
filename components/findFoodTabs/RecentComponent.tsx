@@ -49,6 +49,7 @@ export default RecentComponent;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        marginHorizontal: 20,
         gap: 8,
     },
 });

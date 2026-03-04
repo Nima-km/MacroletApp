@@ -11,7 +11,7 @@ interface Props {
     foodData: FoodInsert;
     foodItemData: FoodItemData & Required<Pick<FoodItemData, "timestamp">>;
     recipeData?: RecipeInsert;
-    servingData?: Omit<ServingSizeType, "food_id">[];
+    servingData: Omit<ServingSizeType, "food_id">[];
     setNewServing?: (newServing: Omit<ServingSizeType, "food_id">) => void;
     primaryText: string;
     secondaryText?: string;

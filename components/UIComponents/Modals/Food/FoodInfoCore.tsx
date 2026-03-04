@@ -6,11 +6,13 @@ import {
 import { calculateCalories } from "@/helper/calculateCalories";
 import { macroSum } from "@/helper/calculateMacro";
 import formatDateTime from "@/helper/formatDateTime";
-import { TestFood2, TestFoodItem1 } from "@/tests/testData";
+import { servingSizeProvider } from "@/helper/ServingSizeProvider";
+import { SimpleRound } from "@/helper/simpleRound";
+import { FoodItemDefault, TestFood2 } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
 import { ServingSizeType } from "@/types/servingSize";
 import React, { useState } from "react";
-import { Modal, StyleSheet, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 import {
     DateButton,
     PrimaryButton,
@@ -24,7 +26,7 @@ import { H1 } from "../../Typography";
 interface FoodInfoProps {
     foodData?: FoodInsert | undefined;
     foodItemData?: FoodItemData & Required<Pick<FoodItemData, "timestamp">>;
-    servingsData?: Omit<ServingSizeType, "food_id">[];
+    servingsData: Omit<ServingSizeType, "food_id">[];
     primaryText: string;
     secondaryText?: string;
     edit?: boolean;
@@ -50,9 +52,14 @@ const FoodInfoCore = ({
     const [calendarVisible, setCalendarVisible] = useState(false);
     const [servingTypes, setServingTypes] = useState<
         Omit<ServingSizeType, "food_id">[]
-    >([...(servingsData ?? [{ serving_mult: 1, serving_type: "Serving" }])]);
+    >(
+        servingSizeProvider({
+            servingData: servingsData,
+            serving_100g: food.serving_100g,
+        }),
+    );
     const [foodItem, setFoodItem] = useState(
-        foodItemData ?? { ...TestFoodItem1, timestamp: new Date() },
+        foodItemData ?? { ...FoodItemDefault, timestamp: new Date() },
     );
     function onCancelEdit() {
         setEdit(false);
@@ -68,7 +75,7 @@ const FoodInfoCore = ({
     function multiplyServing(inp: number) {
         return inp * foodItem.serving_mult * foodItem.servings;
     }
-    // console.log("mounted foodInfoCore", foodItemData);
+    console.log("mounted foodInfoCore", foodData);
     return (
         <View style={{ flex: 1, gap: 20 }}>
             {edit ? (
@@ -88,9 +95,11 @@ const FoodInfoCore = ({
                 }}
             >
                 <H1>
-                    {calculateCalories(food) *
-                        foodItem.serving_mult *
-                        foodItem.servings}{" "}
+                    {SimpleRound(
+                        calculateCalories(food) *
+                            foodItem.serving_mult *
+                            foodItem.servings,
+                    )}{" "}
                     cal
                 </H1>
                 <DateButton onPress={() => setCalendarVisible(true)}>
@@ -196,18 +205,33 @@ const FoodInfoCore = ({
                     setCalendarVisible(false);
                 }}
             >
-                <View style={{ flex: 1 }}>
-                    <TimeDateSelector
-                        value={foodItem.timestamp}
-                        onChange={(newDate) =>
-                            setFoodItem((prev) => ({
-                                ...prev,
-                                timestamp: newDate,
-                            }))
-                        }
-                        isTime={false}
-                    />
-                </View>
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    onPress={() => setCalendarVisible(false)}
+                >
+                    <Pressable
+                        style={{
+                            backgroundColor: "red",
+                            width: "80%",
+                        }}
+                    >
+                        <TimeDateSelector
+                            value={foodItem.timestamp}
+                            onChange={(newDate) =>
+                                setFoodItem((prev) => ({
+                                    ...prev,
+                                    timestamp: newDate,
+                                }))
+                            }
+                            isTime={false}
+                        />
+                    </Pressable>
+                </Pressable>
             </Modal>
         </View>
     );

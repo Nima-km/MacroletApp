@@ -20,8 +20,8 @@ export const food = sqliteTable(
         fiber: integer("fiber").notNull(),
 
         barcode: integer("barcode").default(0),
-        serving_100g: integer("serving_100g").default(1).notNull(),
-        volume_100ml: integer("volume_100ml").default(1).notNull(),
+        serving_100g: integer("serving_100g").default(0).notNull(),
+        volume_100ml: integer("volume_100ml").default(0).notNull(),
         micro_nutriants: text("micro_nutriants", { mode: "json" }),
 
         recipe_id: integer("recipe_id").references(() => recipe.id),

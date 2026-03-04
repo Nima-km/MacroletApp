@@ -134,7 +134,7 @@ const food = () => {
                     foodData={foodData[0]}
                     foodItemData={foodItem}
                     recipeData={recipeData?.[0]?.recipe}
-                    servingData={servingData}
+                    servingData={servingData ?? []}
                     primaryText={"Log"}
                     primaryButton={LogNewFood}
                     setNewServing={AddNewServing}

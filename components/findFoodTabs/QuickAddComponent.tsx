@@ -1,14 +1,10 @@
 import { useInsertFoodAndItem } from "@/db/hooks/food/useFood";
 import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
-import {
-    DefaultServings,
-    FoodDefault,
-    FoodItemDefault,
-} from "@/tests/testData";
+import { FoodDefault, FoodItemDefault } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import KeyboardAware from "../UIComponents/KeyboardAware/KeyboardAware";
 import FoodView from "../UIComponents/Modals/Food/FoodView";
 
@@ -47,16 +43,18 @@ const QuickAddComponent = () => {
 
     return (
         <KeyboardAware>
-            <FoodView
-                foodData={FoodDefault}
-                foodItemData={foodItem}
-                servingData={DefaultServings}
-                primaryText={"Log"}
-                primaryButton={LogNewFood}
-                ingredientItemsData={[]}
-                edit={edit}
-                setEdit={setEdit}
-            />
+            <View style={{ marginHorizontal: 20 }}>
+                <FoodView
+                    foodData={FoodDefault}
+                    foodItemData={foodItem}
+                    servingData={[]}
+                    primaryText={"Log"}
+                    primaryButton={LogNewFood}
+                    ingredientItemsData={[]}
+                    edit={edit}
+                    setEdit={setEdit}
+                />
+            </View>
         </KeyboardAware>
     );
 };

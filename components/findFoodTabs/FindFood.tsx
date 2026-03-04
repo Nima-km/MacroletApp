@@ -97,8 +97,14 @@ const FindFood = ({
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.container}>
-                <FormInputSearch value={search} onChangeText={setSearch} />
-                <View style={{ marginHorizontal: -20, marginVertical: 12 }}>
+                <View style={{ paddingHorizontal: 20 }}>
+                    <FormInputSearch
+                        style={{ paddingHorizontal: 20 }}
+                        value={search}
+                        onChangeText={setSearch}
+                    />
+                </View>
+                <View style={{ marginHorizontal: 0, marginVertical: 12 }}>
                     <NavSelector
                         selectedValue={selectedPage}
                         onSelect={(value) => setSelectedPage(value)}
@@ -139,7 +145,7 @@ export default FindFood;
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: 20,
+        // marginHorizontal: 20,
         flex: 1,
     },
 });

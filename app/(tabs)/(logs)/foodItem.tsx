@@ -238,7 +238,7 @@ const foodItem = () => {
                     foodData={foodData[0]}
                     foodItemData={foodItemData[0]}
                     recipeData={recipeData?.[0]?.recipe}
-                    servingData={servingData}
+                    servingData={servingData ?? []}
                     primaryText={"Update"}
                     primaryButton={LogUpdateFoodItem}
                     secondaryText={"Log New"}

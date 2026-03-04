@@ -44,7 +44,7 @@ const RecipeComponent = () => {
         console.log("RecipeComponent", recipeBookList);
     }, [recipeBookList]);
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginHorizontal: 20 }}>
             <View style={{ flex: 1, gap: 12 }}>
                 <View
                     style={{

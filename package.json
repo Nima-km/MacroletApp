@@ -19,9 +19,11 @@
     "@react-navigation/native": "^7.1.8",
     "@shopify/react-native-skia": "2.2.12",
     "@tanstack/react-query": "^5.90.10",
+    "axios": "^1.13.6",
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-orm": "^0.44.7",
     "expo": "~54.0.33",
+    "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.10",
     "expo-crypto": "~15.0.8",
     "expo-dev-client": "~6.0.20",
@@ -59,5 +61,6 @@
     "react-native-svg-transformer": "^1.5.2",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
