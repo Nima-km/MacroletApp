@@ -22,7 +22,10 @@ const FoodCardFull = ({ food, foodItem }: FoodCardProps) => {
     return (
         <View style={styles.container}>
             <View style={styles.rowContainer}>
-                <H4>{food.name}</H4>
+                <View style={{ width: 240 }}>
+                    <H4 numberOfLines={1}>{food.name}</H4>
+                </View>
+
                 <H4>{calculateCalories(foodData)} cals</H4>
             </View>
             <View style={styles.rowContainer}>

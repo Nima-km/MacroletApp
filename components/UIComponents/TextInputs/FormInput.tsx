@@ -86,7 +86,7 @@ export function FormInput({
                 )}
                 <View style={[styles.input, !center && { flex: 1 }]}>
                     <TextInput
-                        multiline
+                        multiline={multiline}
                         value={value}
                         ref={inputRef}
                         // selectTextOnFocus={selectTextOnFocus}
