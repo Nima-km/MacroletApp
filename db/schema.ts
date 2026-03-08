@@ -19,7 +19,7 @@ export const food = sqliteTable(
         carbs: integer("carbs").notNull(),
         fiber: integer("fiber").notNull(),
 
-        barcode: integer("barcode").default(0),
+        barcode: text("barcode").default(""),
         serving_100g: integer("serving_100g").default(0).notNull(),
         volume_100ml: integer("volume_100ml").default(0).notNull(),
         micro_nutriants: text("micro_nutriants", { mode: "json" }),

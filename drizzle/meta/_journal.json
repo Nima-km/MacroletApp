@@ -85,6 +85,13 @@
       "when": 1772042802620,
       "tag": "0011_abnormal_kinsey_walden",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1772948355663,
+      "tag": "0012_normal_moon_knight",
+      "breakpoints": true
     }
   ]
 }

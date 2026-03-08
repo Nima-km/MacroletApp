@@ -5,6 +5,9 @@ export async function updloadRecipe(
     recipe: RecipeData,
     token: string,
 ): Promise<RecipeData> {
+    if (recipe.recipeData.recipe_slug) {
+        throw new Error("recipe has been uploaded already");
+    }
     const payload = transformRecipeForAPI(recipe);
     console.log("this is the payload", payload.ingredients);
     const response = await fetch("https://macrolet.onrender.com/recipes/", {

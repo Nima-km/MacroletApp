@@ -9,8 +9,11 @@ export async function fetchFilteredRecipes({
     title: string;
     token: string;
 }) {
+    console.log("search recipe is fetching", filters, title);
+    if (title.length < 3) {
+        return [];
+    }
     const query = new URLSearchParams();
-
     if (title?.trim()) {
         query.append("search", title.trim());
     }
@@ -35,5 +38,6 @@ export async function fetchFilteredRecipes({
     }
 
     const data = await response.json();
-    return transformRecipesFromAPI(data);
+    console.log("data from fetchfilteredrecips", data.results);
+    return transformRecipesFromAPI(data.results);
 }

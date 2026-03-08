@@ -2,9 +2,10 @@ import {
     createAndLogOnlineRecipe,
     createAndLogRecipeWithFoodAndIngredients,
     createRecipeWithFoodAndIngredients,
+    updateRecipe,
 } from "@/db/queries/recipe";
 import { FoodItemInsert } from "@/types/food";
-import { RecipeData } from "@/types/recipe";
+import { RecipeData, RecipeInsert } from "@/types/recipe";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateRecipeWithFoodAndIngredients = () => {
@@ -68,6 +69,22 @@ export const useCreateAndLogOnlineRecipe = () => {
         },
         onError: (error) => {
             console.log("something went wrong with saving recipe", error);
+        },
+    });
+};
+interface UpdateRecipeProps {
+    recipeData: RecipeInsert;
+    recipe_Id: number;
+}
+export const useUpdateRecipe = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ recipeData, recipe_Id }: UpdateRecipeProps) =>
+            updateRecipe(recipe_Id, recipeData),
+        onSuccess: (data, variables, id) => {
+            console.log("Updated recipe", data);
+            queryClient.invalidateQueries({ queryKey: ["food-history"] });
         },
     });
 };

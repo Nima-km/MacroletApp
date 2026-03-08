@@ -12,7 +12,7 @@ interface Props {
     recipe: Omit<RecipeData, "ingredientItemsData">;
 }
 const RecipeCard = ({ recipe }: Props) => {
-    console.log("recipe card: ", recipe);
+    // console.log("recipe card: ", recipe);
     return (
         <View
             style={{

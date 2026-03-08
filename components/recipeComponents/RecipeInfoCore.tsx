@@ -1,5 +1,6 @@
 import { updloadRecipe } from "@/api/uploadRecipe";
 import Bookmark from "@/assets/svg/bookmark.svg";
+import Share from "@/assets/svg/share.svg";
 import RecipeNav from "@/components/recipeComponents/RecipeNav";
 import Directions from "@/components/recipeComponents/View/Directions";
 import Ingredients from "@/components/recipeComponents/View/Ingredients";
@@ -9,6 +10,7 @@ import {
     SubButton,
 } from "@/components/UIComponents/Buttons/Button";
 import { H2, H5 } from "@/components/UIComponents/Typography";
+import { useUpdateRecipe } from "@/db/hooks/recipe/useCreateRecipe";
 import { useGetRecipeBookList } from "@/db/hooks/recipeBook/getRecipeBookList";
 import {
     useInsertRecipeBook,
@@ -24,13 +26,20 @@ import { Modal, View } from "react-native";
 import IconButton from "../UIComponents/Buttons/IconButton";
 import CreateRecipeBook from "../UIComponents/Modals/CreateRecipeBook";
 import SelectRecipeBook from "../UIComponents/Modals/SelectRecipeBook";
+
 interface Props {
     servings: number;
     setServings: (newServing: number) => void;
     onLogRecipe?: () => void;
+    onUploadRecipe?: () => void;
 }
 
-const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
+const RecipeInfoCore = ({
+    servings,
+    setServings,
+    onLogRecipe,
+    onUploadRecipe,
+}: Props) => {
     const { getToken, has } = useAuth();
     const ingredientItemsData = useRecipeStateStore(
         (state) => state.data.ingredientItemsData,
@@ -45,6 +54,7 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
         error: recipeBookError,
     } = useGetRecipeBookList();
     const { mutate: insertRecipeBook } = useInsertRecipeBook();
+    const { mutate: updateRecipe } = useUpdateRecipe();
     const { mutate: insertRecipeBookItem } = useInsertRecipeBookItem();
 
     const foodData = useRecipeStateStore((state) => state.data.foodData);
@@ -66,6 +76,7 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
             recipeDataWithDirections as RecipeData,
             clerk_token ?? "",
         ).catch((e) => console.log(e));
+        //.then(updateRecipe(recipe)); FOR MAKING SURE DUPLICATE RECIPES DON'T GET REUPLOADED
     }
     function createRecipeBook(newName: string) {
         insertRecipeBook(
@@ -163,7 +174,7 @@ const RecipeInfoCore = ({ servings, setServings, onLogRecipe }: Props) => {
                             />
                             <IconButton
                                 onPress={onUpload}
-                                icon={<Bookmark pointerEvents="none" />}
+                                icon={<Share pointerEvents="none" />}
                             />
                         </View>
                     )}

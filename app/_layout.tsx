@@ -23,8 +23,8 @@ if (!publishableKey) {
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-    //  const expoDb = openDatabaseSync(DATABASE_NAME);
-    // useDrizzleStudio(expoDb);
+    // const expoDb = openDatabaseSync(DATABASE_NAME);
+    //   useDrizzleStudio(expoDb);
     const { success, error } = useMigrations(db, migrations);
     const [loaded, fontError] = useFonts({
         "Metro-Medium": require("@/assets/fonts/Metropolis-Medium.ttf"),

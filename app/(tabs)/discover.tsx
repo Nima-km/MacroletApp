@@ -10,7 +10,7 @@ import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -45,10 +45,14 @@ const discover = () => {
         initializeRecipe(selectedRecipe);
         router.push("/(tabs)/(logs)/onlineRecipe");
     }
+    useEffect(() => {
+        console.log("error", error, data);
+    }, [error]);
     return (
         <View style={{ flex: 1 }}>
             <KeyboardAware>
                 <HeaderSimple title="Discover" />
+
                 <View style={{ flex: 1, padding: 20 }}>
                     <View
                         style={{
@@ -78,6 +82,9 @@ const discover = () => {
                         </Pressable>
                     </View>
                     <View>
+                        <H5>
+                            {error?.message} {isFetching ? "loading" : ""}
+                        </H5>
                         <FlatList
                             data={data}
                             renderItem={({ item }) => (

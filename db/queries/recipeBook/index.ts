@@ -38,6 +38,16 @@ export const getRecipeBookData = async (recipeBookID: number) => {
         .where(eq(recipeBookItem.recipeBook_id, recipeBookID));
     return res;
 };
+export const getAllRecipeList = async () => {
+    const res = await db
+        .select({
+            recipeData: recipe,
+            foodData: food,
+        })
+        .from(recipe)
+        .innerJoin(food, eq(food.recipe_id, recipe.id));
+    return res;
+};
 export const insertRecipeBook = async (recipeBookObject: RecipeBookInsert) => {
     return db.insert(recipeBook).values(recipeBookObject).returning();
 };

@@ -3,7 +3,6 @@ import { RecipeData } from "@/types/recipe";
 export function transformRecipeForAPI(data: RecipeData) {
     return {
         title: data.foodData.name,
-        slug: data.recipeData.recipe_slug,
         description: data.recipeData.description ?? "",
         instructions: data.recipeData.directions?.map((d) => d.text).join("\n"),
         servings: data.recipeData.servings_yield ?? 1,
@@ -23,6 +22,8 @@ export function transformRecipeForAPI(data: RecipeData) {
                 protein: item.food.protein,
                 carbs: item.food.carbs,
                 fat: item.food.fat,
+                serving_100g: item.food.serving_100g,
+                volume_100ml: item.food.volume_100ml,
                 micronutrients: item.food.micro_nutriants ?? {},
             },
         })),
@@ -32,7 +33,7 @@ export function transformRecipeFromAPI(apiRecipe: any): RecipeData {
     return {
         recipeData: {
             id: apiRecipe.id,
-            recipe_slug: apiRecipe.slug,
+            recipe_slug: apiRecipe.author,
             description: apiRecipe.description,
             servings_yield: apiRecipe.servings,
             prep_time: apiRecipe.prep_time,
@@ -63,8 +64,8 @@ export function transformRecipeFromAPI(apiRecipe: any): RecipeData {
             fat: apiRecipe.fat,
             carbs: apiRecipe.carbs,
             fiber: 0,
-            serving_100g: 100,
-            volume_100ml: 100,
+            serving_100g: 0,
+            volume_100ml: 0,
             micro_nutriants: {},
         },
 
@@ -79,8 +80,8 @@ export function transformRecipeFromAPI(apiRecipe: any): RecipeData {
                 carbs: item.carbs / item.quantity / item.serving_mult,
                 fiber: 0,
                 barcode: null,
-                serving_100g: 100,
-                volume_100ml: 100,
+                serving_100g: item.serving_100g,
+                volume_100ml: item.volume_100ml,
                 micro_nutriants: {},
             },
 

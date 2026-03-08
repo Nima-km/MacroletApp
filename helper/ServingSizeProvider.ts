@@ -6,6 +6,7 @@ interface Props {
     serving_100g?: number;
 }
 export function servingSizeProvider({ servingData, serving_100g }: Props) {
+    console.log("servingsizeprovider", servingData, serving_100g);
     const weight =
         serving_100g != 0
             ? ServingSizeWeight.map((item) => ({

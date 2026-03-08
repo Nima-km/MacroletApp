@@ -40,22 +40,22 @@ export default function Index() {
                 <H1>Calorie Intake</H1>
                 <ArcChart
                     targetPercentage={calculateCalories(currentGoal?.[0])}
-                    dailyProgress={1300}
+                    dailyProgress={calculateCalories(LiveFood?.[0])}
                 />
                 <View style={styles.macroChartContainer}>
                     <SimpleChartProteinGoal
                         target={currentGoal?.[0]?.protein}
-                        progress={85}
+                        progress={LiveFood?.[0].protein}
                         backgroundColor={colors.off_white}
                     />
                     <SimpleChartCarbsGoal
                         target={currentGoal?.[0]?.carbs}
-                        progress={85}
+                        progress={LiveFood?.[0].carbs}
                         backgroundColor={colors.off_white}
                     />
                     <SimpleChartFatGoal
                         target={currentGoal?.[0]?.fat}
-                        progress={85}
+                        progress={LiveFood?.[0].fat}
                         backgroundColor={colors.off_white}
                     />
                 </View>

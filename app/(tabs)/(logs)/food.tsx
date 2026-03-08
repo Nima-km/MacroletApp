@@ -27,7 +27,7 @@ import { StyleSheet, View } from "react-native";
 
 const food = () => {
     const router = useRouter();
-    const { food_id, foodItem_id } = useLocalSearchParams();
+    const { food_id } = useLocalSearchParams();
     const recipeStoreData = useRecipeStateStore((state) => state.data);
     const {
         data: foodData,

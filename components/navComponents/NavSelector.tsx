@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import Barcode from "@/assets/svg/barcode.svg";
 import Recent from "@/assets/svg/clock.svg";
@@ -16,10 +16,15 @@ interface Option {
 
 interface SelectionComponentProps {
     selectedValue: number;
+    isNotRecipe?: boolean;
     onSelect: (value: number) => void;
 }
 
-const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
+const NavSelector = ({
+    selectedValue,
+    isNotRecipe = true,
+    onSelect,
+}: SelectionComponentProps) => {
     const width = 28;
     const height = 28;
     const options: Option[] = [
@@ -35,18 +40,22 @@ const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
                 />
             ),
         },
-        {
-            label: "Recipes",
-            value: 1,
-            icon: (style) => (
-                <Recipes
-                    width={width}
-                    height={height}
-                    style={style}
-                    pointerEvents="none"
-                />
-            ),
-        },
+        ...(isNotRecipe
+            ? [
+                  {
+                      label: "Recipes",
+                      value: 1,
+                      icon: (style?: object) => (
+                          <Recipes
+                              width={width}
+                              height={height}
+                              style={style}
+                              pointerEvents="none"
+                          />
+                      ),
+                  },
+              ]
+            : []),
         {
             label: "Barcode",
             value: 2,
@@ -73,14 +82,14 @@ const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
         },
     ];
     //const [selectedValue, setSelectedValue] = useState<number | null>(options[0].value);
-
+    console.log("");
     const handleSelect = (value: number) => {
         //  setSelectedValue(value);
         onSelect(value);
     };
 
     return (
-        <ScrollView horizontal>
+        <View>
             <View style={[styles.container]}>
                 {options.map((option) => (
                     <TouchableOpacity
@@ -90,7 +99,7 @@ const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
                             styles.optionButton,
                             selectedValue === option.value &&
                                 styles.selectedButton,
-                            option.value === 0 && { marginLeft: 20 },
+                            //  option.value === 0 && { marginLeft: 20 },
                         ]}
                         onPress={() => handleSelect(option.value)}
                         accessibilityRole="button"
@@ -140,16 +149,16 @@ const NavSelector = ({ selectedValue, onSelect }: SelectionComponentProps) => {
                     </TouchableOpacity>
                 ))}
             </View>
-        </ScrollView>
+        </View>
     );
 };
 export default NavSelector;
 
 const styles = StyleSheet.create({
     container: {
-        gap: 50,
+        //gap: 50,
         flexDirection: "row",
-
+        justifyContent: "space-between",
         borderBottomWidth: 1, // ultra thin (1px on most screens)
         borderBottomColor: colors.light_gray,
     },

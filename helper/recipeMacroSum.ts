@@ -47,6 +47,7 @@ export const CalculateMacroSumIngredient = (
     return {
         protein: total_macros.protein / (servings_yield ?? 1),
         fat: total_macros.fat / (servings_yield ?? 1),
+        fiber: total_macros.fiber / (servings_yield ?? 1),
         carbs: total_macros.carbs / (servings_yield ?? 1),
     };
 };

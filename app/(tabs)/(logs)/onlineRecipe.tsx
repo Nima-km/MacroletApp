@@ -1,13 +1,13 @@
 import HeaderFood from "@/components/navComponents/HeaderFood";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
-import { H1, H2 } from "@/components/UIComponents/Typography";
+import { H1 } from "@/components/UIComponents/Typography";
 import { useCreateAndLogOnlineRecipe } from "@/db/hooks/recipe/useCreateRecipe";
 import {
     isValidRecipeDraft,
     useRecipeStateStore,
 } from "@/store/recipeStore/useRecipeStore";
-import { DefaultServings, FoodItemDefault } from "@/tests/testData";
+import { FoodItemDefault } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -55,13 +55,13 @@ const onlineRecipe = () => {
                 onEdit={setEdit}
                 onBack={() => router.back()}
             />
-            <H2>{recipeStoreData.foodData.protein}</H2>
+
             <View style={{ padding: 20 }}>
                 <FoodView
                     foodData={recipeStoreData.foodData}
                     foodItemData={foodItemDefault}
                     recipeData={recipeStoreData.recipeData}
-                    servingData={DefaultServings}
+                    servingData={[]}
                     primaryText={"Log"}
                     primaryButton={LogNewFood}
                     ingredientItemsData={recipeStoreData.ingredientItemsData}

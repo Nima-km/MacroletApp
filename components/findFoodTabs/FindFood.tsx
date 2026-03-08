@@ -2,11 +2,11 @@ import BarcodeComponent from "@/components/findFoodTabs/BarcodeComponent";
 import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
 import RecentComponent from "@/components/findFoodTabs/RecentComponent";
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
-import VoiceComponent from "@/components/findFoodTabs/VoiceComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
 import { FoodFullData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import NavSelector from "../navComponents/NavSelector";
@@ -36,14 +36,23 @@ const FindFood = ({
     ingredientList,
     isNewRecipe = false,
 }: FindFoodProps) => {
-    const [selectedPage, setSelectedPage] = useState(0);
+    const { pageId } = useLocalSearchParams();
+    const isNotRecipe =
+        ingredientList == undefined && setIngredientList == undefined;
+    const [selectedPage, setSelectedPage] = useState(
+        pageId ? Number(pageId) : 0,
+    );
     const sheetRef = useRef<BottomSheet>(null);
     const [search, setSearch] = useState("");
     const {
         data: history,
         isLoading: loadingSectionList,
         error: errorSectionList,
-    } = useGetFoodItemRecent();
+    } = useGetFoodItemRecent(isNotRecipe);
+    console.log(
+        "ingredientList != undefined && setIngredientList != undefined",
+        isNotRecipe,
+    );
     const [filteredData, setFilteredData] = useState(history);
 
     function onAddFood(item: FoodFullData) {
@@ -70,10 +79,8 @@ const FindFood = ({
             case 1:
                 return <RecipeComponent />;
             case 2:
-                return <BarcodeComponent />;
+                return <BarcodeComponent onScan={onFoodCardID} />;
             case 3:
-                return <VoiceComponent />;
-            case 4:
                 return <QuickAddComponent />;
             default:
                 return null;
@@ -91,6 +98,9 @@ const FindFood = ({
         );
         console.log("recent history", errorSectionList, loadingSectionList);
     }, [search, history]);
+    useEffect(() => {
+        if (pageId) setSelectedPage(Number(pageId));
+    }, [pageId]);
     if (loadingSectionList) {
         return <H5>{loadingSectionList}</H5>;
     }
@@ -104,10 +114,11 @@ const FindFood = ({
                         onChangeText={setSearch}
                     />
                 </View>
-                <View style={{ marginHorizontal: 0, marginVertical: 12 }}>
+                <View style={{ marginHorizontal: 20, marginVertical: 12 }}>
                     <NavSelector
                         selectedValue={selectedPage}
                         onSelect={(value) => setSelectedPage(value)}
+                        isNotRecipe={isNotRecipe}
                     />
                 </View>
                 <View style={{ flex: 1 }}>{renderPage}</View>

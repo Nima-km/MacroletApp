@@ -12,6 +12,10 @@ export const getFood = async (foodID: number) => {
     const res = db.select().from(food).where(eq(food.id, foodID));
     return res;
 };
+export const getFoodBarcode = async (barcode: string) => {
+    const res = db.select().from(food).where(eq(food.barcode, barcode));
+    return res;
+};
 export const insertFoodAndItem = async (
     foodData: Omit<FoodInsert, "recipe_id">,
     foodItemData: FoodItemData,
@@ -88,6 +92,9 @@ export const deleteFood = async (foodID: number) => {
 export const getFoodItem = async (foodItemID: number) => {
     const res = db.select().from(foodItem).where(eq(foodItem.id, foodItemID));
     return res;
+};
+export const insertFood = async (foodObject: FoodInsert) => {
+    return db.insert(food).values(foodObject).returning();
 };
 export const insertFoodItem = async (foodItemObject: FoodItemInsert) => {
     return db.insert(foodItem).values(foodItemObject).returning();

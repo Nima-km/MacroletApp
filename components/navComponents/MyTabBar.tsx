@@ -23,8 +23,8 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const toggleMenu = () => {
         setOpen(!open);
         progress.value = withSpring(open ? 0 : 1, {
-            damping: 1500,
-            stiffness: 1500,
+            damping: 3000,
+            stiffness: 3000,
         });
     };
     const option1Style = useAnimatedStyle(() => ({
@@ -32,6 +32,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
             { translateY: interpolate(progress.value, [0, 1], [0, -10]) },
         ],
         opacity: progress.value,
+        //   shadowColor: "black",
     }));
 
     // Option 2 animation
@@ -40,6 +41,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
             { translateY: interpolate(progress.value, [0, 1], [0, -80]) },
         ],
         opacity: progress.value,
+        //   shadowColor: "white",
     }));
 
     // Option 3 animation
@@ -111,15 +113,36 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                         pointerEvents={open ? "auto" : "none"}
                     >
                         <TouchableOpacity
-                            style={{
-                                width: 50,
-                                height: 50,
-                                borderRadius: 50,
-                                backgroundColor: colors.white,
+                            style={[
+                                open ? styles.boxWithShadow : {},
+                                {
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: 50,
+                                    backgroundColor: colors.white,
+                                },
+                            ]}
+                            onPress={() => {
+                                (router.navigate({
+                                    pathname: "/(tabs)/(logs)/logFood",
+                                    params: { pageId: 2 },
+                                }),
+                                    toggleMenu());
                             }}
-                            onPress={() => navigation.navigate("")}
                         ></TouchableOpacity>
-                        <TouchableOpacity style={styles.optionBtn}>
+                        <TouchableOpacity
+                            style={[
+                                open ? styles.boxWithShadow : {},
+                                styles.optionBtn,
+                            ]}
+                            onPress={() => {
+                                (router.navigate({
+                                    pathname: "/(tabs)/(logs)/logFood",
+                                    params: { pageId: 2 },
+                                }),
+                                    toggleMenu());
+                            }}
+                        >
                             <H4 style={{ color: colors.primary }}>
                                 Scan Barcode
                             </H4>
@@ -130,14 +153,36 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                         pointerEvents={open ? "auto" : "none"}
                     >
                         <TouchableOpacity
-                            style={{
-                                width: 50,
-                                height: 50,
-                                borderRadius: 50,
-                                backgroundColor: colors.white,
+                            style={[
+                                open ? styles.boxWithShadow : {},
+                                {
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: 50,
+                                    backgroundColor: colors.white,
+                                },
+                            ]}
+                            onPress={() => {
+                                (router.navigate({
+                                    pathname: "/(tabs)/(logs)/logFood",
+                                    params: { pageId: 3 },
+                                }),
+                                    toggleMenu());
                             }}
                         ></TouchableOpacity>
-                        <TouchableOpacity style={styles.optionBtn}>
+                        <TouchableOpacity
+                            style={[
+                                open ? styles.boxWithShadow : {},
+                                styles.optionBtn,
+                            ]}
+                            onPress={() => {
+                                (router.navigate({
+                                    pathname: "/(tabs)/(logs)/logFood",
+                                    params: { pageId: 3 },
+                                }),
+                                    toggleMenu());
+                            }}
+                        >
                             <H4 style={{ color: colors.primary }}>Quick Add</H4>
                         </TouchableOpacity>
                     </Animated.View>
@@ -199,7 +244,8 @@ const styles = StyleSheet.create({
         gap: 8,
         height: 50,
         alignItems: "center",
-        backgroundColor: "red",
+        // backgroundColor: "red",
+        elevation: 5,
     },
     optionBtn: {
         width: 141,
@@ -209,5 +255,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         // marginBottom: 10,
+    },
+    boxWithShadow: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
     },
 });

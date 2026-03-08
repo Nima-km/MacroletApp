@@ -28,6 +28,9 @@ const IngredientsEdit = ({
     setServingsYield,
 }: Props) => {
     const recipeObject = useRecipeDraftStore((state) => state);
+    const removeIngredient = useRecipeDraftStore(
+        (state) => state.removeIngredient,
+    );
     const foodData = CalculateMacroSumIngredient(
         recipeObject.data.ingredientItemsData,
     );
@@ -118,6 +121,7 @@ const IngredientsEdit = ({
                         style={{ backgroundColor: "" }}
                         food={item.food}
                         ingredientItem={item.ingredientItem}
+                        onRemove={() => removeIngredient(index)}
                     />
                 )}
                 scrollEnabled={false}

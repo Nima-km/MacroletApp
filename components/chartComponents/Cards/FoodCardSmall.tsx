@@ -15,7 +15,9 @@ const FoodCardSmall = ({ food, foodItem }: FoodFullData) => {
     return (
         <View style={styles.container}>
             <View style={styles.rowContainer}>
-                <H4>{food.name}</H4>
+                <View style={{ width: 240 }}>
+                    <H4 numberOfLines={1}>{food.name}</H4>
+                </View>
                 <H4>
                     {foodItem.servings} serving{foodItem.servings > 1 && "s"}
                 </H4>

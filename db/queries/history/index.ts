@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
-import { and, desc, eq, gte, lt, max, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lt, max, sql } from "drizzle-orm";
 
 // for retreving the history of foods ate from-to date
 
@@ -20,8 +20,10 @@ export const getFoodItemHistory = async (from: Date, to: Date) => {
 };
 
 // for retreving recently logged foods
-
-export const getFoodItemRecent = async () => {
+interface RecentProps {
+    showRecipe?: boolean;
+}
+export const getFoodItemRecent = async ({ showRecipe = true }: RecentProps) => {
     const latest = db
         .select({
             food_id: foodItem.food_id,
@@ -33,21 +35,38 @@ export const getFoodItemRecent = async () => {
         .as("latests");
 
     console.log("getFoodItemRecent, latest");
-    const result = db
-        .select({
-            food: food,
-            foodItem: foodItem,
-        })
-        .from(food)
-        .innerJoin(latest, eq(latest.food_id, food.id))
-        .innerJoin(
-            foodItem,
-            and(
-                eq(foodItem.id, latest.foodItem_id),
-                eq(foodItem.timestamp, latest.max_timestamp),
-            ),
-        )
-        .orderBy(desc(foodItem.timestamp));
+    const result = showRecipe
+        ? db
+              .select({
+                  food: food,
+                  foodItem: foodItem,
+              })
+              .from(food)
+              .innerJoin(latest, eq(latest.food_id, food.id))
+              .innerJoin(
+                  foodItem,
+                  and(
+                      eq(foodItem.id, latest.foodItem_id),
+                      eq(foodItem.timestamp, latest.max_timestamp),
+                  ),
+              )
+              .orderBy(desc(foodItem.timestamp))
+        : db
+              .select({
+                  food: food,
+                  foodItem: foodItem,
+              })
+              .from(food)
+              .innerJoin(latest, eq(latest.food_id, food.id))
+              .innerJoin(
+                  foodItem,
+                  and(
+                      eq(foodItem.id, latest.foodItem_id),
+                      eq(foodItem.timestamp, latest.max_timestamp),
+                  ),
+              )
+              .where(isNull(food.recipe_id))
+              .orderBy(desc(foodItem.timestamp));
     console.log("getFoodItemRecent, result");
     return result;
 };
