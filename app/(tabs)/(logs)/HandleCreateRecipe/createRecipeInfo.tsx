@@ -11,7 +11,10 @@ import {
     FormInputLong,
 } from "@/components/UIComponents/TextInputs/FormInput";
 import { H4 } from "@/components/UIComponents/Typography";
-import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
+import {
+    useRecipeDraftStore,
+    validateRecipeDraft,
+} from "@/store/recipeStore/useRecipeStore";
 import { RecipeTags } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -40,6 +43,7 @@ const createRecipeInfo = () => {
     );
     const [filteredData, setFilteredData] = useState<DropdownOption[]>(options);
     const [tagText, setTagText] = useState("");
+    const [errorName, setErrorName] = useState(false);
     useEffect(() => {
         setFilteredData(
             options
@@ -52,6 +56,20 @@ const createRecipeInfo = () => {
         );
         //console.log("recent history", errorSectionList, loadingSectionList);
     }, [tagText]);
+    function onContinue() {
+        const validated = validateRecipeDraft(draft);
+        const nameErrors = validated.errors.filter((error) =>
+            error.includes("Food name"),
+        );
+        const isNameValid = nameErrors.length === 0;
+        console.log("isNameValid", isNameValid);
+        if (isNameValid) {
+            setErrorName(false);
+            router.push("/(tabs)/(logs)/HandleCreateRecipe/createRecipe");
+        } else {
+            setErrorName(true);
+        }
+    }
     useEffect(() => {
         updateRecipe("tags", tagList);
     }, [tagList]);
@@ -63,7 +81,11 @@ const createRecipeInfo = () => {
                     <FormInput
                         value={draft.foodData.name ?? ""}
                         placeholder="Enter recipe name"
-                        error={undefined}
+                        error={
+                            errorName && (draft.foodData.name ?? "") == ""
+                                ? "This field cannot be empty"
+                                : null
+                        }
                         onChangeText={(text) => updateFood("name", text)}
                     />
                     <View style={{ gap: 12 }}>
@@ -109,11 +131,7 @@ const createRecipeInfo = () => {
                 </View>
                 <PrimaryButton
                     style={{ marginHorizontal: 20 }}
-                    onPress={() =>
-                        router.push(
-                            "/(tabs)/(logs)/HandleCreateRecipe/createRecipe",
-                        )
-                    }
+                    onPress={onContinue}
                 >
                     Continue
                 </PrimaryButton>

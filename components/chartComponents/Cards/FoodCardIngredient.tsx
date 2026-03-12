@@ -33,9 +33,11 @@ const FoodCardIngredient = ({
         <View style={[styles.container, style]}>
             <View style={{ flex: 1 }}>
                 <View style={styles.rowContainer}>
-                    <H4>
-                        {name}, {ingredientItem.prep_notes}
-                    </H4>
+                    <View style={{ width: 240 }}>
+                        <H4 numberOfLines={1}>
+                            {name}, {ingredientItem.prep_notes}
+                        </H4>
+                    </View>
                     <H4>
                         {ingredientItem.servings} {ingredientItem.serving_type}
                         {ingredientItem.servings > 1 && "s"}

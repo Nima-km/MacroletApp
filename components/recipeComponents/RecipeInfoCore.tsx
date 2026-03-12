@@ -136,7 +136,7 @@ const RecipeInfoCore = ({
                     gap: 20,
                 }}
             >
-                <View style={{ gap: 12, flex: 1 }}>
+                <View style={{ gap: 12, flex: 1, paddingHorizontal: 20 }}>
                     <H2>{foodData.name}</H2>
                     <View
                         style={{

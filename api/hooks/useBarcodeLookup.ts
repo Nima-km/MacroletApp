@@ -13,38 +13,40 @@ export const useBarcodeLookup = (barcode: string) => {
         queryFn: async ({ queryKey }) => {
             const [, barcodeValue] = queryKey;
 
+            // Validate barcode
+            if (!barcodeValue) {
+                throw new Error("No Barcode Provided");
+            }
+
             // Try local SQLite first
             try {
-                if (barcodeValue != "") {
-                    const localResult = await getFoodBarcode(barcodeValue);
-                    console.log("localResult", localResult[0]);
-                    if (localResult[0]) {
-                        console.log("localResult", localResult[0]);
-                        return localResult;
-                    }
-                } else throw new Error("No Barcode Provided");
+                const localResult = await getFoodBarcode(barcodeValue);
+                if (localResult?.[0]) {
+                    console.log("Found locally:", localResult[0]);
+                    return localResult;
+                }
             } catch (error) {
                 console.warn("Local SQLite lookup failed:", error);
                 // Continue to API fallback
             }
+
             // Fallback to API
-            const apiResult = await FetchBarcode(barcodeValue);
             try {
-                console.log("apiResult", apiResult);
+                const apiResult = await FetchBarcode(barcodeValue);
                 if (apiResult) {
-                    const localResult = insertFood(apiResult);
-                    return localResult;
+                    console.log("Found via API:", apiResult);
+                    const savedResult = await insertFood(apiResult);
+                    return savedResult; // ← This was missing!
                 } else {
-                    throw new Error("Insert Failed");
+                    throw new Error("No results from API");
                 }
-            } catch (saveError) {
-                console.warn("Cache save failed:", saveError);
-                // Continue anyway - user still gets the result
+            } catch (apiError) {
+                console.warn("API lookup and cache save failed:", apiError);
+                throw apiError; // ← Throw to trigger error state instead of undefined
             }
         },
-
-        enabled: !!barcode, // Only run query if barcode exists
-        retry: 1, // Adjust retry logic as needed
-        staleTime: 1000 * 10 * 5, // 5 minutes
+        enabled: !!barcode,
+        retry: 1,
+        staleTime: 1000 * 60 * 5, // 5 minutes (also fixed the math here)
     });
 };

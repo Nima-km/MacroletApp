@@ -8,12 +8,16 @@ import ExpandableFlatlist from "@/components/UIComponents/CustomFlatlist/Expanda
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { H2, H5 } from "@/components/UIComponents/Typography";
 import { useImageManager } from "@/helper/useImageManager";
-import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
+import {
+    useRecipeDraftStore,
+    validateRecipeDraft,
+} from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import Toast from "react-native-toast-message";
 const createRecipe = () => {
     const router = useRouter();
     const [selectedPage, setSelectedPage] = useState(0);
@@ -24,13 +28,26 @@ const createRecipe = () => {
         draft.data.recipeData.bannerImage ?? "",
     );
     const [servingsYield, setServingsYield] = useState(
-        draft.data.recipeData.servings_yield?.toString() ?? "1",
+        draft.data.recipeData.servings_yield?.toString() ?? "",
     );
     const onAddImage = async () => {
         const image = await addImageFromGallery();
         if (!image) return;
         setBannerImageUri(image.uri);
     };
+    function onPreview() {
+        const validated = validateRecipeDraft(draft.data);
+        if (validated.isValid)
+            router.push("/(tabs)/(logs)/HandleCreateRecipe/PreviewRecipe");
+        else {
+            console.log(validated.errors);
+            Toast.show({
+                type: "error",
+                text1: validated.errors[0],
+                text2: "Item removed successfully",
+            });
+        }
+    }
     useEffect(() => {
         draft.updateRecipe("bannerImage", bannerImageUri);
     }, [bannerImageUri]);
@@ -137,15 +154,7 @@ const createRecipe = () => {
                         </View>
                     </View>
                 </View>
-                <PrimaryButton
-                    onPress={() =>
-                        router.push(
-                            "/(tabs)/(logs)/HandleCreateRecipe/PreviewRecipe",
-                        )
-                    }
-                >
-                    Preview
-                </PrimaryButton>
+                <PrimaryButton onPress={onPreview}>Preview</PrimaryButton>
             </View>
         </KeyboardAware>
     );

@@ -66,7 +66,7 @@ const PreviewRecipe = () => {
                     paddingTop: 12,
                     gap: 20,
                     paddingBottom: 20,
-                    paddingHorizontal: 20,
+                    //paddingHorizontal: 20,
                 }}
             >
                 <RecipeInfoCore

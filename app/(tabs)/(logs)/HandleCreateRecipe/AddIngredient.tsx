@@ -2,7 +2,7 @@ import FindFood from "@/components/findFoodTabs/FindFood";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import QuickAddIngredientModal from "@/components/UIComponents/Modals/QuickAddIngredientModal";
 import { useGetFood } from "@/db/hooks/food/useFood";
-import { DefaultServings } from "@/tests/testData";
+import { servingSizeProvider } from "@/helper/ServingSizeProvider";
 import { IngredientFullData } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -59,7 +59,10 @@ const AddIngredient = () => {
                 >
                     <QuickAddIngredientModal
                         foodData={foodData[0]}
-                        options={[...DefaultServings, ...(servingsData ?? [])]}
+                        options={servingSizeProvider({
+                            servingData: servingsData,
+                            serving_100g: foodData[0].serving_100g,
+                        })}
                         setIngredient={(item) =>
                             setFoodList((prev) => [...prev, item])
                         }

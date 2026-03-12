@@ -39,8 +39,8 @@ const QuickAddIngredientModal = ({
         (foodData.carbs + foodData.fat + foodData.protein) *
         Number(servingAmount) *
         selectedServing.serving_mult;
-    const [display_name, setDisplay_name] = useState("");
-    const [prep_notes, setPrep_notes] = useState("");
+    const [display_name, setDisplay_name] = useState<string>();
+    const [prep_notes, setPrep_notes] = useState<string>();
     function onSave() {
         setIngredient({
             food: foodData,
@@ -88,13 +88,13 @@ const QuickAddIngredientModal = ({
                 <View style={styles.mainContent}>
                     <View style={{ marginTop: 20, gap: 20 }}>
                         <ExpandableTextInput
-                            value={display_name}
+                            value={display_name ?? ""}
                             onChangeText={setDisplay_name}
                             collapsedPlaceholder="Ingredient Display Name"
                             placeholder="Enter display name for public recipes"
                         />
                         <ExpandableTextInput
-                            value={prep_notes}
+                            value={prep_notes ?? ""}
                             onChangeText={setPrep_notes}
                             collapsedPlaceholder="Prep Notes"
                             placeholder="e.g chopped, cooked, screwed"

@@ -16,8 +16,9 @@ export function servingSizeProvider({ servingData, serving_100g }: Props) {
             : [];
 
     return [
-        ...weight,
         { serving_mult: 1, serving_type: "Serving" },
+        ...weight,
+
         ...servingData,
     ];
 }

@@ -9,7 +9,9 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 //import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import Toast from "react-native-toast-message";
 //import { openDatabaseSync } from "expo-sqlite";
+import { toastConfig } from "@/components/UIComponents/Toasts/toastConfig";
 import React, { Suspense, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -58,6 +60,7 @@ export default function RootLayout() {
                                     },
                                 }}
                             />
+                            <Toast config={toastConfig} />
                         </ClerkProvider>
                     </GestureHandlerRootView>
                 </FontProvider>

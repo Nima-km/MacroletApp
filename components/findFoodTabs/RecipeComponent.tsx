@@ -120,13 +120,6 @@ const RecipeComponent = () => {
                             )}
                             scrollEnabled={false}
                         />
-                        <View>
-                            <SecondaryButton
-                                onPress={() => setShowCreateRecipe(true)}
-                            >
-                                create recipebook
-                            </SecondaryButton>
-                        </View>
                     </View>
                 </View>
                 <Modal

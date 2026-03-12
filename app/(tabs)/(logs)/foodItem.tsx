@@ -233,7 +233,7 @@ const foodItem = () => {
                 onEdit={setEdit}
                 onBack={() => console.log("back pressed")}
             />
-            <View style={{ padding: 20 }}>
+            <View style={{}}>
                 <FoodView
                     foodData={foodData[0]}
                     foodItemData={foodItemData[0]}

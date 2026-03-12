@@ -39,7 +39,6 @@ const FindFood = ({
     const router = useRouter();
 
     const { pageId } = useLocalSearchParams();
-    console.log("pageID", pageId);
     //router.setParams({ pageId: 0 });
 
     const isNotRecipe =
@@ -97,7 +96,6 @@ const FindFood = ({
                 )
                 .slice(0, 4),
         );
-        console.log("recent history", errorSectionList, loadingSectionList);
     }, [search, history]);
     useEffect(() => {
         if (pageId) setSelectedPage(Number(pageId));

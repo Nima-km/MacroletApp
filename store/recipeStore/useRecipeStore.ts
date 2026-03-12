@@ -231,26 +231,95 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
     reset: () => set({ data: emptyDraft }),
 }));
 
+interface ValidationResult {
+    isValid: boolean;
+    errors: string[];
+}
+
+export function validateRecipeDraft(draft: RecipeDraft): ValidationResult {
+    const errors: string[] = [];
+
+    // Check food name
+    if (typeof draft.foodData.name !== "string") {
+        errors.push("Food name cannot be empty");
+    } else if (draft.foodData.name.trim() === "") {
+        errors.push("Food name cannot be empty");
+    }
+
+    // Check servings yield exists and is valid
+    if (typeof draft.recipeData.servings_yield !== "number") {
+        errors.push("Servings yield must not be empty");
+    } else if (draft.recipeData.servings_yield <= 0) {
+        errors.push("Servings yield must be greater than 0");
+    }
+
+    // Check ingredient items exist
+    if (!Array.isArray(draft.ingredientItemsData)) {
+        errors.push("Ingredient items must be valid");
+    } else if (draft.ingredientItemsData.length === 0) {
+        errors.push("Recipe must have at least one ingredient");
+    } else {
+        // Validate each ingredient item
+        draft.ingredientItemsData.forEach((ingredient, index) => {
+            const ingredientPrefix = `Ingredient ${index + 1}`;
+
+            // Validate food data
+            if (typeof ingredient.food.id !== "number") {
+                errors.push(`${ingredientPrefix}: Food ID must be a number`);
+            }
+            if (typeof ingredient.food.protein !== "number") {
+                errors.push(`${ingredientPrefix}: Protein must be a number`);
+            }
+            if (typeof ingredient.food.fat !== "number") {
+                errors.push(`${ingredientPrefix}: Fat must be a number`);
+            }
+            if (typeof ingredient.food.carbs !== "number") {
+                errors.push(`${ingredientPrefix}: Carbs must be a number`);
+            }
+            if (typeof ingredient.food.fiber !== "number") {
+                errors.push(`${ingredientPrefix}: Fiber must be a number`);
+            }
+
+            // Validate ingredient item data
+            if (typeof ingredient.ingredientItem.servings !== "number") {
+                errors.push(`${ingredientPrefix}: Servings must be a number`);
+            } else if (ingredient.ingredientItem.servings <= 0) {
+                errors.push(
+                    `${ingredientPrefix}: Servings must be greater than 0`,
+                );
+            }
+            if (typeof ingredient.ingredientItem.serving_mult !== "number") {
+                errors.push(
+                    `${ingredientPrefix}: Serving multiplier must be a number`,
+                );
+            } else if (ingredient.ingredientItem.serving_mult <= 0) {
+                errors.push(
+                    `${ingredientPrefix}: Serving multiplier must be greater than 0`,
+                );
+            }
+            if (typeof ingredient.ingredientItem.serving_type !== "string") {
+                errors.push(
+                    `${ingredientPrefix}: Serving type must be a string`,
+                );
+            } else if (ingredient.ingredientItem.serving_type.trim() === "") {
+                errors.push(
+                    `${ingredientPrefix}: Serving type cannot be empty`,
+                );
+            }
+        });
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
+}
+
+// Type guard function (keeps your original functionality)
 export function isValidRecipeDraft(draft: RecipeDraft): draft is {
     recipeData: RecipeInsert;
     foodData: Omit<FoodInsert, "recipe_id">;
     ingredientItemsData: IngredientFullData[];
 } {
-    return (
-        typeof draft.foodData.name === "string" &&
-        typeof draft.recipeData.servings_yield === "number" &&
-        draft.ingredientItemsData.length > 0 &&
-        draft.recipeData.servings_yield > 0 &&
-        draft.ingredientItemsData.every(
-            (i) =>
-                typeof i.food.id === "number" &&
-                typeof i.food.protein === "number" &&
-                typeof i.food.fat === "number" &&
-                typeof i.food.carbs === "number" &&
-                typeof i.food.fiber === "number" &&
-                typeof i.ingredientItem.servings === "number" &&
-                typeof i.ingredientItem.serving_mult === "number" &&
-                typeof i.ingredientItem.serving_type === "string",
-        )
-    );
+    return validateRecipeDraft(draft).isValid;
 }

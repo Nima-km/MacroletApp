@@ -1,7 +1,7 @@
 import { useBarcodeLookup } from "@/api/hooks/useBarcodeLookup";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import React, { useEffect, useState } from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, Pressable, StyleSheet, View } from "react-native";
 import { H4 } from "../UIComponents/Typography";
 interface BarcodeComponentProps {
     onScan: (id: number) => void;
@@ -44,16 +44,21 @@ const BarcodeComponent = ({ onScan }: BarcodeComponentProps) => {
     return (
         <View style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
-                <CameraView
+                <Pressable
                     style={{ flex: 1 }}
-                    facing={"back"}
-                    barcodeScannerSettings={{
-                        barcodeTypes: ["upc_a", "ean13", "upc_e"],
-                    }}
-                    onBarcodeScanned={({ data }) => {
-                        !isScanned ? handleScanned(data) : null;
-                    }}
-                ></CameraView>
+                    onPress={() => setIsScanned(false)}
+                >
+                    <CameraView
+                        style={{ flex: 1 }}
+                        facing={"back"}
+                        barcodeScannerSettings={{
+                            barcodeTypes: ["upc_a", "ean13", "upc_e"],
+                        }}
+                        onBarcodeScanned={({ data }) => {
+                            !isScanned ? handleScanned(data) : null;
+                        }}
+                    ></CameraView>
+                </Pressable>
             </View>
         </View>
     );

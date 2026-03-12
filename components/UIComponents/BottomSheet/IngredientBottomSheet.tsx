@@ -53,7 +53,7 @@ const IngredientBottomSheet = forwardRef<BottomSheet, IngredientBottomSheet>(
                     style={{
                         flex: 1,
                         justifyContent: "space-between",
-                        paddingHorizontal: 20,
+                        // paddingHorizontal: 20,
                     }}
                 >
                     <FlatList
