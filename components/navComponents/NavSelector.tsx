@@ -70,7 +70,7 @@ const NavSelector = ({
         },
         {
             label: "Quick Add",
-            value: 4,
+            value: 3,
             icon: (style) => (
                 <Quick
                     width={width}

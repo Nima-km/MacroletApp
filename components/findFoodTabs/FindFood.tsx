@@ -6,7 +6,7 @@ import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
 import { FoodFullData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import NavSelector from "../navComponents/NavSelector";
@@ -36,7 +36,12 @@ const FindFood = ({
     ingredientList,
     isNewRecipe = false,
 }: FindFoodProps) => {
+    const router = useRouter();
+
     const { pageId } = useLocalSearchParams();
+    console.log("pageID", pageId);
+    //router.setParams({ pageId: 0 });
+
     const isNotRecipe =
         ingredientList == undefined && setIngredientList == undefined;
     const [selectedPage, setSelectedPage] = useState(
@@ -49,10 +54,6 @@ const FindFood = ({
         isLoading: loadingSectionList,
         error: errorSectionList,
     } = useGetFoodItemRecent(isNotRecipe);
-    console.log(
-        "ingredientList != undefined && setIngredientList != undefined",
-        isNotRecipe,
-    );
     const [filteredData, setFilteredData] = useState(history);
 
     function onAddFood(item: FoodFullData) {
@@ -101,6 +102,10 @@ const FindFood = ({
     useEffect(() => {
         if (pageId) setSelectedPage(Number(pageId));
     }, [pageId]);
+    useEffect(() => {
+        if (selectedPage != Number(pageId))
+            router.setParams({ pageId: selectedPage });
+    }, [selectedPage]);
     if (loadingSectionList) {
         return <H5>{loadingSectionList}</H5>;
     }
