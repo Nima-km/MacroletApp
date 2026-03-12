@@ -117,7 +117,7 @@ const FindFood = ({
                         onChangeText={setSearch}
                     />
                 </View>
-                <View style={{ marginHorizontal: 20, marginVertical: 12 }}>
+                <View style={{ marginVertical: 12 }}>
                     <NavSelector
                         selectedValue={selectedPage}
                         onSelect={(value) => setSelectedPage(value)}

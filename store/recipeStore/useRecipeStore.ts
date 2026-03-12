@@ -34,7 +34,7 @@ export type RecipeDraftType = {
     reset: () => void;
 };
 
-const emptyDraft: RecipeDraft = {
+export const emptyDraft: RecipeDraft = {
     recipeData: {},
     foodData: {},
     ingredientItemsData: [],

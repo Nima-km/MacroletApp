@@ -68,18 +68,22 @@ const NavSelector = ({
                 />
             ),
         },
-        {
-            label: "Quick Add",
-            value: 3,
-            icon: (style) => (
-                <Quick
-                    width={width}
-                    height={height}
-                    style={style}
-                    pointerEvents="none"
-                />
-            ),
-        },
+        ...(isNotRecipe
+            ? [
+                  {
+                      label: "Quick Add",
+                      value: 3,
+                      icon: (style?: object) => (
+                          <Quick
+                              width={width}
+                              height={height}
+                              style={style}
+                              pointerEvents="none"
+                          />
+                      ),
+                  },
+              ]
+            : []),
     ];
     //const [selectedValue, setSelectedValue] = useState<number | null>(options[0].value);
     console.log("");
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
     container: {
         //gap: 50,
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "space-around",
         borderBottomWidth: 1, // ultra thin (1px on most screens)
         borderBottomColor: colors.light_gray,
     },
