@@ -78,18 +78,20 @@ const FoodView = ({
                     onLogRecipe={() => setEdit(false)}
                 />
             ) : (
-                <FoodInfoCore
-                    foodData={food}
-                    foodItemData={foodItem}
-                    servingsData={servingData}
-                    setNewServing={setNewServing}
-                    primaryText={primaryText}
-                    primaryButton={primaryButton}
-                    secondaryText={secondaryText}
-                    secondaryButton={secondaryButton}
-                    edit={recipeData ? false : edit}
-                    setEdit={setEdit}
-                />
+                <View style={{ padding: 20 }}>
+                    <FoodInfoCore
+                        foodData={food}
+                        foodItemData={foodItem}
+                        servingsData={servingData}
+                        setNewServing={setNewServing}
+                        primaryText={primaryText}
+                        primaryButton={primaryButton}
+                        secondaryText={secondaryText}
+                        secondaryButton={secondaryButton}
+                        edit={recipeData ? false : edit}
+                        setEdit={setEdit}
+                    />
+                </View>
             )}
         </View>
     );

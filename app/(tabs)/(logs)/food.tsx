@@ -129,7 +129,7 @@ const food = () => {
                 onEdit={setEdit}
                 onBack={() => router.back()}
             />
-            <View style={{ padding: 20 }}>
+            <View style={{}}>
                 <FoodView
                     foodData={foodData[0]}
                     foodItemData={foodItem}

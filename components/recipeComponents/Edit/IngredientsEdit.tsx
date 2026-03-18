@@ -45,6 +45,7 @@ const IngredientsEdit = ({
             recipeObject.updateRecipe("servings_yield", Number(text));
     }
     const calories = calculateCalories(foodData);
+    console.log("ingredientEdit foodData", foodData);
     const total_macro = calculate_final(macroSum(foodData));
     return (
         <View style={{ flex: 1, gap: 24 }}>

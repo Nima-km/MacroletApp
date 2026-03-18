@@ -43,7 +43,7 @@ const QuickAddComponent = () => {
 
     return (
         <KeyboardAware>
-            <View style={{ marginHorizontal: 20 }}>
+            <View style={{}}>
                 <FoodView
                     foodData={FoodDefault}
                     foodItemData={foodItem}

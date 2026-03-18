@@ -30,14 +30,14 @@ const OverviewEdit = ({ servingsYield, setServingsYield }: Props) => {
 
         if (mult == 0 || mult == undefined) return inp;
         else {
-            console.log(
+            /*  console.log(
                 "overviewEdit",
                 inp / mult,
                 inp,
                 mult,
-                foodData.fat,
+                foodData.fat / mult,
                 recipeObject.data.foodData.fat,
-            );
+            );*/
             return inp;
         }
     }
@@ -48,6 +48,7 @@ const OverviewEdit = ({ servingsYield, setServingsYield }: Props) => {
             recipeObject.updateRecipe("servings_yield", Number(text));
     }
     const calories = calculateCalories(recipeObject.data.foodData);
+    console.log("overviewEdit foodData", recipeObject.data.foodData);
     const total_macro = macroSum(recipeObject.data.foodData);
     return (
         <View style={{ flex: 1, gap: 24 }}>

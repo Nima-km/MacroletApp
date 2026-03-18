@@ -1,8 +1,10 @@
 import Home from "@/assets/svg/Home.svg";
+import Barcode from "@/assets/svg/barcode.svg";
 import Discover from "@/assets/svg/compass.svg";
 import Logs from "@/assets/svg/logs.svg";
 import Plus from "@/assets/svg/plus-empty.svg";
 import Profile from "@/assets/svg/profile.svg";
+import Quick from "@/assets/svg/quick.svg";
 import { colors } from "@/theme";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
@@ -120,6 +122,8 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                                     height: 50,
                                     borderRadius: 50,
                                     backgroundColor: colors.white,
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                 },
                             ]}
                             onPress={() => {
@@ -129,7 +133,14 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                                 }),
                                     toggleMenu());
                             }}
-                        ></TouchableOpacity>
+                        >
+                            <Barcode
+                                width={27}
+                                height={27}
+                                style={{ color: colors.primary }}
+                                pointerEvents="none"
+                            />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 open ? styles.boxWithShadow : {},
@@ -160,6 +171,8 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                                     height: 50,
                                     borderRadius: 50,
                                     backgroundColor: colors.white,
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                 },
                             ]}
                             onPress={() => {
@@ -169,7 +182,14 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                                 }),
                                     toggleMenu());
                             }}
-                        ></TouchableOpacity>
+                        >
+                            <Quick
+                                width={27}
+                                height={27}
+                                style={{ color: colors.primary }}
+                                pointerEvents="none"
+                            />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={[
                                 open ? styles.boxWithShadow : {},

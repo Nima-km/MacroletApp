@@ -106,7 +106,10 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
                     ingredientItemsData: items,
                     foodData: {
                         ...state.data.foodData,
-                        ...CalculateMacroSumIngredient(items),
+                        ...CalculateMacroSumIngredient(
+                            items,
+                            state.data.recipeData.servings_yield,
+                        ),
                     },
                 },
             };
@@ -125,6 +128,7 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
                         state.data.ingredientItemsData.filter(
                             (_, i) => i !== index,
                         ),
+                        state.data.recipeData.servings_yield,
                     ),
                 },
             },
@@ -204,7 +208,10 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
                     ingredientItemsData: items,
                     foodData: {
                         ...state.data.foodData,
-                        ...CalculateMacroSumIngredient(items),
+                        ...CalculateMacroSumIngredient(
+                            items,
+                            state.data.recipeData.servings_yield,
+                        ),
                     },
                 },
             };
@@ -223,6 +230,7 @@ export const useRecipeStateStore = create<RecipeDraftType>((set) => ({
                         state.data.ingredientItemsData.filter(
                             (_, i) => i !== index,
                         ),
+                        state.data.recipeData.servings_yield,
                     ),
                 },
             },
