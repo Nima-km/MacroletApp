@@ -21,6 +21,11 @@ const profile = () => {
                 >
                     Goals
                 </SecondaryButton>
+                <SecondaryButton
+                    onPress={() => router.push("/(tabs)/(profile)/myRecipes")}
+                >
+                    My Recipes
+                </SecondaryButton>
             </View>
         </KeyboardAware>
     );

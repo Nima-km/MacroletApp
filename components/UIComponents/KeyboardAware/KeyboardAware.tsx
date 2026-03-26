@@ -1,13 +1,10 @@
 import React, { ReactNode } from "react";
 import {
-    Keyboard,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
     StyleSheet,
-    TouchableWithoutFeedback,
 } from "react-native";
-
 interface KeyboardScreenProps {
     children: ReactNode;
     scrollEnabled?: boolean;
@@ -20,25 +17,26 @@ const KeyboardAware = ({
     contentPadding = 16,
 }: KeyboardScreenProps) => {
     return (
+        /*  <Pressable
+            onPress={Keyboard.dismiss}
+            accessible={false}
+            style={{ flex: 1 }}
+        >*/
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
             keyboardVerticalOffset={0} // adjust if header is present
         >
-            <TouchableWithoutFeedback
-                onPress={Keyboard.dismiss}
-                accessible={false}
+            <ScrollView
+                nestedScrollEnabled={true}
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+                scrollEnabled={scrollEnabled}
             >
-                <ScrollView
-                    nestedScrollEnabled={true}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps="handled"
-                    scrollEnabled={scrollEnabled}
-                >
-                    {children}
-                </ScrollView>
-            </TouchableWithoutFeedback>
+                {children}
+            </ScrollView>
         </KeyboardAvoidingView>
+        //   </Pressable>
     );
 };
 

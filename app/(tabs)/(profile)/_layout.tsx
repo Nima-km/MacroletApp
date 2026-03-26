@@ -13,6 +13,7 @@ export default function Layout() {
         >
             <Stack.Screen name="profile" options={{ title: "profile" }} />
             <Stack.Screen name="goals" options={{ title: "goals" }} />
+            <Stack.Screen name="myRecipes" options={{ title: "myRecipes" }} />
         </Stack>
     );
 }
