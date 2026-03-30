@@ -17,11 +17,6 @@ const KeyboardAware = ({
     contentPadding = 16,
 }: KeyboardScreenProps) => {
     return (
-        /*  <Pressable
-            onPress={Keyboard.dismiss}
-            accessible={false}
-            style={{ flex: 1 }}
-        >*/
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -29,14 +24,14 @@ const KeyboardAware = ({
         >
             <ScrollView
                 nestedScrollEnabled={true}
-                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardDismissMode="none"
                 keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ flexGrow: 1 }}
                 scrollEnabled={scrollEnabled}
             >
                 {children}
             </ScrollView>
         </KeyboardAvoidingView>
-        //   </Pressable>
     );
 };
 

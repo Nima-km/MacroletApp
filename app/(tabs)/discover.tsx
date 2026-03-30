@@ -51,7 +51,7 @@ const discover = () => {
     return (
         <View style={{ flex: 1 }}>
             <KeyboardAware>
-                <HeaderSimple title="Discover" />
+                <HeaderSimple title="Discover" back={false} />
 
                 <View style={{ flex: 1, padding: 20 }}>
                     <View

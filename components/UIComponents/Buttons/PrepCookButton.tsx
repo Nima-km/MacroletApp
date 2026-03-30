@@ -83,10 +83,15 @@ const PrepCookButton = ({
                 <H4>Prep</H4>
                 <H5>
                     {getHour(prepTime) > 0 && getHour(prepTime) + " hr "}
-                    {getMinute(prepTime) > 0 && getMinute(prepTime) + " mins"}
-                    {getHour(prepTime) == 0 && getMinute(prepTime) == 0 && (
-                        <H5 style={{ color: colors.inactive }}>Enter Time</H5>
-                    )}
+                    {(getMinute(prepTime) > 0 || disable) &&
+                        getMinute(prepTime) + " mins"}
+                    {getHour(prepTime) == 0 &&
+                        getMinute(prepTime) == 0 &&
+                        !disable && (
+                            <H5 style={{ color: colors.inactive }}>
+                                Enter Time
+                            </H5>
+                        )}
                 </H5>
             </Pressable>
             <View style={styles.line} />
@@ -98,10 +103,15 @@ const PrepCookButton = ({
                 <H4>Cook</H4>
                 <H5>
                     {getHour(cookTime) > 0 && getHour(cookTime) + " hr "}
-                    {getMinute(cookTime) > 0 && getMinute(cookTime) + " mins"}
-                    {getHour(cookTime) == 0 && getMinute(cookTime) == 0 && (
-                        <H5 style={{ color: colors.inactive }}>Enter Time</H5>
-                    )}
+                    {(getMinute(cookTime) > 0 || disable) &&
+                        getMinute(cookTime) + " mins"}
+                    {getHour(cookTime) == 0 &&
+                        getMinute(cookTime) == 0 &&
+                        !disable && (
+                            <H5 style={{ color: colors.inactive }}>
+                                Enter Time
+                            </H5>
+                        )}
                 </H5>
             </Pressable>
             <View style={styles.line} />
@@ -140,7 +150,10 @@ const PrepCookButton = ({
                     setPrepModalVisible(false);
                 }}
             >
-                <ModalCore title="Prep Time">
+                <ModalCore
+                    title="Prep Time"
+                    onClose={() => setPrepModalVisible(false)}
+                >
                     <PrepCookSetter
                         hour={newPrepHour}
                         mins={newPrepMinute}
@@ -159,7 +172,10 @@ const PrepCookButton = ({
                     setCookModalVisible(false);
                 }}
             >
-                <ModalCore title="Cook Time">
+                <ModalCore
+                    title="Cook Time"
+                    onClose={() => setCookModalVisible(false)}
+                >
                     <PrepCookSetter
                         hour={newCookHour}
                         mins={newCookMinute}

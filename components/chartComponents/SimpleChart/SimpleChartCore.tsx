@@ -104,6 +104,10 @@ const SimpleChartCore = ({
             subscription.remove();
         };
     }, []);
+    useEffect(() => {
+        animatedBar.value = progress - 0.01;
+        animateChart();
+    }, []);
 
     return (
         <View style={{ alignSelf: "flex-start", alignItems: "center" }}>

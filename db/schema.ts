@@ -35,7 +35,7 @@ export const recipe = sqliteTable("recipe", {
     servings_yield: integer("servings_yield").default(0).notNull(),
     recipe_slug: text("recipe_slug", { length: 50 }),
     description: text("description", { length: 250 }),
-    note: text("description", { length: 2000 }),
+    note: text("note", { length: 2000 }),
     directions: text("directions", { mode: "json" }).$type<DirectionStep[]>(),
     bannerImage: text("bannerImage", { mode: "json" }).$type<string>(),
     tags: text("tags", { mode: "json" }).$type<RecipeTags[]>(),

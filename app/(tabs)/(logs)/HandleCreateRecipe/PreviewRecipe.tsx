@@ -11,7 +11,7 @@ import { CalculateMacroSumIngredient } from "@/helper/recipeMacroSum";
 import {
     isValidRecipeDraft,
     useRecipeDraftStore,
-    useRecipeStateStore
+    useRecipeStateStore,
 } from "@/store/recipeStore/useRecipeStore";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -41,6 +41,7 @@ const PreviewRecipe = () => {
                 {
                     onSuccess: (item) => {
                         resetDraft();
+                        router.dismissAll();
                         router.navigate({
                             pathname: "/(tabs)/(logs)/food",
                             params: { food_id: item.food.id },
