@@ -3,6 +3,7 @@ import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import QuickAddIngredientModal from "@/components/UIComponents/Modals/QuickAddIngredientModal";
 import { useGetFood } from "@/db/hooks/food/useFood";
 import { servingSizeProvider } from "@/helper/ServingSizeProvider";
+import { FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,14 +15,22 @@ const AddIngredient = () => {
     const [servingsData, setServingsData] = useState([]);
     const [foodList, setFoodList] = useState<IngredientFullData[]>([]);
     const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
+    const [ingredientIndex, setIngredientIndex] = useState<number>();
+    const [ingredientItemData, setIngredientItemData] =
+        useState<FoodItemData>();
     const {
         data: foodData,
         isLoading: foodDataLoading,
         error: errorfoodData,
     } = useGetFood(selectedFoodID ?? undefined, !!selectedFoodID);
-    function onFoodCardID(food_id: number) {
+    function onFoodCardID(
+        food_id: number,
+        index?: number,
+        foodItemData?: FoodItemData,
+    ) {
         console.log("onFoodCardID id is", food_id, foodData);
-
+        setIngredientIndex(index);
+        setIngredientItemData(foodItemData);
         setSelectedFoodID(food_id);
         setIngredientModalVisible(true);
     }
@@ -59,12 +68,23 @@ const AddIngredient = () => {
                 >
                     <QuickAddIngredientModal
                         foodData={foodData[0]}
+                        foodItemData={ingredientItemData}
                         options={servingSizeProvider({
                             servingData: servingsData,
                             serving_100g: foodData[0].serving_100g,
                         })}
                         setIngredient={(item) =>
                             setFoodList((prev) => [...prev, item])
+                        }
+                        cleanUp={() =>
+                            ingredientIndex !== undefined
+                                ? setFoodList((prev) =>
+                                      prev.filter(
+                                          (_, index) =>
+                                              index !== ingredientIndex,
+                                      ),
+                                  )
+                                : console.log("didnt run")
                         }
                         onClose={() => setIngredientModalVisible(false)}
                     />

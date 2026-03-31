@@ -29,6 +29,7 @@ import SelectRecipeBook from "../UIComponents/Modals/SelectRecipeBook";
 
 interface Props {
     servings: number;
+    canModifyIngredient?: boolean;
     setServings: (newServing: number) => void;
     onLogRecipe?: () => void;
     onUploadRecipe?: () => void;
@@ -36,6 +37,7 @@ interface Props {
 
 const RecipeInfoCore = ({
     servings,
+    canModifyIngredient = true,
     setServings,
     onLogRecipe,
     onUploadRecipe,
@@ -110,6 +112,7 @@ const RecipeInfoCore = ({
                     <Ingredients
                         servings={servingString}
                         setServings={onServingChange}
+                        canModifyIngredient={canModifyIngredient}
                         addIngredient={() =>
                             router.push(
                                 "/(tabs)/(logs)/HandleModifyRecipe/AddIngredientModify",
@@ -123,6 +126,7 @@ const RecipeInfoCore = ({
                 return null;
         }
     }, [selectedPage, servings, foodData]);
+    console.log("canmodifyingredient, recipeInfoCore", canModifyIngredient);
     return (
         <View style={{ flex: 1 }}>
             <View

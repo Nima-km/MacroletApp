@@ -3,7 +3,7 @@ import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
 import RecentComponent from "@/components/findFoodTabs/RecentComponent";
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
-import { FoodFullData } from "@/types/food";
+import { FoodFullData, FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -16,7 +16,11 @@ import { FormInputSearch } from "../UIComponents/TextInputs/FormInput";
 import { H5 } from "../UIComponents/Typography";
 
 interface FindFoodProps {
-    onFoodCardID: (id: number) => void;
+    onFoodCardID: (
+        id: number,
+        index?: number,
+        ingredientItemData?: FoodItemData,
+    ) => void;
     onLogFoodList: () => void;
     setFoodList?: React.Dispatch<React.SetStateAction<FoodFullData[]>>;
     setIngredientList?: React.Dispatch<
@@ -148,6 +152,9 @@ const FindFood = ({
                         setIngredientList((prev) =>
                             prev.filter((_, index) => index !== i),
                         )
+                    }
+                    onModify={(index, food_id, ingredientItemData) =>
+                        onFoodCardID(food_id, index, ingredientItemData)
                     }
                 />
             )}

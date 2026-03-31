@@ -2,6 +2,7 @@ import FoodCardIngredient from "@/components/chartComponents/Cards/FoodCardIngre
 
 import { useIngredientBottomSheetStore } from "@/store/useStore";
 import { colors } from "@/theme";
+import { FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
 import React, { forwardRef, useEffect } from "react";
@@ -16,10 +17,24 @@ interface IngredientBottomSheet {
     isNewRecipe?: boolean;
     onLogAll: () => void;
     onRemove: (index: number) => void;
+    onModify: (
+        index: number,
+        food_id: number,
+        ingredientItemData: FoodItemData,
+    ) => void;
 }
 
 const IngredientBottomSheet = forwardRef<BottomSheet, IngredientBottomSheet>(
-    ({ ingredientFullData, isNewRecipe = false, onRemove, onLogAll }, ref) => {
+    (
+        {
+            ingredientFullData,
+            isNewRecipe = false,
+            onRemove,
+            onModify,
+            onLogAll,
+        },
+        ref,
+    ) => {
         const setFoodFullData = useIngredientBottomSheetStore(
             (s) => s.setFoodFullData,
         );
@@ -59,7 +74,15 @@ const IngredientBottomSheet = forwardRef<BottomSheet, IngredientBottomSheet>(
                     <FlatList
                         data={ingredientFullData}
                         renderItem={({ item, index }) => (
-                            <Pressable onPress={() => {}}>
+                            <Pressable
+                                onPress={() =>
+                                    onModify(
+                                        index,
+                                        item.food.id,
+                                        item.ingredientItem,
+                                    )
+                                }
+                            >
                                 <FoodCardIngredient
                                     food={item.food}
                                     ingredientItem={item.ingredientItem}

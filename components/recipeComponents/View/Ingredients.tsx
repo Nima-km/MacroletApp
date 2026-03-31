@@ -21,10 +21,16 @@ import { H1, H2, H3, H6 } from "../../UIComponents/Typography";
 
 type Props = {
     servings: string;
+    canModifyIngredient?: boolean;
     setServings: (newServing: string) => void;
     addIngredient: () => void;
 };
-const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
+const Ingredients = ({
+    servings,
+    canModifyIngredient = true,
+    addIngredient,
+    setServings,
+}: Props) => {
     const foodData = useRecipeStateStore((state) => state.data.foodData);
     const recipeData = useRecipeStateStore((state) => state.data.recipeData);
     const ingredientItemsData = useRecipeStateStore(
@@ -47,6 +53,7 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
     }, [foodData]);
     const calories = calculateCalories(foodData);
     const total_macro = macroSum(foodData);
+    console.log("canmodifyingredient, ingredient", canModifyIngredient);
     return (
         <View style={{ flex: 1, gap: 24 }}>
             <PrepCookButton
@@ -145,11 +152,13 @@ const Ingredients = ({ servings, addIngredient, setServings }: Props) => {
                 )}
                 extraData={showIngredientModal}
             />
-            <View>
-                <SecondaryAddButton onPress={addIngredient}>
-                    Add Ingredient
-                </SecondaryAddButton>
-            </View>
+            {canModifyIngredient && (
+                <View>
+                    <SecondaryAddButton onPress={addIngredient}>
+                        Add Ingredient
+                    </SecondaryAddButton>
+                </View>
+            )}
             <View>
                 <Modal
                     visible={showIngredientModal}

@@ -43,14 +43,36 @@ const FoodCardFull = ({ food, foodItem }: FoodCardProps) => {
                             backgroundColor: colors.protein,
                             borderTopLeftRadius: 8,
                             borderBottomLeftRadius: 8,
+
                             flex: food.protein,
                         },
+                        food.fat + food.carbs == 0
+                            ? {
+                                  borderTopRightRadius: 8,
+                                  borderBottomRightRadius: 8,
+                              }
+                            : {},
                     ]}
                 />
                 <View
                     style={[
                         styles.progressBar,
-                        { backgroundColor: colors.carbs, flex: food.carbs },
+                        {
+                            backgroundColor: colors.carbs,
+                            flex: food.carbs,
+                        },
+                        food.fat == 0
+                            ? {
+                                  borderTopRightRadius: 8,
+                                  borderBottomRightRadius: 8,
+                              }
+                            : {},
+                        food.protein == 0
+                            ? {
+                                  borderTopLeftRadius: 8,
+                                  borderBottomLeftRadius: 8,
+                              }
+                            : {},
                     ]}
                 />
                 <View
@@ -62,6 +84,12 @@ const FoodCardFull = ({ food, foodItem }: FoodCardProps) => {
                             borderBottomRightRadius: 8,
                             flex: food.fat,
                         },
+                        food.protein + food.carbs == 0
+                            ? {
+                                  borderTopLeftRadius: 8,
+                                  borderBottomLeftRadius: 8,
+                              }
+                            : {},
                     ]}
                 />
             </View>

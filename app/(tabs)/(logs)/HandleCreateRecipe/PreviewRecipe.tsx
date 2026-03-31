@@ -74,6 +74,7 @@ const PreviewRecipe = () => {
             >
                 <RecipeInfoCore
                     onLogRecipe={() => console.log()}
+                    canModifyIngredient={false}
                     servings={servings}
                     setServings={setServings}
                 />

@@ -105,7 +105,8 @@ const SimpleChartCore = ({
         };
     }, []);
     useEffect(() => {
-        animatedBar.value = progress - 0.01;
+        animatedBar.value = progress - 1;
+        //   console.log("i got called");
         animateChart();
     }, []);
 

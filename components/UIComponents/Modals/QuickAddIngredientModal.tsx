@@ -4,7 +4,7 @@ import {
     SimpleChartProteinSmall,
 } from "@/components/chartComponents/SimpleChart/SimpleChartSmall";
 import { colors } from "@/theme";
-import { FoodGet } from "@/types/food";
+import { FoodGet, FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import { ServingSizeType } from "@/types/servingSize";
 import React, { useState } from "react";
@@ -21,20 +21,34 @@ import ModalCore from "./ModalCore";
 
 interface AddIngredientProps {
     foodData: FoodGet;
+    foodItemData?: FoodItemData;
     options: Omit<ServingSizeType, "food_id">[];
     setIngredient: (ingredientItem: IngredientFullData) => void;
+    cleanUp?: () => void;
     onClose: () => void;
 }
 
 const QuickAddIngredientModal = ({
     foodData,
+    foodItemData,
     options,
     onClose,
+    cleanUp,
     setIngredient,
 }: AddIngredientProps) => {
-    const [servingAmount, setServingAmount] = useState(1);
-    const [selectedServing, setSelectedServing] = useState(options[0]);
-
+    const [servingAmount, setServingAmount] = useState(
+        foodItemData?.servings ?? 1,
+    );
+    const [selectedServing, setSelectedServing] = useState<
+        Omit<ServingSizeType, "food_id">
+    >(
+        foodItemData != undefined
+            ? {
+                  serving_mult: foodItemData.serving_mult,
+                  serving_type: foodItemData.serving_type,
+              }
+            : options[0],
+    );
     const total_macro =
         (foodData.carbs + foodData.fat + foodData.protein) *
         Number(servingAmount) *
@@ -52,6 +66,8 @@ const QuickAddIngredientModal = ({
                 display_name,
             },
         });
+        console.log("quickaddingredeintModal test");
+        cleanUp?.();
     }
     const calories = calculate_final(
         (foodData.carbs + foodData.protein) * 4 +
@@ -144,7 +160,7 @@ const QuickAddIngredientModal = ({
                     <View style={[{ marginBottom: 20 }]}>
                         <DropDownServings
                             options={options}
-                            placeholder={options[0]}
+                            placeholder={selectedServing}
                             servings={servingAmount}
                             setNewServing={setSelectedServing}
                             setServings={(servings) =>
