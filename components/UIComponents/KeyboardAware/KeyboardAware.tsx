@@ -1,6 +1,8 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import {
     KeyboardAvoidingView,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
     Platform,
     ScrollView,
     StyleSheet,
@@ -16,6 +18,13 @@ const KeyboardAware = ({
     scrollEnabled = true,
     contentPadding = 16,
 }: KeyboardScreenProps) => {
+    const [scrollPositions, setScrollPositions] = useState(0);
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const scrollY = event.nativeEvent.contentOffset.y;
+
+        setScrollPositions((prev) => scrollY);
+        console.log("scroll position", scrollY);
+    };
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -24,6 +33,7 @@ const KeyboardAware = ({
         >
             <ScrollView
                 nestedScrollEnabled={true}
+                onScroll={handleScroll}
                 keyboardDismissMode="none"
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ flexGrow: 1 }}

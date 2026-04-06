@@ -22,6 +22,7 @@ export const useCreateRecipeWithFoodAndIngredients = () => {
             console.log("new recipe logged", data);
             queryClient.invalidateQueries({ queryKey: ["food-history"] });
             queryClient.invalidateQueries({ queryKey: ["recipeBook-list"] });
+            queryClient.invalidateQueries({ queryKey: ["recipe-list"] });
         },
         onError: (error) => {
             console.log("something went wrong with saving recipe", error);
@@ -48,6 +49,7 @@ export const useCreateAndLogRecipeWithFoodAndIngredients = () => {
             console.log("new recipe logged", data);
             queryClient.invalidateQueries({ queryKey: ["food-history"] });
             queryClient.invalidateQueries({ queryKey: ["recipeBook-list"] });
+            queryClient.invalidateQueries({ queryKey: ["recipe-list"] });
         },
         onError: (error) => {
             console.log("something went wrong with saving recipe", error);
@@ -69,6 +71,7 @@ export const useCreateAndLogOnlineRecipe = () => {
             console.log("new recipe logged", data);
             queryClient.invalidateQueries({ queryKey: ["food-history"] });
             queryClient.invalidateQueries({ queryKey: ["recipeBook-list"] });
+            queryClient.invalidateQueries({ queryKey: ["recipe-list"] });
         },
         onError: (error) => {
             console.log("something went wrong with saving recipe", error);
@@ -89,6 +92,7 @@ export const useUpdateRecipe = () => {
             console.log("Updated recipe", data);
             queryClient.invalidateQueries({ queryKey: ["food-history"] });
             queryClient.invalidateQueries({ queryKey: ["recipeBook-list"] });
+            queryClient.invalidateQueries({ queryKey: ["recipe-list"] });
         },
     });
 };

@@ -15,7 +15,7 @@ import {
 import { colors } from "@/theme";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
 const createRecipe = () => {
@@ -48,6 +48,35 @@ const createRecipe = () => {
             });
         }
     }
+    const renderPage = useMemo(() => {
+        switch (selectedPage) {
+            case 0:
+                return (
+                    <OverviewEdit
+                        // recipeObject={draft}
+                        servingsYield={servingsYield}
+                        setServingsYield={setServingsYield}
+                    />
+                );
+            case 1:
+                return (
+                    <IngredientsEdit
+                        //   recipeObject={draft}
+                        servingsYield={servingsYield}
+                        setServingsYield={setServingsYield}
+                        onAddIngredient={() =>
+                            router.push(
+                                "/(tabs)/(logs)/HandleCreateRecipe/AddIngredient",
+                            )
+                        }
+                    />
+                );
+            case 2:
+                return <DirectionsEdit recipeObject={draft} />;
+            default:
+                return null;
+        }
+    }, [selectedPage, servingsYield, draft.data]);
     useEffect(() => {
         draft.updateRecipe("bannerImage", bannerImageUri);
     }, [bannerImageUri]);
@@ -114,44 +143,7 @@ const createRecipe = () => {
                             selectedValue={selectedPage}
                             onSelect={setSelectedPage}
                         />
-                        <View
-                            style={{
-                                display: selectedPage === 0 ? "flex" : "none",
-                            }}
-                        >
-                            {
-                                <OverviewEdit
-                                    // recipeObject={draft}
-                                    servingsYield={servingsYield}
-                                    setServingsYield={setServingsYield}
-                                />
-                            }
-                        </View>
-                        <View
-                            style={{
-                                display: selectedPage === 1 ? "flex" : "none",
-                            }}
-                        >
-                            {
-                                <IngredientsEdit
-                                    //   recipeObject={draft}
-                                    servingsYield={servingsYield}
-                                    setServingsYield={setServingsYield}
-                                    onAddIngredient={() =>
-                                        router.push(
-                                            "/(tabs)/(logs)/HandleCreateRecipe/AddIngredient",
-                                        )
-                                    }
-                                />
-                            }
-                        </View>
-                        <View
-                            style={{
-                                display: selectedPage === 2 ? "flex" : "none",
-                            }}
-                        >
-                            {<DirectionsEdit recipeObject={draft} />}
-                        </View>
+                        {renderPage}
                     </View>
                 </View>
                 <PrimaryButton onPress={onPreview}>Preview</PrimaryButton>

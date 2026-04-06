@@ -85,7 +85,7 @@ const SimpleChartCore = ({
     const widthGoal = useDerivedValue(
         () => (width - h5.measureText(goalText.value).width) / 2,
     );
-    useEffect(() => {
+    /*useEffect(() => {
         // console.log('SimpleChartCore got rerednered')
         const subscription = AppState.addEventListener(
             "change",
@@ -109,7 +109,7 @@ const SimpleChartCore = ({
         //   console.log("i got called");
         animateChart();
     }, []);
-
+    */
     return (
         <View style={{ alignSelf: "flex-start", alignItems: "center" }}>
             <View
