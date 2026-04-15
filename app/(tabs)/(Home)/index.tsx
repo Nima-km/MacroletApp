@@ -11,9 +11,11 @@ import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
-import { StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
 
 export default function Index() {
+    const router = useRouter();
     const date = useDateStore((state) => state.date);
     const {
         data: LiveFood,
@@ -36,30 +38,34 @@ export default function Index() {
     return (
         <View style={styles.container}>
             <HeaderSimple title={"MACROLET"} dateSelector back={false} />
-            <View style={styles.chartContainer}>
-                <H1>Calorie Intake</H1>
-                <ArcChart
-                    targetPercentage={calculateCalories(currentGoal?.[0])}
-                    dailyProgress={calculateCalories(LiveFood?.[0])}
-                />
-                <View style={styles.macroChartContainer}>
-                    <SimpleChartProteinGoal
-                        target={currentGoal?.[0]?.protein}
-                        progress={LiveFood?.[0].protein}
-                        backgroundColor={colors.off_white}
+            <Pressable
+                onPress={() => router.push("/(tabs)/(Home)/foodHistory")}
+            >
+                <View style={styles.chartContainer}>
+                    <H1>Calorie Intake</H1>
+                    <ArcChart
+                        targetPercentage={calculateCalories(currentGoal?.[0])}
+                        dailyProgress={calculateCalories(LiveFood?.[0])}
                     />
-                    <SimpleChartCarbsGoal
-                        target={currentGoal?.[0]?.carbs}
-                        progress={LiveFood?.[0].carbs}
-                        backgroundColor={colors.off_white}
-                    />
-                    <SimpleChartFatGoal
-                        target={currentGoal?.[0]?.fat}
-                        progress={LiveFood?.[0].fat}
-                        backgroundColor={colors.off_white}
-                    />
+                    <View style={styles.macroChartContainer}>
+                        <SimpleChartProteinGoal
+                            target={currentGoal?.[0]?.protein}
+                            progress={LiveFood?.[0].protein}
+                            backgroundColor={colors.off_white}
+                        />
+                        <SimpleChartCarbsGoal
+                            target={currentGoal?.[0]?.carbs}
+                            progress={LiveFood?.[0].carbs}
+                            backgroundColor={colors.off_white}
+                        />
+                        <SimpleChartFatGoal
+                            target={currentGoal?.[0]?.fat}
+                            progress={LiveFood?.[0].fat}
+                            backgroundColor={colors.off_white}
+                        />
+                    </View>
                 </View>
-            </View>
+            </Pressable>
         </View>
     );
 }

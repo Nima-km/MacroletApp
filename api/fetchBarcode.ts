@@ -10,10 +10,10 @@ export const FetchBarcode = async (barcode: any) => {
             const result: FoodInsert = {
                 name: data.product_name,
 
-                carbs: data.nutriments.carbohydrates_serving,
-                fat: data.nutriments.fat_serving,
-                protein: data.nutriments.proteins_serving,
-                fiber: data.nutriments.fiber_serving,
+                carbs: data.nutriments.carbohydrates_serving ?? 0,
+                fat: data.nutriments.fat_serving ?? 0,
+                protein: data.nutriments.proteins_serving ?? 0,
+                fiber: data.nutriments.fiber_serving ?? 0,
 
                 barcode: barcode,
                 serving_100g: data.serving_quantity,

@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
 import TopDateSelector from "../UIComponents/Calendar/TopDateSelector";
 import { H1 } from "../UIComponents/Typography";
@@ -18,6 +19,8 @@ function HeaderCore({
     RightButton,
     dateSelector = false,
 }: Props) {
+    const date = useDateStore((state) => state.date);
+    const setDate = useDateStore((state) => state.setDate);
     return (
         <SafeAreaView
             style={[styles.container, { gap: 20 }]}
@@ -44,7 +47,7 @@ function HeaderCore({
                 </View>
                 <View style={styles.rightButton}>{RightButton}</View>
             </View>
-            {dateSelector && <TopDateSelector />}
+            {dateSelector && <TopDateSelector date={date} setDate={setDate} />}
         </SafeAreaView>
     );
 }

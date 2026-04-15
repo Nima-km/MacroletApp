@@ -1,7 +1,9 @@
 import {
+    getDailyFoodSums,
     getFoodItemHistory,
     getFoodItemRecent,
     getFoodItemSum,
+    Period,
 } from "@/db/queries/history";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +19,18 @@ export const useGetFoodItemSum = (from: Date, to: Date) => {
         queryFn: () => getFoodItemSum(from, to),
     });
 };
-
+// for retrieving daily sums of macros, from a date to a date (used to display daily history)
+export const useGetDailyFoodSums = (from: Date, to: Date, period: Period) => {
+    return useQuery({
+        queryKey: [
+            "food-history",
+            "daily-food-sums",
+            from.toISOString(),
+            to.toISOString(),
+        ],
+        queryFn: () => getDailyFoodSums(from, to, period),
+    });
+};
 // for retreving the history of foods ate from-to date
 export const useGetFoodItemList = (from: Date, to: Date) => {
     return useQuery({

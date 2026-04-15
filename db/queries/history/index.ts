@@ -1,5 +1,6 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
+import { MacroDateType } from "@/types/food";
 import { and, desc, eq, gte, isNull, lt, max, sql } from "drizzle-orm";
 
 // for retreving the history of foods ate from-to date
@@ -86,4 +87,39 @@ export const getFoodItemSum = async (from: Date, to: Date) => {
         .from(foodItem)
         .innerJoin(food, eq(foodItem.food_id, food.id))
         .where(and(gte(foodItem.timestamp, from), lt(foodItem.timestamp, to)));
+};
+
+// for retrieving daily sums of macros, from a date to a date (used to display daily history)
+export type Period = "day" | "week" | "month";
+export const getDailyFoodSums = async (
+    from: Date,
+    to: Date,
+    type: Period,
+): Promise<MacroDateType[]> => {
+    const results = [];
+
+    // Start from the 'from' date
+    const currentDate = new Date(from);
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Loop until we reach the 'to' date
+    while (currentDate < to) {
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        const row = await getFoodItemSum(currentDate, nextDate);
+
+        results.push({
+            date: currentDate,
+            fat: row[0]?.fat ?? 0,
+            carbs: row[0]?.carbs ?? 0,
+            fiber: row[0]?.fiber ?? 0,
+            protein: row[0]?.protein ?? 0,
+            calories: row[0]?.calories ?? 0,
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return results;
 };

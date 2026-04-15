@@ -1,14 +1,16 @@
 import Calendar from "@/assets/svg/calendar.svg";
 import { formatDate } from "@/helper/formatDate";
-import { useDateStore } from "@/store/dateStore";
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { H2, H4 } from "../Typography";
 import TimeDateSelector from "./TimeDateSelector";
 
-const TopDateSelector = () => {
-    const date = useDateStore((state) => state.date);
-    const setDate = useDateStore((state) => state.setDate);
+interface CalendarDatePickerProps {
+    date: Date;
+    setDate: (date: Date) => void;
+}
+
+const TopDateSelector = ({ date, setDate }: CalendarDatePickerProps) => {
     const [calendarVisible, setCalendarVisible] = useState(false);
     const handleDateChange = (dateDelta: number) => {
         const newDate = new Date(date);

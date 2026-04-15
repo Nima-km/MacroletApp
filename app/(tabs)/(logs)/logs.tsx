@@ -1,6 +1,6 @@
 import FoodSVG from "@/assets/svg/foods.svg";
 import FoodCardFull from "@/components/chartComponents/Cards/FoodCardFull";
-import BarChart from "@/components/chartComponents/MacroCharts/BarChart";
+import MyBarChart from "@/components/chartComponents/MacroCharts/MyBarChart";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
 import SwipeableDelete from "@/components/UIComponents/Swipeable/SwipeableDelete";
@@ -82,7 +82,7 @@ const logs = () => {
                     }}
                 >
                     <H1>Calorie Intake</H1>
-                    <BarChart
+                    <MyBarChart
                         goal={{
                             fiber: 0,
                             calories: calculateCalories(nutriGoals?.[0]),

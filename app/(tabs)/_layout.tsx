@@ -14,7 +14,7 @@ export default function Layout() {
             tabBar={(props) => <MyTabBar {...props} />}
         >
             <Tabs.Screen
-                name="index"
+                name="(Home)"
                 options={{ title: "Home", headerShown: false }}
             />
             <Tabs.Screen name="discover" options={{ title: "Discover" }} />
