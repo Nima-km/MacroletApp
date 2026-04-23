@@ -218,7 +218,7 @@ const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                         }}
                         onPress={toggleMenu}
                     >
-                        <Plus pointerEvents="none" />
+                        <Plus pointerEvents="none" color={colors.white} />
                     </TouchableOpacity>
                 </View>
             </View>

@@ -97,7 +97,6 @@ export const getDailyFoodSums = async (
     type: Period,
 ): Promise<MacroDateType[]> => {
     const results = [];
-
     // Start from the 'from' date
     const currentDate = new Date(from);
     currentDate.setHours(0, 0, 0, 0);
@@ -108,9 +107,9 @@ export const getDailyFoodSums = async (
         nextDate.setDate(nextDate.getDate() + 1);
 
         const row = await getFoodItemSum(currentDate, nextDate);
-
+        console.log("row is", currentDate);
         results.push({
-            date: currentDate,
+            date: new Date(currentDate),
             fat: row[0]?.fat ?? 0,
             carbs: row[0]?.carbs ?? 0,
             fiber: row[0]?.fiber ?? 0,
@@ -120,6 +119,5 @@ export const getDailyFoodSums = async (
 
         currentDate.setDate(currentDate.getDate() + 1);
     }
-
     return results;
 };

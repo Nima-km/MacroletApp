@@ -9,7 +9,7 @@ export const TestFood1: FoodInsert = {
     fat: 15,
     carbs: 55,
     fiber: 8,
-    barcode: 1,
+    barcode: "1",
     serving_100g: 1,
     volume_100ml: 1,
     micro_nutriants: {
@@ -25,7 +25,7 @@ export const TestFood2: FoodInsert = {
     fat: 2,
     carbs: 10,
     fiber: 1,
-    barcode: 2,
+    barcode: "2",
     serving_100g: 50,
     volume_100ml: 30,
     micro_nutriants: {
@@ -41,7 +41,7 @@ export const TestFood3: FoodInsert = {
     fat: 4,
     carbs: 18,
     fiber: 2,
-    barcode: 3,
+    barcode: "3",
     serving_100g: 100,
     volume_100ml: 80,
     micro_nutriants: {
@@ -57,7 +57,7 @@ export const TestFood4: FoodInsert = {
     fat: 10,
     carbs: 25,
     fiber: 3,
-    barcode: 4,
+    barcode: "4",
     serving_100g: 150,
     volume_100ml: 120,
     micro_nutriants: {
@@ -71,7 +71,7 @@ export const FoodDefault: FoodInsert = {
     fat: 0,
     carbs: 0,
     fiber: 0,
-    barcode: 0,
+    barcode: "0",
     serving_100g: 0,
     volume_100ml: 0,
 };
@@ -120,4 +120,28 @@ export const DefaultServings: Omit<ServingSizeType, "food_id">[] = [
     { serving_type: "Serving", serving_mult: 1 },
     { serving_type: "lb", serving_mult: 2 },
     { serving_type: "Cup", serving_mult: 3 },
+];
+
+export const TESTFOODITEMDATA: FoodItemInsert[] = [
+    {
+        food_id: 9,
+        serving_type: "Serving",
+        servings: 125,
+        serving_mult: 1,
+        timestamp: new Date("2026-03-31"),
+    },
+    {
+        food_id: 10,
+        serving_type: "Serving",
+        servings: 245,
+        serving_mult: 1,
+        timestamp: new Date("2026-03-31"),
+    },
+    {
+        food_id: 11,
+        serving_type: "Serving",
+        servings: 65,
+        serving_mult: 1,
+        timestamp: new Date("2026-03-31"),
+    },
 ];

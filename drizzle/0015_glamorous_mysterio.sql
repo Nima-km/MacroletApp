@@ -1,0 +1,1 @@
+ALTER TABLE `weightItem` DROP COLUMN `unit`;

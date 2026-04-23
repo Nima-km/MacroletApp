@@ -1,15 +1,10 @@
+import Chain from "@/assets/svg/chain.svg";
 import Dash from "@/assets/svg/dash.svg";
 import FoodLogChart from "@/components/chartComponents/LogHistoryCharts/FoodLogChart";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import StyledRadioButton from "@/components/UIComponents/Buttons/RadioButton";
 import TopDateSelector from "@/components/UIComponents/Calendar/TopDateSelector";
-import {
-    H1,
-    H3,
-    H4,
-    H5,
-    H5_SemiBold,
-} from "@/components/UIComponents/Typography";
+import { H3, H4, H5, H5_SemiBold } from "@/components/UIComponents/Typography";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetDailyFoodSums } from "@/db/hooks/history/foodItemhistory";
 import { Period } from "@/db/queries/history";
@@ -18,15 +13,17 @@ import { colors } from "@/theme";
 import { MacroDateType } from "@/types/food";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { Switch } from "react-native-gesture-handler";
 const foodHistory = () => {
     const [fromDate, setFromDate] = useState(new Date());
+    const [showWeight, setShowWeight] = useState(true);
     const [period, setPeriod] = useState<Period>("day");
     const [selectedDate, setSelectedDate] = useState<MacroDateType>();
     const sevenDaysAgo = new Date(fromDate);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 20);
     const { data, isLoading, error } = useGetDailyFoodSums(
-        fromDate,
         sevenDaysAgo,
+        fromDate,
         period,
     );
     const {
@@ -34,8 +31,6 @@ const foodHistory = () => {
         isLoading: currentGoalLoading,
         error: currentGoalError,
     } = useGetNutriGoals();
-    console.log("test");
-    if (error) return <H1>Error</H1>;
 
     const dummyData = [
         {
@@ -97,10 +92,10 @@ const foodHistory = () => {
 
         {
             date: new Date("2026-04-07"),
-            fat: 72,
-            carbs: 280,
+            fat: 90,
+            carbs: 300,
             fiber: 30,
-            protein: 140,
+            protein: 200,
             calories: 2350,
         },
         {
@@ -120,13 +115,58 @@ const foodHistory = () => {
             calories: 0,
         },
     ];
-    const dummyGoal = {
-        fat: 68,
-        carbs: 250,
-        fiber: 26,
-        protein: 130,
-        calories: 2160,
-    };
+    const dummyWeightData = [
+        {
+            timestamp: new Date("2026-03-31"),
+            weight: 148,
+        },
+        {
+            timestamp: new Date("2026-04-01"),
+            weight: 152,
+        },
+        {
+            timestamp: new Date("2026-04-02"),
+            weight: 150,
+        },
+        {
+            timestamp: new Date("2026-04-03"),
+            weight: 155,
+        },
+        {
+            timestamp: new Date("2026-04-04"),
+            weight: 153,
+        },
+        {
+            timestamp: new Date("2026-04-05"),
+            weight: 153,
+        },
+        {
+            timestamp: new Date("2026-04-06"),
+            weight: 156,
+        },
+
+        {
+            timestamp: new Date("2026-04-07"),
+            weight: 155,
+        },
+        {
+            timestamp: new Date("2026-04-08"),
+            weight: 152,
+        },
+        {
+            timestamp: new Date("2026-04-09"),
+            weight: 154,
+        },
+    ];
+    /* useEffect(() => {
+        console.log("actual data is", data);
+    }, [data]);
+    useEffect(() => {
+        console.log("actual isLoading is", isLoading);
+    }, [isLoading]);
+    useEffect(() => {
+        console.log("actual error is", error);
+    }, [error]);*/
     return (
         <View style={{ flex: 1 }}>
             <HeaderSimple title="History" />
@@ -148,8 +188,20 @@ const foodHistory = () => {
                         onSelect={(item) => setPeriod(item)}
                     />
                     <TopDateSelector date={fromDate} setDate={setFromDate} />
+                    <Switch
+                        trackColor={{
+                            false: colors.light_gray,
+                            true: colors.primary_bg,
+                        }}
+                        thumbColor={showWeight ? colors.primary : colors.white}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={() => setShowWeight((prev) => !prev)}
+                        value={showWeight}
+                    />
                     <FoodLogChart
-                        data={dummyData}
+                        foodData={data}
+                        weightData={dummyWeightData}
+                        showWeight={showWeight}
                         goal={currentGoal?.[0]}
                         onSelect={(item) => setSelectedDate(item)}
                     />
@@ -164,6 +216,17 @@ const foodHistory = () => {
                         <Dash />
                         <H4>Daily Calorie Goal</H4>
                         <H3>{calculateCalories(currentGoal?.[0])} cal</H3>
+                    </View>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: 8,
+                        }}
+                    >
+                        <Chain />
+                        <H4>Weight Log History</H4>
                     </View>
                 </View>
                 {selectedDate && (
@@ -183,7 +246,7 @@ const foodHistory = () => {
                             }}
                         >
                             <H4>{selectedDate?.date.toDateString()}</H4>
-                            <H4>{calculateCalories(selectedDate)}</H4>
+                            <H4>{calculateCalories(selectedDate)} Cals</H4>
                         </View>
                         <View
                             style={{

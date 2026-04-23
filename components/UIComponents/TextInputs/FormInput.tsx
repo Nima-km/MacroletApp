@@ -9,6 +9,7 @@ import {
     TextInput,
     TextStyle,
     View,
+    ViewStyle,
 } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { H5_SemiBold, H6 } from "../Typography";
@@ -17,6 +18,7 @@ interface FormInputProps {
     label?: string;
     value: string;
     style?: TextStyle | TextStyle[];
+    viewStyle?: ViewStyle | ViewStyle[];
     keyboardType?: KeyboardTypeOptions;
     onChangeText: (text: string) => void;
     onFocus?: () => void;
@@ -43,6 +45,7 @@ export function FormInput({
     placeholder,
     keyboardType,
     style,
+    viewStyle,
     error,
     secureTextEntry,
     selectTextOnFocus = false,
@@ -74,6 +77,7 @@ export function FormInput({
                     hasError && styles.inputError,
                     center && styles.centerText,
                     { paddingHorizontal: 10, paddingVertical: 10 },
+                    viewStyle,
                 ]}
             >
                 {Icon && (
@@ -176,6 +180,7 @@ export function FormInputMacro({
     onChangeText,
     error,
     style,
+    viewStyle,
 }: FormInputProps) {
     return (
         <FormInput
@@ -188,6 +193,7 @@ export function FormInputMacro({
             error={error}
             unit="g"
             style={style}
+            viewStyle={viewStyle}
             selectTextOnFocus
         />
     );
@@ -198,6 +204,7 @@ export function FormInputNumber({
     upperLimit,
     unit,
     lowerLimit,
+    viewStyle,
     onChangeText,
 }: FormInputProps) {
     return (
@@ -210,6 +217,7 @@ export function FormInputNumber({
             unit={unit}
             placeholder={"0"}
             style={style ?? typography.h3}
+            viewStyle={viewStyle}
             upperLimit={upperLimit}
             lowerLimit={lowerLimit}
             selectTextOnFocus

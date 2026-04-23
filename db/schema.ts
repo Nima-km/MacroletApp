@@ -55,6 +55,13 @@ export const foodItem = sqliteTable("foodItem", {
     serving_mult: integer("serving_mult").notNull(),
     serving_type: text("serving_type", { length: 20 }).notNull(),
 });
+export const weightItem = sqliteTable("weightItem", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    timestamp: integer("timestamp", { mode: "timestamp" })
+        .notNull()
+        .default(sql`(unixepoch())`),
+    weight: integer("weight").notNull(),
+});
 export const servingSize = sqliteTable("servingSize", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     serving_mult: integer("serving_mult").notNull(),

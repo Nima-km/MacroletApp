@@ -15,6 +15,8 @@ import m0010 from './0010_certain_wrecking_crew.sql';
 import m0011 from './0011_abnormal_kinsey_walden.sql';
 import m0012 from './0012_normal_moon_knight.sql';
 import m0013 from './0013_flawless_hellcat.sql';
+import m0014 from './0014_yummy_grandmaster.sql';
+import m0015 from './0015_glamorous_mysterio.sql';
 
   export default {
     journal,
@@ -32,7 +34,9 @@ m0009,
 m0010,
 m0011,
 m0012,
-m0013
+m0013,
+m0014,
+m0015
     }
   }
   

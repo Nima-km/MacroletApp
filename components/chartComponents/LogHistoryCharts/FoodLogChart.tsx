@@ -1,21 +1,40 @@
 import { H5 } from "@/components/UIComponents/Typography";
+import { bigRound } from "@/helper/bigRound";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { colors, typography } from "@/theme";
 import { MacroDateType } from "@/types/food";
 import { nutritionGoalGet } from "@/types/goals";
+import { WeightType } from "@/types/weight";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { BarChart } from "react-native-gifted-charts";
+import { BarChart, CurveType } from "react-native-gifted-charts";
 interface Props {
-    data?: MacroDateType[];
+    foodData?: MacroDateType[];
+    weightData?: WeightType[];
+    showWeight?: boolean;
     goal?: nutritionGoalGet;
     onSelect: (item: MacroDateType) => void;
 }
+const customDataPoint = () => {
+    return (
+        <View
+            style={{
+                width: 12,
+                height: 12,
+                backgroundColor: "white",
+                borderWidth: 3,
+                borderRadius: 10,
+                borderColor: colors.primary,
+            }}
+        />
+    );
+};
+
 const formatDailyFoodSumsForChart = (
-    data: MacroDateType[],
+    foodData: MacroDateType[],
     onSelect: (item: MacroDateType) => void,
 ) => {
-    return data.map((item) => ({
+    return foodData.map((item) => ({
         stacks: [
             {
                 value: item.protein * 4,
@@ -31,16 +50,48 @@ const formatDailyFoodSumsForChart = (
         onPress: () => onSelect(item),
     }));
 };
-const FoodLogChart = ({ data, goal, onSelect }: Props) => {
-    const chartData = data ? formatDailyFoodSumsForChart(data, onSelect) : [];
-    console.log("foodLogChart", chartData);
+const formatWeightForChart = (
+    weightData: WeightType[],
+    //  onSelect: (item: WeightType) => void,
+) => {
+    return weightData.map((item) => ({
+        value: item.weight,
+        label:
+            item.timestamp.getMonth().toString() +
+            "/" +
+            item.timestamp.getDate().toString(),
+    }));
+};
+const FoodLogChart = ({
+    foodData,
+    weightData,
+    goal,
+    showWeight,
+    onSelect,
+}: Props) => {
+    const chartData = foodData
+        ? formatDailyFoodSumsForChart(foodData, onSelect)
+        : [];
+    const lineData = weightData ? formatWeightForChart(weightData) : [];
+    const minWeight = weightData?.reduce((a, b) =>
+        a.weight < b.weight || b.weight == 0 ? a : b,
+    );
+    const maxWeight = weightData?.reduce((a, b) =>
+        a.weight > b.weight ? a : b,
+    );
+    console.log("minWeight", minWeight);
+    console.log("maxWeight", maxWeight);
+    console.log(
+        "biground",
+        bigRound(maxWeight?.weight, 5) - bigRound(minWeight?.weight, 5),
+    );
     return (
-        <View>
+        <View style={{}}>
             <View
                 style={{
-                    width: 40,
-                    alignItems: "center",
                     //   backgroundColor: "blue",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
                 }}
             >
                 <H5
@@ -52,21 +103,37 @@ const FoodLogChart = ({ data, goal, onSelect }: Props) => {
                 >
                     Cals
                 </H5>
+                {showWeight && (
+                    <H5
+                        style={{
+                            width: 31,
+
+                            //    backgroundColor: "red",
+                        }}
+                    >
+                        lbs
+                    </H5>
+                )}
             </View>
 
             <BarChart
                 stackData={chartData}
-                width={300}
-                noOfSections={4}
+                lineData={lineData}
+                showLine={
+                    showWeight &&
+                    chartData != undefined &&
+                    chartData.length != 0
+                }
+                width={290}
                 barWidth={20}
                 yAxisThickness={0}
                 rulesType="dash"
                 rulesColor={colors.light_gray}
                 dashGap={2}
                 yAxisTextStyle={[typography.h6, { color: colors.medium_gray }]}
-                yAxisLabelWidth={40}
+                yAxisLabelWidth={44}
                 yAxisLabelContainerStyle={{
-                    width: 38,
+                    width: 39,
                     marginRight: 7,
                     justifyContent: "flex-end",
                 }}
@@ -76,8 +143,7 @@ const FoodLogChart = ({ data, goal, onSelect }: Props) => {
                 stackBorderTopRightRadius={4}
                 maxValue={
                     goal
-                        ? Math.round((calculateCalories(goal) * 1.2) / 500) *
-                          500
+                        ? bigRound(calculateCalories(goal) * 1.4, 500)
                         : undefined
                 }
                 stepValue={500}
@@ -90,7 +156,46 @@ const FoodLogChart = ({ data, goal, onSelect }: Props) => {
                     dashWidth: 2,
                 }}
                 spacing={24}
-                secondaryYAxis
+                secondaryYAxis={
+                    showWeight && {
+                        // stepValue: 5,
+
+                        yAxisTextStyle: [
+                            typography.h6,
+                            { color: colors.black },
+                        ],
+                        yAxisLabelContainerStyle: {
+                            marginLeft: -24,
+                            //  justifyContent: "flex-end",
+                            width: 39,
+                        },
+                        //  yAxisLabelWidth: 10,
+
+                        yAxisThickness: 0,
+                        yAxisOffset: bigRound(minWeight?.weight, 5) - 20,
+                        maxValue: Math.max(
+                            60,
+                            bigRound(maxWeight?.weight, 5) -
+                                bigRound(minWeight?.weight, 5) +
+                                50,
+                        ),
+                        hideOrigin: true,
+                    }
+                }
+                lineConfig={{
+                    curved: true,
+                    curveType: CurveType.CUBIC,
+                    isSecondary: true,
+                    color: colors.primary,
+                    shiftY: 0,
+                    initialSpacing: 21,
+                    customDataPoint: customDataPoint,
+                    dataPointsHeight: 2,
+                    dataPointsWidth: 0,
+
+                    // dataPointsShape: "",
+                    thickness: 3,
+                }}
             />
         </View>
     );

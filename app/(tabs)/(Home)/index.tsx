@@ -1,3 +1,5 @@
+import Plus from "@/assets/svg/plus-empty.svg";
+import WeightLogChartSmall from "@/components/chartComponents/LogHistoryCharts/WeightLogChartSmall";
 import ArcChart from "@/components/chartComponents/MacroCharts/ArcChart";
 import {
     SimpleChartCarbsGoal,
@@ -5,18 +7,36 @@ import {
     SimpleChartProteinGoal,
 } from "@/components/chartComponents/SimpleChart/SimpleChartGoal";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
-import { H1 } from "@/components/UIComponents/Typography";
+import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
+import { H1, H2, H3, H5 } from "@/components/UIComponents/Typography";
+import { useInsertFoodItems } from "@/db/hooks/food/useFoodItem";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { useDateStore } from "@/store/dateStore";
+import { generateMacroTestData } from "@/tests/generateTestData";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+const INTAKETESTDATA = generateMacroTestData({
+    startDate: new Date("2026-03-01"),
+    endDate: new Date("2026-04-21"),
+    proteinRange: { min: 80, max: 160 },
+    carbsRange: { min: 200, max: 300 },
+    fatRange: { min: 50, max: 100 },
+});
 export default function Index() {
+    const {
+        mutate: logFoodItems,
+        isPending: logFoodItemsPending,
+        error: logFoodItemsError,
+        isSuccess: logFoodItemsSuccess,
+    } = useInsertFoodItems();
     const router = useRouter();
     const date = useDateStore((state) => state.date);
+    const [newWeightLog, setNewWeightLog] = useState("");
     const {
         data: LiveFood,
         isLoading: liveFoodLoading,
@@ -30,13 +50,68 @@ export default function Index() {
         isLoading: currentGoalLoading,
         error: currentGoalError,
     } = useGetNutriGoals();
+    const dummyWeightData = [
+        {
+            timestamp: new Date("2026-03-31"),
+            weight: 148,
+        },
+        {
+            timestamp: new Date("2026-04-01"),
+            weight: 152,
+        },
+        {
+            timestamp: new Date("2026-04-02"),
+            weight: 150,
+        },
+        {
+            timestamp: new Date("2026-04-03"),
+            weight: 155,
+        },
+        {
+            timestamp: new Date("2026-04-04"),
+            weight: 153,
+        },
+        {
+            timestamp: new Date("2026-04-05"),
+            weight: 153,
+        },
+        {
+            timestamp: new Date("2026-04-06"),
+            weight: 156,
+        },
+
+        {
+            timestamp: new Date("2026-04-07"),
+            weight: 155,
+        },
+        {
+            timestamp: new Date("2026-04-08"),
+            weight: 152,
+        },
+        {
+            timestamp: new Date("2026-04-09"),
+            weight: 154,
+        },
+    ];
 
     console.log("the number is", Number(".2"));
+
+    useEffect(() => {
+        const isAdd = false;
+        if (isAdd) {
+            console.log("adding test data");
+            logFoodItems(INTAKETESTDATA, {
+                onSuccess: () => {
+                    console.log("added successfully");
+                },
+            });
+        }
+    }, []);
     if (liveFoodLoading || currentGoalLoading) {
         return <H1>loading</H1>;
     }
     return (
-        <View style={styles.container}>
+        <KeyboardAware>
             <HeaderSimple title={"MACROLET"} dateSelector back={false} />
             <Pressable
                 onPress={() => router.push("/(tabs)/(Home)/foodHistory")}
@@ -66,7 +141,40 @@ export default function Index() {
                     </View>
                 </View>
             </Pressable>
-        </View>
+            <View style={{ padding: 20 }}>
+                <Pressable
+                    onPress={() => router.push("/(tabs)/(Home)/weightHistory")}
+                >
+                    <View
+                        style={{
+                            backgroundColor: colors.white,
+                            borderRadius: 8,
+                            padding: 20,
+                            gap: 20,
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <H2>Weight</H2>
+                            <Plus
+                                color={colors.primary}
+                                height={25}
+                                width={25}
+                            />
+                        </View>
+                        <View style={{ alignItems: "center" }}>
+                            <H3>Weekly Average</H3>
+                        </View>
+                        <H5>lbs</H5>
+                        <WeightLogChartSmall weightData={dummyWeightData} />
+                    </View>
+                </Pressable>
+            </View>
+        </KeyboardAware>
     );
 }
 
