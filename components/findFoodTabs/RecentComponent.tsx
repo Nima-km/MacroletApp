@@ -1,4 +1,10 @@
-import { FoodFullData, FoodInsert, FoodItemInsert } from "@/types/food";
+import { FoodItemDefault } from "@/tests/testData";
+import {
+    FoodFullData,
+    FoodInsert,
+    FoodItemInsert,
+    RecentFoodFullData,
+} from "@/types/food";
 import React from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import FoodCardSmall from "../chartComponents/Cards/FoodCardSmall";
@@ -11,7 +17,7 @@ interface FoodData {
 }
 
 interface RecentComponentProps {
-    filteredData?: FoodFullData[];
+    filteredData?: RecentFoodFullData[];
     onFoodCardID: (id: number) => void;
     onAddFood: (foodObject: FoodFullData) => void;
 }
@@ -27,11 +33,18 @@ const RecentComponent = ({
             <FlatList
                 data={filteredData}
                 renderItem={({ item }) => (
-                    <SwipeableAdd onSwipe={() => onAddFood(item)}>
+                    <SwipeableAdd
+                        onSwipe={() =>
+                            onAddFood({
+                                food: item.food,
+                                foodItem: item.foodItem ?? FoodItemDefault,
+                            })
+                        }
+                    >
                         <Pressable onPress={() => onFoodCardID(item.food.id)}>
                             <FoodCardSmall
                                 food={item.food}
-                                foodItem={item.foodItem}
+                                foodItem={item.foodItem ?? FoodItemDefault}
                             />
                         </Pressable>
                     </SwipeableAdd>

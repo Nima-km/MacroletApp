@@ -73,6 +73,7 @@ const RecipeComponent = () => {
                             Create Recipe
                         </SecondaryButton>
                         <SecondaryButton
+                            onPress={() => router.push("/discover")}
                             style={{ flex: 1 }}
                             icon={<FindRecipe pointerEvents="none" />}
                         >

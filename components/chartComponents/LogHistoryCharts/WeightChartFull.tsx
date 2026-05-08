@@ -49,7 +49,7 @@ const formatWeightForChart = (
 const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
     const lineData = weightData
         ? formatWeightForChart(weightData, onSelect)
-        : [];
+        : undefined;
     const minWeight = weightData?.reduce((a, b) =>
         a.weight < b.weight || b.weight == 0 ? a : b,
     );
@@ -90,14 +90,14 @@ const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
                 focusEnabled
                 yAxisTextStyle={[typography.h6, { color: colors.black }]}
                 yAxisLabelContainerStyle={{
-                    width: 24,
+                    width: 28,
                     marginRight: 5,
                     //  justifyContent: "flex-end",
                 }}
                 yAxisLabelWidth={30}
                 initialSpacing={30}
-                dataPointsHeight={70}
-                dataPointsWidth={20}
+                dataPointsHeight={65}
+                dataPointsWidth={25}
                 thickness={3}
                 spacing={41}
                 yAxisThickness={0}

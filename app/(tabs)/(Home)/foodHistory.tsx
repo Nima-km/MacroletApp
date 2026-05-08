@@ -2,11 +2,11 @@ import Chain from "@/assets/svg/chain.svg";
 import Dash from "@/assets/svg/dash.svg";
 import FoodLogChart from "@/components/chartComponents/LogHistoryCharts/FoodLogChart";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
-import StyledRadioButton from "@/components/UIComponents/Buttons/RadioButton";
 import TopDateSelector from "@/components/UIComponents/Calendar/TopDateSelector";
 import { H3, H4, H5, H5_SemiBold } from "@/components/UIComponents/Typography";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetDailyFoodSums } from "@/db/hooks/history/foodItemhistory";
+import { useGetWeightList } from "@/db/hooks/weight/useWeightLog";
 import { Period } from "@/db/queries/history";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { colors } from "@/theme";
@@ -26,147 +26,13 @@ const foodHistory = () => {
         fromDate,
         period,
     );
+    const { data: WeightData } = useGetWeightList(sevenDaysAgo, fromDate);
     const {
         data: currentGoal,
         isLoading: currentGoalLoading,
         error: currentGoalError,
     } = useGetNutriGoals();
 
-    const dummyData = [
-        {
-            date: new Date("2026-03-31"),
-            fat: 65,
-            carbs: 245,
-            fiber: 28,
-            protein: 125,
-            calories: 2150,
-        },
-        {
-            date: new Date("2026-04-01"),
-            fat: 58,
-            carbs: 210,
-            fiber: 22,
-            protein: 110,
-            calories: 1950,
-        },
-        {
-            date: new Date("2026-04-02"),
-            fat: 72,
-            carbs: 280,
-            fiber: 30,
-            protein: 140,
-            calories: 2350,
-        },
-        {
-            date: new Date("2026-04-03"),
-            fat: 55,
-            carbs: 190,
-            fiber: 20,
-            protein: 95,
-            calories: 1800,
-        },
-        {
-            date: new Date("2026-04-04"),
-            fat: 0,
-            carbs: 0,
-            fiber: 0,
-            protein: 0,
-            calories: 0,
-        },
-        {
-            date: new Date("2026-04-05"),
-            fat: 62,
-            carbs: 235,
-            fiber: 25,
-            protein: 118,
-            calories: 2050,
-        },
-        {
-            date: new Date("2026-04-06"),
-            fat: 68,
-            carbs: 250,
-            fiber: 26,
-            protein: 130,
-            calories: 2160,
-        },
-
-        {
-            date: new Date("2026-04-07"),
-            fat: 90,
-            carbs: 300,
-            fiber: 30,
-            protein: 200,
-            calories: 2350,
-        },
-        {
-            date: new Date("2026-04-08"),
-            fat: 55,
-            carbs: 190,
-            fiber: 20,
-            protein: 95,
-            calories: 1800,
-        },
-        {
-            date: new Date("2026-04-09"),
-            fat: 0,
-            carbs: 0,
-            fiber: 0,
-            protein: 0,
-            calories: 0,
-        },
-    ];
-    const dummyWeightData = [
-        {
-            timestamp: new Date("2026-03-31"),
-            weight: 148,
-        },
-        {
-            timestamp: new Date("2026-04-01"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-02"),
-            weight: 150,
-        },
-        {
-            timestamp: new Date("2026-04-03"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-04"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-05"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-06"),
-            weight: 156,
-        },
-
-        {
-            timestamp: new Date("2026-04-07"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-08"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-09"),
-            weight: 154,
-        },
-    ];
-    /* useEffect(() => {
-        console.log("actual data is", data);
-    }, [data]);
-    useEffect(() => {
-        console.log("actual isLoading is", isLoading);
-    }, [isLoading]);
-    useEffect(() => {
-        console.log("actual error is", error);
-    }, [error]);*/
     return (
         <View style={{ flex: 1 }}>
             <HeaderSimple title="History" />
@@ -179,14 +45,14 @@ const foodHistory = () => {
                         gap: 10,
                     }}
                 >
-                    <StyledRadioButton
+                    {/*<StyledRadioButton
                         options={[
                             { label: "Day", value: "day" },
                             { label: "Week", value: "week" },
                             { label: "Month", value: "month" },
                         ]}
                         onSelect={(item) => setPeriod(item)}
-                    />
+                    />*/}
                     <TopDateSelector date={fromDate} setDate={setFromDate} />
                     <Switch
                         trackColor={{
@@ -200,7 +66,9 @@ const foodHistory = () => {
                     />
                     <FoodLogChart
                         foodData={data}
-                        weightData={dummyWeightData}
+                        weightData={
+                            WeightData?.length == 0 ? undefined : WeightData
+                        }
                         showWeight={showWeight}
                         goal={currentGoal?.[0]}
                         onSelect={(item) => setSelectedDate(item)}

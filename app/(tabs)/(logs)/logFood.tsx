@@ -51,6 +51,7 @@ const logFood = () => {
                 setFoodList={setFoodList}
                 onLogFoodList={onLogFoodList}
             />
+
             {/*BottomFoodList*/}
             {/*OnFood*/}
         </View>

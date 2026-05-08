@@ -3,7 +3,7 @@ import { colors } from "@/theme";
 import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetFooter,
-    BottomSheetView,
+    BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { forwardRef, ReactNode, useCallback, useMemo } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
@@ -77,9 +77,9 @@ export const BottomSheetCore = forwardRef<BottomSheet, Props>(
                     </View>
                 )}
             >
-                <BottomSheetView style={styles.content}>
+                <BottomSheetScrollView>
                     <View style={styles.content}>{children}</View>
-                </BottomSheetView>
+                </BottomSheetScrollView>
             </BottomSheet>
         );
     },

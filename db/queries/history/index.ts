@@ -35,7 +35,6 @@ export const getFoodItemRecent = async ({ showRecipe = true }: RecentProps) => {
         .groupBy(foodItem.food_id)
         .as("latests");
 
-    console.log("getFoodItemRecent, latest");
     const result = showRecipe
         ? db
               .select({
@@ -43,23 +42,26 @@ export const getFoodItemRecent = async ({ showRecipe = true }: RecentProps) => {
                   foodItem: foodItem,
               })
               .from(food)
-              .innerJoin(latest, eq(latest.food_id, food.id))
-              .innerJoin(
+              .leftJoin(latest, eq(latest.food_id, food.id))
+              .leftJoin(
                   foodItem,
                   and(
                       eq(foodItem.id, latest.foodItem_id),
                       eq(foodItem.timestamp, latest.max_timestamp),
                   ),
               )
-              .orderBy(desc(foodItem.timestamp))
+              .orderBy(
+                  desc(foodItem.timestamp),
+                  desc(foodItem.id), // fallback for nulls (sqlite doesn't support NULLS LAST)
+              )
         : db
               .select({
                   food: food,
                   foodItem: foodItem,
               })
               .from(food)
-              .innerJoin(latest, eq(latest.food_id, food.id))
-              .innerJoin(
+              .leftJoin(latest, eq(latest.food_id, food.id))
+              .leftJoin(
                   foodItem,
                   and(
                       eq(foodItem.id, latest.foodItem_id),
@@ -67,8 +69,11 @@ export const getFoodItemRecent = async ({ showRecipe = true }: RecentProps) => {
                   ),
               )
               .where(isNull(food.recipe_id))
-              .orderBy(desc(foodItem.timestamp));
-    console.log("getFoodItemRecent, result");
+              .orderBy(
+                  desc(foodItem.timestamp),
+                  desc(foodItem.id), // fallback for nulls
+              );
+
     return result;
 };
 

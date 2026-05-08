@@ -10,6 +10,10 @@ export type FoodFullData = {
     food: FoodGet;
     foodItem: FoodItemData;
 };
+export type RecentFoodFullData = {
+    food: FoodGet;
+    foodItem?: FoodItemData | null;
+};
 
 export type MacroType = {
     protein: number;

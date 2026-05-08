@@ -67,9 +67,7 @@ const logs = () => {
             params: { food_id, foodItem_id },
         });
     }
-    if (liveFoodLoading || loadingGoal) {
-        return <H1>Loading</H1>;
-    }
+
     return (
         <View style={{ flex: 1 }}>
             <HeaderSimple title="MACROLET" dateSelector back={false} />

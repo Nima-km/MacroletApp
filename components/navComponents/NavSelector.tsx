@@ -86,7 +86,6 @@ const NavSelector = ({
             : []),
     ];
     //const [selectedValue, setSelectedValue] = useState<number | null>(options[0].value);
-    console.log("");
     const handleSelect = (value: number) => {
         //  setSelectedValue(value);
         onSelect(value);

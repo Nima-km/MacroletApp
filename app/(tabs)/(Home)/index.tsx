@@ -12,6 +12,7 @@ import { H1, H2, H3, H5 } from "@/components/UIComponents/Typography";
 import { useInsertFoodItems } from "@/db/hooks/food/useFoodItem";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
+import { useGetWeightList } from "@/db/hooks/weight/useWeightLog";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { useDateStore } from "@/store/dateStore";
 import { generateMacroTestData } from "@/tests/generateTestData";
@@ -37,6 +38,15 @@ export default function Index() {
     const router = useRouter();
     const date = useDateStore((state) => state.date);
     const [newWeightLog, setNewWeightLog] = useState("");
+    const now = new Date();
+    now.setDate(now.getDate() + 1);
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 8);
+    const {
+        data: WeightData,
+        isLoading,
+        error,
+    } = useGetWeightList(sevenDaysAgo, now);
     const {
         data: LiveFood,
         isLoading: liveFoodLoading,
@@ -50,51 +60,6 @@ export default function Index() {
         isLoading: currentGoalLoading,
         error: currentGoalError,
     } = useGetNutriGoals();
-    const dummyWeightData = [
-        {
-            timestamp: new Date("2026-03-31"),
-            weight: 148,
-        },
-        {
-            timestamp: new Date("2026-04-01"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-02"),
-            weight: 150,
-        },
-        {
-            timestamp: new Date("2026-04-03"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-04"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-05"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-06"),
-            weight: 156,
-        },
-
-        {
-            timestamp: new Date("2026-04-07"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-08"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-09"),
-            weight: 154,
-        },
-    ];
-
-    console.log("the number is", Number(".2"));
 
     useEffect(() => {
         const isAdd = false;
@@ -107,9 +72,9 @@ export default function Index() {
             });
         }
     }, []);
-    if (liveFoodLoading || currentGoalLoading) {
+    /*if (liveFoodLoading || currentGoalLoading) {
         return <H1>loading</H1>;
-    }
+    }*/
     return (
         <KeyboardAware>
             <HeaderSimple title={"MACROLET"} dateSelector back={false} />
@@ -170,7 +135,11 @@ export default function Index() {
                             <H3>Weekly Average</H3>
                         </View>
                         <H5>lbs</H5>
-                        <WeightLogChartSmall weightData={dummyWeightData} />
+                        <WeightLogChartSmall
+                            weightData={
+                                WeightData?.length == 0 ? undefined : WeightData
+                            }
+                        />
                     </View>
                 </Pressable>
             </View>

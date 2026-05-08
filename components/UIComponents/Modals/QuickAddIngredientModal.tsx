@@ -4,7 +4,7 @@ import {
     SimpleChartProteinSmall,
 } from "@/components/chartComponents/SimpleChart/SimpleChartSmall";
 import { colors } from "@/theme";
-import { FoodGet, FoodItemData } from "@/types/food";
+import { FoodFullData, FoodGet, FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import { ServingSizeType } from "@/types/servingSize";
 import React, { useState } from "react";
@@ -23,7 +23,8 @@ interface AddIngredientProps {
     foodData: FoodGet;
     foodItemData?: FoodItemData;
     options: Omit<ServingSizeType, "food_id">[];
-    setIngredient: (ingredientItem: IngredientFullData) => void;
+    setIngredient?: (ingredientItem: IngredientFullData) => void;
+    setFoodItem?: (foodItem: FoodFullData) => void;
     cleanUp?: () => void;
     onClose: () => void;
 }
@@ -35,6 +36,7 @@ const QuickAddIngredientModal = ({
     onClose,
     cleanUp,
     setIngredient,
+    setFoodItem,
 }: AddIngredientProps) => {
     const [servingAmount, setServingAmount] = useState(
         foodItemData?.servings ?? 1,
@@ -56,7 +58,7 @@ const QuickAddIngredientModal = ({
     const [display_name, setDisplay_name] = useState<string>();
     const [prep_notes, setPrep_notes] = useState<string>();
     function onSave() {
-        setIngredient({
+        setIngredient?.({
             food: foodData,
             ingredientItem: {
                 serving_mult: selectedServing.serving_mult,
@@ -64,6 +66,14 @@ const QuickAddIngredientModal = ({
                 servings: Number(servingAmount),
                 prep_notes,
                 display_name,
+            },
+        });
+        setFoodItem?.({
+            food: foodData,
+            foodItem: {
+                serving_mult: selectedServing.serving_mult,
+                serving_type: selectedServing.serving_type,
+                servings: Number(servingAmount),
             },
         });
         console.log("quickaddingredeintModal test");
@@ -102,20 +112,22 @@ const QuickAddIngredientModal = ({
                     </View>
                 </View>
                 <View style={styles.mainContent}>
-                    <View style={{ marginTop: 20, gap: 20 }}>
-                        <ExpandableTextInput
-                            value={display_name ?? ""}
-                            onChangeText={setDisplay_name}
-                            collapsedPlaceholder="Ingredient Display Name"
-                            placeholder="Enter display name for public recipes"
-                        />
-                        <ExpandableTextInput
-                            value={prep_notes ?? ""}
-                            onChangeText={setPrep_notes}
-                            collapsedPlaceholder="Prep Notes"
-                            placeholder="e.g chopped, cooked, screwed"
-                        />
-                    </View>
+                    {setIngredient && (
+                        <View style={{ marginTop: 20, gap: 20 }}>
+                            <ExpandableTextInput
+                                value={display_name ?? ""}
+                                onChangeText={setDisplay_name}
+                                collapsedPlaceholder="Ingredient Display Name"
+                                placeholder="Enter display name for public recipes"
+                            />
+                            <ExpandableTextInput
+                                value={prep_notes ?? ""}
+                                onChangeText={setPrep_notes}
+                                collapsedPlaceholder="Prep Notes"
+                                placeholder="e.g chopped, cooked, screwed"
+                            />
+                        </View>
+                    )}
                     <View style={{ alignItems: "flex-end" }}>
                         <InlineButton>
                             <H5_SemiBold style={{ color: colors.primary }}>

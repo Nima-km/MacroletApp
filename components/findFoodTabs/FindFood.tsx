@@ -3,17 +3,18 @@ import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
 import RecentComponent from "@/components/findFoodTabs/RecentComponent";
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
+import { servingSizeProvider } from "@/helper/ServingSizeProvider";
 import { FoodFullData, FoodItemData } from "@/types/food";
 import { IngredientFullData } from "@/types/recipe";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 import NavSelector from "../navComponents/NavSelector";
 import FoodBottomSheet from "../UIComponents/BottomSheet/FoodBottomSheet";
 import IngredientBottomSheet from "../UIComponents/BottomSheet/IngredientBottomSheet";
+import QuickAddIngredientModal from "../UIComponents/Modals/QuickAddIngredientModal";
 import { FormInputSearch } from "../UIComponents/TextInputs/FormInput";
-import { H5 } from "../UIComponents/Typography";
 
 interface FindFoodProps {
     onFoodCardID: (
@@ -44,7 +45,8 @@ const FindFood = ({
 
     const { pageId } = useLocalSearchParams();
     //router.setParams({ pageId: 0 });
-
+    const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
+    const [quickSelectedIndex, setQuickSelectedIndex] = useState<number>();
     const isNotRecipe =
         ingredientList == undefined && setIngredientList == undefined;
     const [selectedPage, setSelectedPage] = useState(
@@ -108,9 +110,7 @@ const FindFood = ({
         if (selectedPage != Number(pageId))
             router.setParams({ pageId: selectedPage });
     }, [selectedPage]);
-    if (loadingSectionList) {
-        return <H5>{loadingSectionList}</H5>;
-    }
+
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.container}>
@@ -140,6 +140,11 @@ const FindFood = ({
                             prev.filter((_, index) => index !== i),
                         )
                     }
+                    onModify={(index, food_id, ingredientItemData) => (
+                        setQuickSelectedIndex(index),
+                        setIngredientModalVisible(true),
+                        console.log("hi")
+                    )}
                 />
             )}
             {ingredientList && setIngredientList && (
@@ -157,6 +162,40 @@ const FindFood = ({
                         onFoodCardID(food_id, index, ingredientItemData)
                     }
                 />
+            )}
+            {foodList && setFoodList && quickSelectedIndex && (
+                <Modal
+                    visible={ingredientModalVisible}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => {
+                        setIngredientModalVisible(false);
+                    }}
+                >
+                    <QuickAddIngredientModal
+                        foodData={foodList[quickSelectedIndex].food}
+                        foodItemData={foodList[quickSelectedIndex].foodItem}
+                        options={servingSizeProvider({
+                            servingData: [],
+                            serving_100g:
+                                foodList[quickSelectedIndex].food.serving_100g,
+                        })}
+                        setFoodItem={(item) =>
+                            setFoodList((prev) => [...prev, item])
+                        }
+                        cleanUp={() =>
+                            quickSelectedIndex !== undefined
+                                ? setFoodList((prev) =>
+                                      prev.filter(
+                                          (_, index) =>
+                                              index !== quickSelectedIndex,
+                                      ),
+                                  )
+                                : console.log("didnt run")
+                        }
+                        onClose={() => setIngredientModalVisible(false)}
+                    />
+                </Modal>
             )}
         </View>
     );

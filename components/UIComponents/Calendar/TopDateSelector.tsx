@@ -2,6 +2,7 @@ import Calendar from "@/assets/svg/calendar.svg";
 import { formatDate } from "@/helper/formatDate";
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
+import KeyboardAware from "../KeyboardAware/KeyboardAware";
 import { H2, H4 } from "../Typography";
 import TimeDateSelector from "./TimeDateSelector";
 
@@ -71,28 +72,30 @@ const TopDateSelector = ({ date, setDate }: CalendarDatePickerProps) => {
                     setCalendarVisible(false);
                 }}
             >
-                <Pressable
-                    style={{
-                        flex: 1,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                    onPress={() => setCalendarVisible(false)}
-                >
+                <KeyboardAware scrollEnabled={false}>
                     <Pressable
                         style={{
-                            backgroundColor: "red",
-                            width: "80%",
+                            flex: 1,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            justifyContent: "center",
+                            alignItems: "center",
                         }}
+                        onPress={() => setCalendarVisible(false)}
                     >
-                        <TimeDateSelector
-                            value={date}
-                            onChange={setDate}
-                            isTime={false}
-                        />
+                        <Pressable
+                            style={{
+                                backgroundColor: "red",
+                                width: "80%",
+                            }}
+                        >
+                            <TimeDateSelector
+                                value={date}
+                                onChange={setDate}
+                                isTime={false}
+                            />
+                        </Pressable>
                     </Pressable>
-                </Pressable>
+                </KeyboardAware>
             </Modal>
         </View>
     );

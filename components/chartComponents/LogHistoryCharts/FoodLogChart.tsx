@@ -125,6 +125,8 @@ const FoodLogChart = ({
                     chartData.length != 0
                 }
                 width={290}
+                yAxisTextNumberOfLines={1}
+                showFractionalValues={false}
                 barWidth={20}
                 yAxisThickness={0}
                 rulesType="dash"

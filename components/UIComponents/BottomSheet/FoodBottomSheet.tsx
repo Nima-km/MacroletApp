@@ -2,7 +2,7 @@ import FoodCardQuick from "@/components/chartComponents/Cards/FoodCardQuick";
 
 import { useFoodBottomSheetStore } from "@/store/useStore";
 import { colors } from "@/theme";
-import { FoodFullData } from "@/types/food";
+import { FoodFullData, FoodItemData } from "@/types/food";
 import BottomSheet from "@gorhom/bottom-sheet";
 import React, { forwardRef, useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -15,10 +15,15 @@ interface FoodBottomSheetProps {
     foodFullData: FoodFullData[];
     onLogAll: () => void;
     onRemove: (index: number) => void;
+    onModify: (
+        index: number,
+        food_id: number,
+        foodItemData: FoodItemData,
+    ) => void;
 }
 
 const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(
-    ({ foodFullData, onRemove, onLogAll }, ref) => {
+    ({ foodFullData, onRemove, onModify, onLogAll }, ref) => {
         const setFoodFullData = useFoodBottomSheetStore(
             (s) => s.setFoodFullData,
         );
@@ -44,11 +49,21 @@ const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(
                     ) : null
                 }
             >
-                <View style={{ flex: 1, justifyContent: "space-between" }}>
+                <View
+                    style={{
+                        flex: 1,
+                        paddingHorizontal: 10,
+                        justifyContent: "space-between",
+                    }}
+                >
                     <FlatList
                         data={foodFullData}
                         renderItem={({ item, index }) => (
-                            <Pressable onPress={() => {}}>
+                            <Pressable
+                                onPress={() =>
+                                    onModify(index, item.food.id, item.foodItem)
+                                }
+                            >
                                 <FoodCardQuick
                                     food={item.food}
                                     foodItem={item.foodItem}

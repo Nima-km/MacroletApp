@@ -1,6 +1,8 @@
-import { getNutriGoals, insertNutritionGoal } from "@/db/queries/nutritionGoals";
+import {
+    getNutriGoals,
+    insertNutritionGoal,
+} from "@/db/queries/nutritionGoals";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 
 export const useGetNutriGoals = () => {
     return useQuery({
@@ -11,13 +13,12 @@ export const useGetNutriGoals = () => {
 };
 
 export const useInsertNutritionGoal = () => {
-    const queryClient = useQueryClient()
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: insertNutritionGoal,
-        onSuccess: newNutritionGoal => {
-            queryClient.setQueryData(["nutrition-goals"], newNutritionGoal)
-            queryClient.invalidateQueries({ queryKey:["nutrition-goals"]})
-            console.log('inserted goal')
-        }
-    })
-}
+        onSuccess: (newNutritionGoal) => {
+            queryClient.setQueryData(["nutrition-goals"], newNutritionGoal);
+            queryClient.invalidateQueries({ queryKey: ["nutrition-goals"] });
+        },
+    });
+};

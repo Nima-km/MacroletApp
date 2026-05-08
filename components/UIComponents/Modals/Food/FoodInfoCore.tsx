@@ -20,6 +20,7 @@ import {
 } from "../../Buttons/Button";
 import TimeDateSelector from "../../Calendar/TimeDateSelector";
 import DropDownServings from "../../DropDown/DropDownServings";
+import KeyboardAware from "../../KeyboardAware/KeyboardAware";
 import { FormInput } from "../../TextInputs/FormInput";
 import { H1 } from "../../Typography";
 
@@ -205,33 +206,35 @@ const FoodInfoCore = ({
                     setCalendarVisible(false);
                 }}
             >
-                <Pressable
-                    style={{
-                        flex: 1,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                    onPress={() => setCalendarVisible(false)}
-                >
+                <KeyboardAware scrollEnabled={false}>
                     <Pressable
                         style={{
-                            backgroundColor: "red",
-                            width: "80%",
+                            flex: 1,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            justifyContent: "center",
+                            alignItems: "center",
                         }}
+                        onPress={() => setCalendarVisible(false)}
                     >
-                        <TimeDateSelector
-                            value={foodItem.timestamp}
-                            onChange={(newDate) =>
-                                setFoodItem((prev) => ({
-                                    ...prev,
-                                    timestamp: newDate,
-                                }))
-                            }
-                            isTime={false}
-                        />
+                        <Pressable
+                            style={{
+                                backgroundColor: "red",
+                                width: "80%",
+                            }}
+                        >
+                            <TimeDateSelector
+                                value={foodItem.timestamp}
+                                onChange={(newDate) =>
+                                    setFoodItem((prev) => ({
+                                        ...prev,
+                                        timestamp: newDate,
+                                    }))
+                                }
+                                isTime={false}
+                            />
+                        </Pressable>
                     </Pressable>
-                </Pressable>
+                </KeyboardAware>
             </Modal>
         </View>
     );

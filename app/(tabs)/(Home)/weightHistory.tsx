@@ -2,8 +2,8 @@ import Chain from "@/assets/svg/chain.svg";
 import WeightChartFull from "@/components/chartComponents/LogHistoryCharts/WeightChartFull";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
-import StyledRadioButton from "@/components/UIComponents/Buttons/RadioButton";
 import TopDateSelector from "@/components/UIComponents/Calendar/TopDateSelector";
+import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
 import { H4 } from "@/components/UIComponents/Typography";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
@@ -13,74 +13,31 @@ import {
 } from "@/db/hooks/weight/useWeightLog";
 import { Period } from "@/db/queries/history";
 import { colors } from "@/theme";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 const weightHistory = () => {
-    const [fromDate, setFromDate] = useState(new Date());
+    const now = new Date();
+    now.setDate(now.getDate() + 1);
+    const [fromDate, setFromDate] = useState(now);
     const [period, setPeriod] = useState<Period>("day");
     const [newWeightLog, setNewWeightLog] = useState("");
     const sevenDaysAgo = new Date(fromDate);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const { data, isLoading, error } = useGetWeightList(fromDate, sevenDaysAgo);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 8);
+    const { data, isLoading, error } = useGetWeightList(sevenDaysAgo, fromDate);
     const { mutate: logWeight } = useInsertWeight();
     const {
         data: currentGoal,
         isLoading: currentGoalLoading,
         error: currentGoalError,
     } = useGetNutriGoals();
-    console.log("test");
-    const dummyWeightData = [
-        {
-            timestamp: new Date("2026-03-31"),
-            weight: 148,
-        },
-        {
-            timestamp: new Date("2026-04-01"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-02"),
-            weight: 150,
-        },
-        {
-            timestamp: new Date("2026-04-03"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-04"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-05"),
-            weight: 153,
-        },
-        {
-            timestamp: new Date("2026-04-06"),
-            weight: 156,
-        },
-
-        {
-            timestamp: new Date("2026-04-07"),
-            weight: 155,
-        },
-        {
-            timestamp: new Date("2026-04-08"),
-            weight: 152,
-        },
-        {
-            timestamp: new Date("2026-04-09"),
-            weight: 154,
-        },
-    ];
-    const dummyGoal = {
-        fat: 68,
-        carbs: 250,
-        fiber: 26,
-        protein: 130,
-        calories: 2160,
-    };
+    useEffect(() => {
+        console.log("data changed in weightHistory", data);
+    }, [data]);
+    useEffect(() => {
+        console.log("data changed in weightHistory", data);
+    }, [data]);
     return (
-        <View style={{ flex: 1 }}>
+        <KeyboardAware>
             <HeaderSimple title="Weight history" />
 
             <View style={{ flex: 1, gap: 20 }}>
@@ -91,6 +48,7 @@ const weightHistory = () => {
                         gap: 10,
                     }}
                 >
+                    {/*
                     <StyledRadioButton
                         options={[
                             { label: "Day", value: "day" },
@@ -98,11 +56,11 @@ const weightHistory = () => {
                             { label: "Month", value: "month" },
                         ]}
                         onSelect={(item) => setPeriod(item)}
-                    />
+                    />*/}
                     <TopDateSelector date={fromDate} setDate={setFromDate} />
 
                     <WeightChartFull
-                        weightData={dummyWeightData}
+                        weightData={data?.length == 0 ? undefined : data}
                         onSelect={(item) => console.log("hi")}
                     />
 
@@ -140,7 +98,7 @@ const weightHistory = () => {
                     </View>
                 </View>
             </View>
-        </View>
+        </KeyboardAware>
     );
 };
 
