@@ -21,7 +21,13 @@ const formatWeightForChart = (
             item.timestamp.getDate().toString(),
     }));
 };
-
+const calculateStepValue = (a?: WeightType, b?: WeightType) => {
+    if (a && b) {
+        const res = Math.ceil((a.weight - b.weight) / 3 / 5) * 5;
+        return res;
+    }
+    return 5;
+};
 const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
     const lineData = weightData
         ? formatWeightForChart(weightData).slice(0, 7)
@@ -53,7 +59,7 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
                 data={lineData}
                 curved
                 curveType={CurveType.CUBIC}
-                stepValue={5}
+                stepValue={calculateStepValue(maxWeight, minWeight)}
                 dashGap={0}
                 width={275}
                 height={120}

@@ -15,21 +15,15 @@ interface Props {
 const customDataPoint = (item: WeightType) => {
     return (
         <View
-            style={{ justifyContent: "center", alignItems: "center", gap: 10 }}
-        >
-            <H6>{item.weight}</H6>
-            <View
-                style={{
-                    width: 12,
-                    height: 12,
-                    backgroundColor: "white",
-                    borderWidth: 3,
-                    borderRadius: 10,
-                    borderColor: colors.primary,
-                }}
-                pointerEvents="auto"
-            ></View>
-        </View>
+            style={{
+                width: 12,
+                height: 12,
+                backgroundColor: "white",
+                borderWidth: 3,
+                borderRadius: 10,
+                borderColor: colors.primary,
+            }}
+        />
     );
 };
 
@@ -44,7 +38,17 @@ const formatWeightForChart = (
             "/" +
             item.timestamp.getDate().toString(),
         customDataPoint: () => customDataPoint(item),
+        dataPointLabelComponent: () => (
+            <H6 style={{ textAlign: "center" }}>{item.weight}</H6>
+        ),
     }));
+};
+const calculateStepValue = (a?: WeightType, b?: WeightType) => {
+    if (a && b) {
+        const res = Math.ceil((a.weight - b.weight) / 7 / 5) * 5;
+        return res;
+    }
+    return 5;
 };
 const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
     const lineData = weightData
@@ -83,7 +87,7 @@ const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
                 data={lineData}
                 curved
                 curveType={CurveType.CUBIC}
-                stepValue={5}
+                stepValue={calculateStepValue(maxWeight, minWeight)}
                 dashGap={0}
                 width={290}
                 color={colors.primary}
@@ -96,8 +100,10 @@ const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
                 }}
                 yAxisLabelWidth={30}
                 initialSpacing={30}
-                dataPointsHeight={65}
-                dataPointsWidth={25}
+                dataPointsHeight={12}
+                dataPointsWidth={12}
+                dataPointLabelWidth={31}
+                dataPointLabelShiftY={-20}
                 thickness={3}
                 spacing={41}
                 yAxisThickness={0}
