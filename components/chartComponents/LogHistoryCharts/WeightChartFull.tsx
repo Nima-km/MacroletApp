@@ -2,12 +2,12 @@ import { H5, H6 } from "@/components/UIComponents/Typography";
 import { bigRound } from "@/helper/bigRound";
 import { colors, typography } from "@/theme";
 import { nutritionGoalGet } from "@/types/goals";
-import { WeightType } from "@/types/weight";
+import { WeightHistoryRecord, WeightType } from "@/types/weight";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { CurveType, LineChart } from "react-native-gifted-charts";
 interface Props {
-    weightData?: WeightType[];
+    weightData?: WeightHistoryRecord[];
     showWeight?: boolean;
     goal?: nutritionGoalGet;
     onSelect: (item: WeightType) => void;
@@ -28,24 +28,27 @@ const customDataPoint = (item: WeightType) => {
 };
 
 const formatWeightForChart = (
-    weightData: WeightType[],
+    weightData: WeightHistoryRecord[],
     onSelect: (item: WeightType) => void,
 ) => {
     return weightData.map((item) => ({
         value: item.weight,
         label:
-            item.timestamp.getMonth().toString() +
+            (item.timestamp.getMonth() + 1).toString() +
             "/" +
-            item.timestamp.getDate().toString(),
+            (item.timestamp.getDate() + 1).toString(),
         customDataPoint: () => customDataPoint(item),
         dataPointLabelComponent: () => (
             <H6 style={{ textAlign: "center" }}>{item.weight}</H6>
         ),
     }));
 };
-const calculateStepValue = (a?: WeightType, b?: WeightType) => {
+const calculateStepValue = (
+    a?: WeightHistoryRecord,
+    b?: WeightHistoryRecord,
+) => {
     if (a && b) {
-        const res = Math.ceil((a.weight - b.weight) / 7 / 5) * 5;
+        const res = Math.ceil(Math.max(a.weight - b.weight, 5) / 7 / 5) * 5;
         return res;
     }
     return 5;
@@ -88,6 +91,7 @@ const WeightChartFull = ({ weightData, goal, showWeight, onSelect }: Props) => {
                 curved
                 curveType={CurveType.CUBIC}
                 stepValue={calculateStepValue(maxWeight, minWeight)}
+                showFractionalValues={false}
                 dashGap={0}
                 width={290}
                 color={colors.primary}

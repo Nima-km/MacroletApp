@@ -1,13 +1,13 @@
 import { bigRound } from "@/helper/bigRound";
 import { colors, typography } from "@/theme";
-import { WeightType } from "@/types/weight";
+import { WeightHistoryRecord, WeightType } from "@/types/weight";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { CurveType, LineChart } from "react-native-gifted-charts";
 
 interface Props {
-    weightData?: WeightType[];
-    onSelect?: (item: WeightType) => void;
+    weightData?: WeightHistoryRecord[];
+    onSelect?: (item: WeightHistoryRecord) => void;
 }
 const formatWeightForChart = (
     weightData: WeightType[],
@@ -16,14 +16,17 @@ const formatWeightForChart = (
     return weightData.map((item) => ({
         value: item.weight,
         label:
-            item.timestamp.getMonth().toString() +
+            (item.timestamp.getMonth() + 1).toString() +
             "/" +
-            item.timestamp.getDate().toString(),
+            (item.timestamp.getDate() + 1).toString(),
     }));
 };
-const calculateStepValue = (a?: WeightType, b?: WeightType) => {
+const calculateStepValue = (
+    a?: WeightHistoryRecord,
+    b?: WeightHistoryRecord,
+) => {
     if (a && b) {
-        const res = Math.ceil((a.weight - b.weight) / 3 / 5) * 5;
+        const res = Math.ceil(Math.max(a.weight - b.weight, 5) / 3 / 5) * 5;
         return res;
     }
     return 5;
@@ -61,6 +64,7 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
                 curveType={CurveType.CUBIC}
                 stepValue={calculateStepValue(maxWeight, minWeight)}
                 dashGap={0}
+                showFractionalValues={false}
                 width={275}
                 height={120}
                 color={colors.primary}

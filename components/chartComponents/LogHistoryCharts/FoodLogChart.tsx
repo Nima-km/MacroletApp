@@ -57,9 +57,9 @@ const formatWeightForChart = (
     return weightData.map((item) => ({
         value: item.weight,
         label:
-            item.timestamp.getMonth().toString() +
+            (item.timestamp.getMonth() + 1).toString() +
             "/" +
-            item.timestamp.getDate().toString(),
+            (item.timestamp.getDate() + 1).toString(),
     }));
 };
 const FoodLogChart = ({

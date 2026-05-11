@@ -1,10 +1,14 @@
 import { getWeightHistory, insertWeight } from "@/db/queries/weight";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetWeightList = (from: Date, to: Date) => {
+export const useGetWeightList = (
+    from: Date,
+    to: Date,
+    period?: "day" | "week" | "month",
+) => {
     return useQuery({
         queryKey: ["weight-history", from.toISOString(), to.toISOString()],
-        queryFn: () => getWeightHistory(from, to),
+        queryFn: () => getWeightHistory(from, to, period),
     });
 };
 
