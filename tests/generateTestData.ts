@@ -4,72 +4,72 @@
  */
 
 interface MacroRange {
-    min: number;
-    max: number;
+	min: number;
+	max: number;
 }
 
 interface MacroTestDataConfig {
-    startDate: Date;
-    endDate: Date;
-    proteinRange: MacroRange;
-    carbsRange: MacroRange;
-    fatRange: MacroRange;
+	startDate: Date;
+	endDate: Date;
+	proteinRange: MacroRange;
+	carbsRange: MacroRange;
+	fatRange: MacroRange;
 }
 
 interface MacroEntry {
-    food_id: number;
-    serving_type: string;
-    servings: number;
-    serving_mult: number;
-    timestamp: Date;
+	food_id: number;
+	serving_type: string;
+	servings: number;
+	serving_mult: number;
+	timestamp: Date;
 }
 
 /**
  * Generate a random number within a range (inclusive)
  */
 function getRandomInRange(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
  * Generate test macro data for a single day
  */
 function generateDayMacros(
-    date: Date,
-    config: MacroTestDataConfig,
+	date: Date,
+	config: MacroTestDataConfig,
 ): MacroEntry[] {
-    return [
-        {
-            food_id: 9, // Protein
-            serving_type: "Serving",
-            servings: getRandomInRange(
-                config.proteinRange.min,
-                config.proteinRange.max,
-            ),
-            serving_mult: 1,
-            timestamp: new Date(date),
-        },
-        {
-            food_id: 10, // Carbs
-            serving_type: "Serving",
-            servings: getRandomInRange(
-                config.carbsRange.min,
-                config.carbsRange.max,
-            ),
-            serving_mult: 1,
-            timestamp: new Date(date),
-        },
-        {
-            food_id: 11, // Fat
-            serving_type: "Serving",
-            servings: getRandomInRange(
-                config.fatRange.min,
-                config.fatRange.max,
-            ),
-            serving_mult: 1,
-            timestamp: new Date(date),
-        },
-    ];
+	return [
+		{
+			food_id: 14, // Protein
+			serving_type: "Serving",
+			servings: getRandomInRange(
+				config.proteinRange.min,
+				config.proteinRange.max,
+			),
+			serving_mult: 1,
+			timestamp: new Date(date),
+		},
+		{
+			food_id: 12, // Carbs
+			serving_type: "Serving",
+			servings: getRandomInRange(
+				config.carbsRange.min,
+				config.carbsRange.max,
+			),
+			serving_mult: 1,
+			timestamp: new Date(date),
+		},
+		{
+			food_id: 13, // Fat
+			serving_type: "Serving",
+			servings: getRandomInRange(
+				config.fatRange.min,
+				config.fatRange.max,
+			),
+			serving_mult: 1,
+			timestamp: new Date(date),
+		},
+	];
 }
 
 /**
@@ -78,20 +78,20 @@ function generateDayMacros(
  * @returns Array of macro entries for all dates in range
  */
 export function generateMacroTestData(
-    config: MacroTestDataConfig,
+	config: MacroTestDataConfig,
 ): MacroEntry[] {
-    const entries: MacroEntry[] = [];
-    const currentDate = new Date(config.startDate);
+	const entries: MacroEntry[] = [];
+	const currentDate = new Date(config.startDate);
 
-    while (currentDate <= config.endDate) {
-        const dayEntries = generateDayMacros(currentDate, config);
-        entries.push(...dayEntries);
+	while (currentDate <= config.endDate) {
+		const dayEntries = generateDayMacros(currentDate, config);
+		entries.push(...dayEntries);
 
-        // Move to next day
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
+		// Move to next day
+		currentDate.setDate(currentDate.getDate() + 1);
+	}
 
-    return entries;
+	return entries;
 }
 
 // ============================================================================
@@ -99,11 +99,11 @@ export function generateMacroTestData(
 // ============================================================================
 
 const INTAKETESTDATA = generateMacroTestData({
-    startDate: new Date("2026-03-01"),
-    endDate: new Date("2026-03-31"),
-    proteinRange: { min: 80, max: 160 },
-    carbsRange: { min: 200, max: 300 },
-    fatRange: { min: 50, max: 100 },
+	startDate: new Date("2026-05-01"),
+	endDate: new Date("2026-05-20"),
+	proteinRange: { min: 80, max: 160 },
+	carbsRange: { min: 200, max: 300 },
+	fatRange: { min: 50, max: 100 },
 });
 
 console.log("Generated test data sample:");
