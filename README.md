@@ -1,50 +1,83 @@
-# Welcome to your Expo app 👋
+# 🥗 MacroletApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> **Coming to the App Store** — Full-featured nutrition tracking with custom charts, recipe creation, and a creator monetization system.
 
-## Get started
+---
 
-1. Install dependencies
+## Overview
 
-   ```bash
-   npm install
-   ```
+MacroletApp is a comprehensive mobile nutrition application that enables users to track their diet while supporting a creator economy. Users can create and share recipes, filter by macros, calories, and tags, and track meals seamlessly. Creators earn money based on the portion of paid users who log their recipes, with Stripe handling all payment processing.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Key Features
 
-In the output, you'll find options to open the app in a
+| Feature                    | Description                                                              |
+| -------------------------- | ------------------------------------------------------------------------ |
+| **Custom Recipe Creation** | Create and upload recipes with macro breakdowns automatically calculated |
+| **Advanced Filtering**     | Filter recipes by macros, calories, tags, and name                       |
+| **Custom Charts (Skia)**   | High-performance nutrition charts built with React Native Skia           |
+| **Creator Monetization**   | Recipe creators earn money based on paid user engagement                 |
+| **Secure Authentication**  | Clerk-powered auth with social login support                             |
+| **Stripe Payments**        | Automated subscriptions and creator earnings payouts                     |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠️ Tech Stack
 
-## Get a fresh project
+**Frontend**
 
-When you're ready, run:
+- [React Native](https://reactnative.dev/) + [Expo](https://expo.dev/)
+- [React Native Skia](https://shopify.github.io/react-native-skia/) — custom chart rendering
+- [TanStack Query](https://tanstack.com/query) — caching & data synchronization
+- [Drizzle ORM](https://orm.drizzle.team/) — local database management
 
-```bash
-npm run reset-project
-```
+**Backend**
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- [Express.js](https://expressjs.com/) _(reimplemented from Django for better scaling)_
+- [Clerk](https://clerk.com/) — authentication
+- [Stripe](https://stripe.com/) — payment processing & webhook handling
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Architecture & Challenges
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### ⚡ High-Performance Charts
 
-## Join the community
+Building smooth, performant charts while handling large nutrition datasets.
+**Solution:** Optimized rendering with data windowing and memoization using React Native Skia.
 
-Join our community of developers creating universal apps.
+### Creator Revenue Tracking
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Accurately tracking and calculating creator earnings from recipe usage across a large catalog.
+**Solution:** Implemented an event-driven tracking system with Stripe webhooks for reliable, real-time calculations.
+
+### Local Database Optimization
+
+Keeping the local Drizzle database in sync while maintaining UI performance.
+**Solution:** Used TanStack Query for intelligent caching and sync management.
+
+### Backend Migration
+
+Originally built on Django, the backend was fully reimplemented in Express.js to improve infrastructure flexibility and horizontal scaling.
+
+---
+
+## Results
+
+- Smooth **60fps** nutrition charts with Skia rendering
+- Accurate creator payment calculations across **1,000+ recipes**
+- **Zero transaction failures** with Stripe webhook system
+- App Store ready with full regulatory compliance
+
+---
+
+## Status
+
+> **Coming to App Store** — Currently in final review stages.
+
+---
+
+## Contact
+
+Interested in this project or want to collaborate? Feel free to reach out!
