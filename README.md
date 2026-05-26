@@ -1,4 +1,4 @@
-# 🥗 MacroletApp
+# MacroletApp
 
 > **Coming to the App Store** — Full-featured nutrition tracking with custom charts, recipe creation, and a creator monetization system.
 
@@ -23,7 +23,7 @@ MacroletApp is a comprehensive mobile nutrition application that enables users t
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend**
 
@@ -42,7 +42,7 @@ MacroletApp is a comprehensive mobile nutrition application that enables users t
 
 ## Architecture & Challenges
 
-### ⚡ High-Performance Charts
+### High-Performance Charts
 
 Building smooth, performant charts while handling large nutrition datasets.
 **Solution:** Optimized rendering with data windowing and memoization using React Native Skia.
