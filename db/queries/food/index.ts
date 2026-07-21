@@ -1,10 +1,10 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
 import {
-    FoodInsert,
-    FoodItemData,
-    FoodItemInsert,
-    FoodType,
+	FoodInsert,
+	FoodItemData,
+	FoodItemInsert,
+	FoodType,
 } from "@/types/food";
 import { eq } from "drizzle-orm";
 
@@ -20,6 +20,9 @@ export const insertFoodAndItem = async (
 	foodData: Omit<FoodInsert, "recipe_id">,
 	foodItemData: FoodItemData,
 ) => {
+	if (foodData.name.length < 3) {
+		throw Error("food name is too short");
+	}
 	return await db.transaction(async (tx) => {
 		const [newFood] = await tx
 			.insert(food)
@@ -53,6 +56,10 @@ export const updateFoodAndItem = async (
 		const [deletedFoodItem] = await tx
 			.delete(foodItem)
 			.where(eq(foodItem.id, foodItemID))
+			.returning();
+		const [deletedFood] = await tx
+			.delete(food)
+			.where(eq(food.id, deletedFoodItem.food_id))
 			.returning();
 		const [newFood] = await tx
 			.insert(food)
@@ -95,6 +102,13 @@ export const getFoodItem = async (foodItemID: number) => {
 };
 export const insertFood = async (foodObject: FoodInsert) => {
 	return db.insert(food).values(foodObject).returning();
+};
+export const insertFoodList = async (foodObjects: FoodInsert[]) => {
+	return db
+		.insert(food)
+		.values(foodObjects)
+		.onConflictDoNothing({ target: food.nickname })
+		.returning();
 };
 export const insertFoodItem = async (foodItemObject: FoodItemInsert) => {
 	return db.insert(foodItem).values(foodItemObject).returning();

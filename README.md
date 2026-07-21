@@ -77,7 +77,3 @@ Originally built on Django, the backend was fully reimplemented in Express.js to
 > **Coming to App Store** — Currently in final review stages.
 
 ---
-
-## Contact
-
-Interested in this project or want to collaborate? Feel free to reach out!

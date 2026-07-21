@@ -7,26 +7,26 @@ export type FoodType = Omit<FoodInsert, "id">;
 export type FoodItemType = Omit<FoodItemInsert, "id">;
 export type FoodItemData = Omit<FoodItemType, "food_id">;
 export type FoodFullData = {
-    food: FoodGet;
-    foodItem: FoodItemData;
+	food: FoodGet;
+	foodItem: FoodItemData;
 };
 export type RecentFoodFullData = {
-    food: FoodGet;
-    foodItem?: FoodItemData | null;
+	food: FoodGet;
+	foodItem?: FoodItemData | null;
 };
 
 export type MacroType = {
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-    calories?: number;
+	protein: number;
+	carbs: number;
+	fat: number;
+	fiber: number;
+	calories?: number;
 };
 export type MacroDateType = {
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-    calories?: number;
-    date: Date;
+	protein: number;
+	carbs: number;
+	fat: number;
+	fiber: number;
+	calories?: number;
+	date: Date;
 };

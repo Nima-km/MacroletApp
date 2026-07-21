@@ -5,37 +5,37 @@ import { StyleSheet, View } from "react-native";
 import SwipeableCore from "./SwipeableCore";
 
 type SwipeableCoreProps = {
-    children: ReactNode;
-    onPress?: () => void;
-    onSwipe?: () => void;
+	children: ReactNode;
+	onPress?: () => void;
+	onSwipe?: () => void;
 };
 
 const SwipeableAdd = ({
-    children,
-    onPress = () => {},
-    onSwipe,
+	children,
+	onPress = () => {},
+	onSwipe,
 }: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) => {
-    return (
-        <SwipeableCore
-            underChildren={
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
-                    <Plus pointerEvents="none" />
-                </View>
-            }
-            onPress={onPress}
-            onSwipe={onSwipe}
-            backgroundColor={colors.primary}
-            autoClose
-        >
-            {children}
-        </SwipeableCore>
-    );
+	return (
+		<SwipeableCore
+			underChildren={
+				<View
+					style={{
+						flex: 1,
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+				>
+					<Plus pointerEvents="none" />
+				</View>
+			}
+			onPress={onPress}
+			onSwipe={onSwipe}
+			backgroundColor={colors.primary}
+			autoClose
+		>
+			{children}
+		</SwipeableCore>
+	);
 };
 
 export default SwipeableAdd;

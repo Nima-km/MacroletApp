@@ -68,11 +68,6 @@ export const TestFood4: FoodInsert = {
 };
 export const FoodDefault: FoodInsert = {
 	name: "",
-	protein: 0,
-	fat: 0,
-	carbs: 0,
-	fiber: 0,
-	barcode: "0",
 	serving_100g: 0,
 	volume_100ml: 0,
 };

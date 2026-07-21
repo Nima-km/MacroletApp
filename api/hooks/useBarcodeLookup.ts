@@ -4,7 +4,6 @@ import { QueryClient } from "@tanstack/react-query";
 
 export const queryClient = new QueryClient();
 
-// Your custom hook
 import { useQuery } from "@tanstack/react-query";
 import { FetchBarcode } from "../fetchBarcode";
 export const useBarcodeLookup = (barcode: string) => {

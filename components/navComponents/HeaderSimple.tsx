@@ -1,36 +1,45 @@
+import ArrowLeft from "@/assets/svg/chevron-left.svg";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { ReactNode } from "react";
 import { Pressable, StyleSheet } from "react-native";
-import { H2 } from "../UIComponents/Typography";
 import HeaderCore from "./HeaderCore";
-
 interface HeaderSimpleProps {
-    title: string;
+	title?: string;
 
-    back?: boolean;
-    dateSelector?: boolean;
+	back?: boolean;
+	logo?: ReactNode;
+	dateSelector?: boolean;
 }
 
 const HeaderSimple = ({
-    title,
-    back = true,
-    dateSelector = false,
+	title,
+	back = true,
+	logo,
+	dateSelector = false,
 }: HeaderSimpleProps) => {
-    const router = useRouter();
-    return (
-        <HeaderCore
-            title={title}
-            dateSelector={dateSelector}
-            LeftButton={
-                back ? (
-                    <Pressable style={{}} onPress={() => router.back()}>
-                        <H2 style={{ color: colors.primary }}>{"<"}</H2>
-                    </Pressable>
-                ) : null
-            }
-        />
-    );
+	const router = useRouter();
+	return (
+		<HeaderCore
+			title={title}
+			logo={logo}
+			dateSelector={dateSelector}
+			LeftButton={
+				back ? (
+					<Pressable
+						style={{
+							height: 50,
+							width: 70,
+							justifyContent: "center",
+						}}
+						onPress={() => router.back()}
+					>
+						<ArrowLeft color={colors.primary} />
+					</Pressable>
+				) : null
+			}
+		/>
+	);
 };
 
 export default HeaderSimple;

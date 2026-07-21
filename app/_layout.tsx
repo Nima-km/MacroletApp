@@ -1,34 +1,32 @@
 import { toastConfig } from "@/components/UIComponents/Toasts/toastConfig";
 import { FontProvider } from "@/context/FontProvider";
-import { DATABASE_NAME, db } from "@/db/client";
+import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 
 import { colors } from "@/theme";
-import { ClerkProvider } from "@clerk/clerk-expo";
-import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+//import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { openDatabaseSync } from "expo-sqlite";
+//import { openDatabaseSync } from "expo-sqlite";
 import React, { Suspense, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+	initialWindowMetrics,
+	SafeAreaProvider,
+} from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-if (!publishableKey) {
-	throw new Error(
-		"Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable",
-	);
-}
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-	const expoDb = openDatabaseSync(DATABASE_NAME);
-	useDrizzleStudio(expoDb);
 	const { success, error } = useMigrations(db, migrations);
+
 	const [loaded, fontError] = useFonts({
 		"Metro-Medium": require("@/assets/fonts/Metropolis-Medium.ttf"),
 		"Metro-SemiBold": require("@/assets/fonts/Metropolis-SemiBold.ttf"),
@@ -45,6 +43,11 @@ export default function RootLayout() {
 	if (!loaded && !error) {
 		return null;
 	}
+	if (!publishableKey) {
+		throw new Error(
+			"Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable",
+		);
+	}
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Suspense fallback={<ActivityIndicator size="large" />}>
@@ -54,15 +57,19 @@ export default function RootLayout() {
 							publishableKey={publishableKey}
 							tokenCache={tokenCache}
 						>
-							<Stack
-								screenOptions={{
-									headerShown: false,
-									contentStyle: {
-										backgroundColor: colors.error,
-									},
-								}}
-							/>
-							<Toast config={toastConfig} />
+							<SafeAreaProvider
+								initialMetrics={initialWindowMetrics}
+							>
+								<Stack
+									screenOptions={{
+										headerShown: false,
+										contentStyle: {
+											backgroundColor: colors.error,
+										},
+									}}
+								/>
+								<Toast config={toastConfig} />
+							</SafeAreaProvider>
 						</ClerkProvider>
 					</GestureHandlerRootView>
 				</FontProvider>

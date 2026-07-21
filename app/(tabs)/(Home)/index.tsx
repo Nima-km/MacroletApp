@@ -1,3 +1,4 @@
+import Logo from "@/assets/svg/logo.svg";
 import Plus from "@/assets/svg/plus-empty.svg";
 import WeightLogChartSmall from "@/components/chartComponents/LogHistoryCharts/WeightLogChartSmall";
 import ArcChart from "@/components/chartComponents/MacroCharts/ArcChart";
@@ -17,12 +18,11 @@ import { useGetWeightList } from "@/db/hooks/weight/useWeightLog";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { useDateStore } from "@/store/dateStore";
 import { generateMacroTestData } from "@/tests/generateTestData";
-import { foodFullDataList, weightHistoryTestData } from "@/tests/testData";
+import { foodFullDataList } from "@/tests/testData";
 import { colors } from "@/theme";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-
 const INTAKETESTDATA = generateMacroTestData({
 	startDate: new Date("2026-05-01"),
 	endDate: new Date("2026-05-20"),
@@ -93,7 +93,11 @@ export default function Index() {
     }*/
 	return (
 		<KeyboardAware>
-			<HeaderSimple title={"MACROLET"} dateSelector back={false} />
+			<HeaderSimple
+				dateSelector
+				back={false}
+				logo={<Logo width={50} height={50} />}
+			/>
 			<Pressable
 				onPress={() => router.push("/(tabs)/(Home)/foodHistory")}
 			>
@@ -153,7 +157,7 @@ export default function Index() {
 						<H5>lbs</H5>
 						<WeightLogChartSmall
 							weightData={
-								weightHistoryTestData //WeightData?.length == 0 ? undefined : WeightData
+								WeightData?.length == 0 ? undefined : WeightData
 							}
 						/>
 					</View>
@@ -170,6 +174,7 @@ const styles = StyleSheet.create({
 	chartContainer: {
 		backgroundColor: colors.white,
 		padding: 20,
+		gap: 30,
 	},
 	macroChartContainer: {
 		flexDirection: "row",

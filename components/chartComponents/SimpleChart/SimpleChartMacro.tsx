@@ -1,71 +1,91 @@
-import Carbs from '@/assets/svg/carbs.svg'
-import Fat from '@/assets/svg/fat.svg'
-import Protein from '@/assets/svg/protein.svg'
-import { colors } from '@/theme'
-import React from 'react'
-import SimpleChartCore from './SimpleChartCore'
-const width = 105
+import Carbs from "@/assets/svg/carbs.svg";
+import Fat from "@/assets/svg/fat.svg";
+import Protein from "@/assets/svg/protein.svg";
+import { colors } from "@/theme";
+import React from "react";
+import SimpleChartCore from "./SimpleChartCore";
+const width = 105;
 type SimpleChartProps = {
-    target: number,
-    progress: number,
-    
-    backgroundColor: string,
-    edit?: boolean,
-    value?: string,
-    onChangeText?: (inp: string) => void
-}
+	target: number;
+	progress: number;
 
-export const SimpleChartProteinMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={false} 
-            width={width} 
-            topText={'PROTEIN'} 
-            barColor={colors.protein} 
-            backgroundColor={backgroundColor}
-            Icon={Protein}
-            edit={edit}
-            value={value}
-            onChangeText={onChangeText}
-        />
-    )
-}
+	backgroundColor: string;
+	edit?: boolean;
+	value?: string;
+	onChangeText?: (inp: string) => void;
+};
 
-export const SimpleChartFatMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={false} 
-            width={width} 
-            topText={'FAT'}
-            barColor={colors.fat}
-            backgroundColor={backgroundColor}
-            Icon={Fat}
-            edit={edit}
-            value={value}
-            onChangeText={onChangeText}
-        />
-    )
-}
+export const SimpleChartProteinMacro = ({
+	target,
+	progress,
+	backgroundColor,
+	edit,
+	value,
+	onChangeText,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={false}
+			width={width}
+			topText={"PROTEIN"}
+			barColor={colors.protein}
+			backgroundColor={colors.white}
+			Icon={Protein}
+			edit={edit}
+			value={value}
+			onChangeText={onChangeText}
+		/>
+	);
+};
 
+export const SimpleChartFatMacro = ({
+	target,
+	progress,
+	backgroundColor,
+	edit,
+	value,
+	onChangeText,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={false}
+			width={width}
+			topText={"FAT"}
+			barColor={colors.fat}
+			backgroundColor={colors.white}
+			Icon={Fat}
+			edit={edit}
+			value={value}
+			onChangeText={onChangeText}
+		/>
+	);
+};
 
-export const SimpleChartCarbsMacro = ({target, progress, backgroundColor, edit, value, onChangeText} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={false} 
-            width={width} 
-            topText={'CARBS'}
-            barColor={colors.carbs}
-            backgroundColor={backgroundColor}
-            Icon={Carbs}
-            edit={edit}
-            value={value}
-            onChangeText={onChangeText}
-        />
-    )
-}
+export const SimpleChartCarbsMacro = ({
+	target,
+	progress,
+	backgroundColor,
+	edit,
+	value,
+	onChangeText,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={false}
+			width={width}
+			topText={"CARBS"}
+			barColor={colors.carbs}
+			backgroundColor={colors.white}
+			Icon={Carbs}
+			edit={edit}
+			value={value}
+			onChangeText={onChangeText}
+		/>
+	);
+};

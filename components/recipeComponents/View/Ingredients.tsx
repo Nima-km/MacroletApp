@@ -6,209 +6,173 @@ import React, { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
-import {
-    SimpleChartCarbsMacro,
-    SimpleChartFatMacro,
-    SimpleChartProteinMacro,
-} from "@/components/chartComponents/SimpleChart/SimpleChartMacro";
 import { SecondaryAddButton } from "@/components/UIComponents/Buttons/Button";
 import IngredientModal from "@/components/UIComponents/Modals/IngredientModal";
-import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
-import { useRecipeStateStore } from "@/store/recipeStore/useRecipeStore";
+import {
+	useRecipeDraftStore,
+	useRecipeStateStore,
+} from "@/store/recipeStore/useRecipeStore";
 import { DefaultServings } from "@/tests/testData";
-import PrepCookButton from "../../UIComponents/Buttons/PrepCookButton";
-import { H1, H2, H3, H6 } from "../../UIComponents/Typography";
+import { H2, H3 } from "../../UIComponents/Typography";
+type MODETYPES = "draft" | "state";
 
 type Props = {
-    servings: string;
-    canModifyIngredient?: boolean;
-    setServings: (newServing: string) => void;
-    addIngredient: () => void;
+	servings: string;
+	mode?: MODETYPES;
+	canModifyIngredient?: boolean;
+	setServings: (newServing: string) => void;
+	addIngredient: () => void;
 };
 const Ingredients = ({
-    servings,
-    canModifyIngredient = true,
-    addIngredient,
-    setServings,
+	servings,
+	canModifyIngredient = true,
+	addIngredient,
+	mode = "state",
+	setServings,
 }: Props) => {
-    const foodData = useRecipeStateStore((state) => state.data.foodData);
-    const recipeData = useRecipeStateStore((state) => state.data.recipeData);
-    const ingredientItemsData = useRecipeStateStore(
-        (state) => state.data.ingredientItemsData,
-    );
-    const updateIngredient = useRecipeStateStore(
-        (state) => state.updateIngredient,
-    );
-    const removeIngredient = useRecipeStateStore(
-        (state) => state.removeIngredient,
-    );
-    const [showIngredientModal, setShowIngredientModal] = useState(false);
-    const [selectedIngredient, setSelectedIngredient] = useState(0);
-    function calculate_final(inp: number) {
-        const mult = 1;
-        return (inp * Number(servings)) / mult;
-    }
-    useEffect(() => {
-        //console.log("recipe changed, ingredient", foodData);
-    }, [foodData]);
-    const calories = calculateCalories(foodData);
-    const total_macro = macroSum(foodData);
-    console.log("canmodifyingredient, ingredient", canModifyIngredient);
-    return (
-        <View style={{ flex: 1, gap: 24 }}>
-            <PrepCookButton
-                prepTime={recipeData.prep_time ?? 0}
-                cookTime={recipeData.cook_time ?? 0}
-                setCookTime={(hour, mins) => {}}
-                setPrepTime={(hour, mins) => {}}
-                disable
-            />
-
-            <View style={{ flexDirection: "row" }}>
-                <View style={{ justifyContent: "center", flex: 1 }}>
-                    <H1>{Math.floor(calculate_final(calories))} cal</H1>
-                </View>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 8,
-                    }}
-                >
-                    <H3 style={{ color: colors.primary }}>Servings</H3>
-                    <FormInputNumber
-                        value={servings}
-                        onChangeText={setServings}
-                        //  lowerLimit={1}
-                    />
-                </View>
-            </View>
-            <H6>Nutritional information shown are per serving</H6>
-            <View style={styles.chartsContainer}>
-                <SimpleChartProteinMacro
-                    target={total_macro}
-                    progress={calculate_final(foodData.protein ?? 0)}
-                    backgroundColor={colors.white}
-                />
-                <SimpleChartCarbsMacro
-                    target={total_macro}
-                    progress={calculate_final(foodData.carbs ?? 0)}
-                    backgroundColor={colors.white}
-                />
-                <SimpleChartFatMacro
-                    target={total_macro}
-                    progress={calculate_final(foodData.fat ?? 0)}
-                    backgroundColor={colors.white}
-                />
-            </View>
-
-            <View
-                style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                }}
-            >
-                <H2>Ingredients</H2>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 8,
-                    }}
-                >
-                    <H3 style={{ color: colors.primary }}>
-                        Servings Yield: {recipeData.servings_yield}
-                    </H3>
-                </View>
-            </View>
-            <FlatList
-                data={ingredientItemsData}
-                renderItem={({ item, index }) => (
-                    <Pressable
-                        onPress={() => {
-                            (setSelectedIngredient(index),
-                                setShowIngredientModal(true));
-                        }}
-                    >
-                        <FoodCardIngredient
-                            style={{ backgroundColor: "" }}
-                            food={item.food}
-                            ingredientItem={item.ingredientItem}
-                        />
-                    </Pressable>
-                )}
-                scrollEnabled={false}
-                ItemSeparatorComponent={() => (
-                    <View
-                        style={{
-                            height: 1,
-                            flex: 1,
-                            backgroundColor: colors.primary_bg,
-                            marginHorizontal: 20,
-                        }}
-                    />
-                )}
-                extraData={showIngredientModal}
-            />
-            {canModifyIngredient && (
-                <View>
-                    <SecondaryAddButton onPress={addIngredient}>
-                        Add Ingredient
-                    </SecondaryAddButton>
-                </View>
-            )}
-            <View>
-                <Modal
-                    visible={showIngredientModal}
-                    transparent
-                    animationType="fade"
-                    onRequestClose={() => {
-                        setShowIngredientModal(false);
-                    }}
-                >
-                    <IngredientModal
-                        foodData={ingredientItemsData[selectedIngredient].food}
-                        ingredientData={
-                            ingredientItemsData[selectedIngredient]
-                                .ingredientItem
-                        }
-                        options={[...DefaultServings]}
-                        selectedOption={0}
-                        setIngredient={(updatedIngredient) =>
-                            updateIngredient(
-                                selectedIngredient,
-                                updatedIngredient,
-                            )
-                        }
-                        onClose={() => setShowIngredientModal(false)}
-                        onSwap={() =>
-                            console.log(
-                                "implement onSwap for ingredientModal in Ingredients.tsx",
-                            )
-                        }
-                        onDelete={() =>
-                            ingredientItemsData.length > 1
-                                ? (setSelectedIngredient(0),
-                                  removeIngredient(selectedIngredient))
-                                : () => {}
-                        }
-                    />
-                </Modal>
-            </View>
-        </View>
-    );
+	const foodData =
+		mode == "state"
+			? useRecipeStateStore((state) => state.data.foodData)
+			: useRecipeDraftStore((state) => state.data.foodData);
+	const recipeData =
+		mode == "state"
+			? useRecipeStateStore((state) => state.data.recipeData)
+			: useRecipeDraftStore((state) => state.data.recipeData);
+	const ingredientItemsData =
+		mode == "state"
+			? useRecipeStateStore((state) => state.data.ingredientItemsData)
+			: useRecipeDraftStore((state) => state.data.ingredientItemsData);
+	const updateIngredient =
+		mode == "state"
+			? useRecipeStateStore((state) => state.updateIngredient)
+			: useRecipeDraftStore((state) => state.updateIngredient);
+	const removeIngredient =
+		mode == "state"
+			? useRecipeStateStore((state) => state.removeIngredient)
+			: useRecipeDraftStore((state) => state.removeIngredient);
+	const [showIngredientModal, setShowIngredientModal] = useState(false);
+	const [selectedIngredient, setSelectedIngredient] = useState(0);
+	function calculate_final(inp: number) {
+		const mult = 1;
+		return (inp * Number(servings)) / mult;
+	}
+	useEffect(() => {
+		//console.log("recipe changed, ingredient", foodData);
+	}, [foodData]);
+	const calories = calculateCalories(foodData);
+	const total_macro = macroSum(foodData);
+	return (
+		<View style={{ flex: 1, gap: 10 }}>
+			<View
+				style={{
+					flexDirection: "row",
+					justifyContent: "space-between",
+				}}
+			>
+				<H2>Ingredients</H2>
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "center",
+						alignItems: "center",
+						gap: 8,
+					}}
+				>
+					<H3 style={{ color: colors.primary }}>
+						Servings Yield: {recipeData.servings_yield}
+					</H3>
+				</View>
+			</View>
+			<FlatList
+				data={ingredientItemsData}
+				renderItem={({ item, index }) => (
+					<Pressable
+						onPress={() => {
+							(setSelectedIngredient(index),
+								setShowIngredientModal(true));
+						}}
+					>
+						<FoodCardIngredient
+							style={{ backgroundColor: "" }}
+							food={item.food}
+							ingredientItem={item.ingredientItem}
+						/>
+					</Pressable>
+				)}
+				scrollEnabled={false}
+				ItemSeparatorComponent={() => (
+					<View
+						style={{
+							height: 1,
+							flex: 1,
+							backgroundColor: colors.primary_bg,
+							marginHorizontal: 20,
+						}}
+					/>
+				)}
+				extraData={showIngredientModal}
+			/>
+			{canModifyIngredient && (
+				<View>
+					<SecondaryAddButton onPress={addIngredient}>
+						Add Ingredient
+					</SecondaryAddButton>
+				</View>
+			)}
+			{ingredientItemsData[selectedIngredient] && (
+				<View>
+					<Modal
+						visible={showIngredientModal}
+						transparent
+						animationType="fade"
+						onRequestClose={() => {
+							setShowIngredientModal(false);
+						}}
+					>
+						<IngredientModal
+							foodData={
+								ingredientItemsData[selectedIngredient]?.food
+							}
+							ingredientData={
+								ingredientItemsData[selectedIngredient]
+									.ingredientItem
+							}
+							options={[...DefaultServings]}
+							selectedOption={0}
+							setIngredient={(updatedIngredient) =>
+								updateIngredient(
+									selectedIngredient,
+									updatedIngredient,
+								)
+							}
+							onClose={() => setShowIngredientModal(false)}
+							onSwap={() =>
+								console.log(
+									"implement onSwap for ingredientModal in Ingredients.tsx",
+								)
+							}
+							onDelete={() =>
+								ingredientItemsData.length > 1
+									? (setSelectedIngredient(0),
+										removeIngredient(selectedIngredient))
+									: () => {}
+							}
+						/>
+					</Modal>
+				</View>
+			)}
+		</View>
+	);
 };
 
 export default Ingredients;
 
 const styles = StyleSheet.create({
-    chartsContainer: {
-        flexDirection: "row",
+	chartsContainer: {
+		flexDirection: "row",
 
-        //alignItems: 'center',
-        justifyContent: "space-between",
-        gap: 20,
-    },
+		//alignItems: 'center',
+		justifyContent: "space-between",
+		gap: 20,
+	},
 });

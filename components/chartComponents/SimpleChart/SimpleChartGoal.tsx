@@ -1,58 +1,69 @@
-import Carbs from '@/assets/svg/carbs.svg'
-import Fat from '@/assets/svg/fat.svg'
-import Protein from '@/assets/svg/protein.svg'
-import { colors } from '@/theme'
-import React from 'react'
-import SimpleChartCore from './SimpleChartCore'
-const width = 105
+import Carbs from "@/assets/svg/carbs.svg";
+import Fat from "@/assets/svg/fat.svg";
+import Protein from "@/assets/svg/protein.svg";
+import { colors } from "@/theme";
+import React from "react";
+import SimpleChartCore from "./SimpleChartCore";
+const width = 105;
 type SimpleChartProps = {
-    target?: number,
-    progress?: number,
-    backgroundColor: string,
-}
+	target?: number;
+	progress?: number;
+	backgroundColor: string;
+};
 
-export const SimpleChartProteinGoal = ({target, progress, backgroundColor} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={true} 
-            width={width} 
-            topText={'PROTEIN'} 
-            barColor={colors.protein} 
-            backgroundColor={backgroundColor}
-            Icon={Protein}
-        />
-    )
-}
+export const SimpleChartProteinGoal = ({
+	target,
+	progress,
+	backgroundColor,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={true}
+			width={width}
+			topText={"PROTEIN"}
+			barColor={colors.protein}
+			backgroundColor={backgroundColor}
+			Icon={Protein}
+		/>
+	);
+};
 
-export const SimpleChartFatGoal = ({target, progress, backgroundColor} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={true} 
-            width={width} 
-            topText={'FAT'}
-            barColor={colors.fat}
-            backgroundColor={backgroundColor}
-            Icon={Fat}
-        />
-    )
-}
+export const SimpleChartFatGoal = ({
+	target,
+	progress,
+	backgroundColor,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={true}
+			width={width}
+			topText={"FAT"}
+			barColor={colors.fat}
+			backgroundColor={backgroundColor}
+			Icon={Fat}
+		/>
+	);
+};
 
-
-export const SimpleChartCarbsGoal = ({target, progress, backgroundColor} : SimpleChartProps) => {
-    return (
-        <SimpleChartCore 
-            target={target}
-            progress={progress} 
-            mode={true} 
-            width={width} 
-            topText={'CARBS'}
-            barColor={colors.carbs}
-            backgroundColor={backgroundColor}
-            Icon={Carbs}
-        />
-    )
-}
+export const SimpleChartCarbsGoal = ({
+	target,
+	progress,
+	backgroundColor,
+}: SimpleChartProps) => {
+	return (
+		<SimpleChartCore
+			target={target}
+			progress={progress}
+			mode={true}
+			width={width}
+			topText={"CARBS"}
+			barColor={colors.carbs}
+			backgroundColor={backgroundColor}
+			Icon={Carbs}
+		/>
+	);
+};
