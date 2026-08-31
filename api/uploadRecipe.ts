@@ -1,10 +1,10 @@
 import { RecipeData } from "@/types/recipe";
-import { transformRecipeForAPI, transformRecipeFromAPI } from "./tranformers";
+import { transformRecipeForAPI } from "./tranformers";
 
 export async function updloadRecipe(
 	recipe: RecipeData,
 	token: string,
-): Promise<RecipeData> {
+): Promise<string> {
 	if (recipe.recipeData.recipe_slug) {
 		throw new Error("recipe has been uploaded already");
 	}
@@ -27,6 +27,7 @@ export async function updloadRecipe(
 	}
 
 	const apiRecipe = await response.json();
-
-	return transformRecipeFromAPI(apiRecipe);
+	const result = apiRecipe;
+	console.log("the result for uploading recipe: ", result);
+	return result;
 }

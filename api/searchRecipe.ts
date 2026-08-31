@@ -5,50 +5,61 @@ export async function fetchFilteredRecipes({
 	filters,
 	title,
 	token,
+	page = 1,
 }: {
 	filters: Record<string, any>;
 	title: string;
 	token: string;
+	page?: number;
 }) {
-	console.log("search recipe is fetching", filters, title);
-	if (title.length < 3) {
-		return [];
-	}
+	if (title.length < 3) return { data: [], pagination: null };
+
 	const query = new URLSearchParams();
-	if (title?.trim()) {
-		query.append("search", title.trim());
-	}
+	if (title?.trim()) query.append("search", title.trim());
+	query.append("page", String(page));
+	query.append("limit", "20");
 
 	Object.entries(filters).forEach(([k, v]) => {
-		if (v !== undefined && v !== null) {
-			query.append(k, String(v));
-		}
+		if (v !== undefined && v !== null) query.append(k, String(v));
 	});
 
 	const response = await fetch(
 		`${process.env.EXPO_PUBLIC_API_URL}/recipes/search/?${query.toString()}`,
 		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
+			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
 
 	const data = await response.json();
-	//console.log("test recieve searchRecipe", data.error, response.ok);
 
-	if (!response.ok) {
-		const err = data.error;
-		throw new Error(err);
-	}
-	console.log("data from fetchfilteredrecips", data);
-	return transformRecipesFromAPI(data);
+	if (!response.ok) throw new Error(data.error);
+
+	return {
+		data: transformRecipesFromAPI(data.data), // data.data since response is now { data, pagination }
+		pagination: data.pagination,
+	};
 }
 export const fetchRecipeFromSlug = async (
 	recipe_slug: string,
 ): Promise<RecipeData> => {
 	const res = await fetch(
 		`${process.env.EXPO_PUBLIC_API_URL}/recipes/${recipe_slug}`,
+	);
+
+	if (!res.ok) throw new Error(`Failed to fetch recipe: ${res.status}`);
+
+	return res.json();
+};
+type AuthorType = {
+	display_name: string;
+	username: string;
+	profilePic?: string;
+};
+export const fetchAuthorFromSlug = async (
+	recipe_slug: string,
+): Promise<{ author: AuthorType }> => {
+	const res = await fetch(
+		`${process.env.EXPO_PUBLIC_API_URL}/creator/${recipe_slug}`,
 	);
 
 	if (!res.ok) throw new Error(`Failed to fetch recipe: ${res.status}`);

@@ -7,7 +7,7 @@ export default function SubscribeButton({ planId }: { planId: string }) {
 	const handleStartCheckout = async () => {
 		try {
 			const checkout = await clerk.billing.startCheckout({
-				planId: planId,
+				planId: "cplan_31CHATwXmr20VQOBVaRmVC7JSib",
 				planPeriod: "month",
 			});
 			console.log(

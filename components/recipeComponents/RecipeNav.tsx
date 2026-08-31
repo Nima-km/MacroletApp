@@ -1,12 +1,7 @@
 import { colors } from "@/theme";
 import React from "react";
-import {
-	ScrollView,
-	StyleSheet,
-	TouchableOpacity,
-	View,
-	ViewStyle,
-} from "react-native";
+import { ScrollView, StyleSheet, View, ViewStyle } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { H5_SemiBold } from "../UIComponents/Typography";
 interface Option {
 	label: string;
@@ -16,11 +11,13 @@ interface Option {
 interface SelectionComponentProps {
 	selectedValue: number;
 	style?: ViewStyle;
+	scrollNavRef: React.RefObject<ScrollView | null>;
 	onSelect: (value: number) => void;
 }
 
 const RecipeNav = ({
 	selectedValue,
+	scrollNavRef,
 	style,
 	onSelect,
 }: SelectionComponentProps) => {
@@ -28,6 +25,7 @@ const RecipeNav = ({
 		{ label: "Overview", value: 0 },
 		{ label: "Ingredients", value: 1 },
 		{ label: "Directions", value: 2 },
+		{ label: "Reviews", value: 3 },
 	];
 	//const [selectedValue, setSelectedValue] = useState<number | null>(options[0].value);
 
@@ -37,58 +35,73 @@ const RecipeNav = ({
 	};
 
 	return (
-		<ScrollView collapsable={false} style={{ zIndex: 10 }}>
-			<View style={[styles.container, style]}>
-				{options.map((option) => (
-					<TouchableOpacity
-						activeOpacity={1}
-						key={option.value}
-						style={[
-							styles.optionButton,
-							selectedValue === option.value &&
-								styles.selectedButton,
-						]}
-						onPressOut={() => handleSelect(option.value)}
-						accessibilityRole="button"
-						accessibilityState={{
-							selected: selectedValue === option.value,
-						}}
-					>
-						<H5_SemiBold
-							style={[
-								{
-									color:
-										selectedValue === option.value
-											? colors.black
-											: colors.inactive,
-									marginBottom: 10,
-								},
-							]}
-						>
-							{option.label}
-						</H5_SemiBold>
+		<ScrollView
+			collapsable={false}
+			style={{ zIndex: 10 }}
+			ref={scrollNavRef}
+			horizontal
+			showsHorizontalScrollIndicator={false}
+			nestedScrollEnabled={true}
+		>
+			<View
+				style={{
+					borderBottomWidth: 1,
 
-						{selectedValue === option.value && (
-							<View
+					paddingHorizontal: 20,
+					borderBottomColor: colors.light_gray,
+				}}
+			>
+				<View style={[styles.container, style]}>
+					{options.map((option) => (
+						<Pressable
+							key={option.value}
+							style={[
+								styles.optionButton,
+								selectedValue === option.value &&
+									styles.selectedButton,
+							]}
+							onPress={() => handleSelect(option.value)}
+							accessibilityRole="button"
+							accessibilityState={{
+								selected: selectedValue === option.value,
+							}}
+						>
+							<H5_SemiBold
 								style={[
 									{
-										flexDirection: "row",
-										alignItems: "center",
+										color:
+											selectedValue === option.value
+												? colors.black
+												: colors.inactive,
+										marginBottom: 10,
 									},
 								]}
 							>
+								{option.label}
+							</H5_SemiBold>
+
+							{selectedValue === option.value && (
 								<View
-									style={{
-										backgroundColor: colors.error,
-										height: 3,
-										//marginTop: 10,
-										flex: 1,
-									}}
-								/>
-							</View>
-						)}
-					</TouchableOpacity>
-				))}
+									style={[
+										{
+											flexDirection: "row",
+											alignItems: "center",
+										},
+									]}
+								>
+									<View
+										style={{
+											backgroundColor: colors.error,
+											height: 3,
+											//marginTop: 10,
+											flex: 1,
+										}}
+									/>
+								</View>
+							)}
+						</Pressable>
+					))}
+				</View>
 			</View>
 		</ScrollView>
 	);
@@ -100,9 +113,7 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: "row",
 
-		justifyContent: "space-between",
-		borderBottomWidth: 1, // ultra thin (1px on most screens)
-		borderBottomColor: colors.light_gray,
+		gap: 65,
 	},
 	optionButton: {
 		justifyContent: "center",

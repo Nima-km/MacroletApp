@@ -1,5 +1,4 @@
 import HeaderFood from "@/components/navComponents/HeaderFood";
-import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
 import { H1 } from "@/components/UIComponents/Typography";
 import { useGetFood, useInsertFoodAndItem } from "@/db/hooks/food/useFood";
@@ -127,7 +126,7 @@ const food = () => {
 		return <H1>Couldn't Load Food</H1>;
 	}
 	return (
-		<KeyboardAware>
+		<View style={{ flex: 1 }}>
 			<HeaderFood
 				title={!edit ? "View Meal" : "Edit Meal"}
 				isEdit={edit}
@@ -148,7 +147,7 @@ const food = () => {
 					setEdit={setEdit}
 				/>
 			</View>
-		</KeyboardAware>
+		</View>
 	);
 };
 

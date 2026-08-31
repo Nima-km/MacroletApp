@@ -8,7 +8,16 @@ export const useCreatorOnboarding = () => {
 	const { getToken } = useAuth();
 
 	return useMutation({
-		mutationFn: async (username: string) => {
+		mutationFn: async ({
+			username,
+			display_name,
+			about,
+		}: {
+			username?: string;
+			display_name?: string;
+			about?: string;
+		}) => {
+			console.log("display name is", display_name);
 			const token = await getToken();
 			const res = await fetch(`${API_URL}/creator/onboard`, {
 				method: "POST",
@@ -16,7 +25,7 @@ export const useCreatorOnboarding = () => {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({ username }),
+				body: JSON.stringify({ username, display_name, about }),
 			});
 
 			if (!res.ok) {
@@ -29,6 +38,7 @@ export const useCreatorOnboarding = () => {
 		},
 		onSuccess: async (data) => {
 			// Open Stripe onboarding in browser
+			console.log("ON BROWSER");
 			await WebBrowser.openBrowserAsync(data.onboarding_url);
 		},
 	});

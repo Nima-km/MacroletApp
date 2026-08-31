@@ -6,6 +6,7 @@ import { colors } from "@/theme";
 import { FoodFullData } from "@/types/food";
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import MacroChart from "../MacroCharts/MacroChart";
 
 const FoodCardSmall = ({ food, foodItem }: FoodFullData) => {
 	const foodData = calculateMacro(
@@ -23,64 +24,7 @@ const FoodCardSmall = ({ food, foodItem }: FoodFullData) => {
 					{foodItem.servings > 1 && "s"}
 				</H4>
 			</View>
-			<View style={[{ flexDirection: "row" }]}>
-				<View
-					style={[
-						styles.progressBar,
-						{
-							backgroundColor: colors.protein,
-							borderTopLeftRadius: 8,
-							borderBottomLeftRadius: 8,
-
-							flex: food.protein,
-						},
-						food.fat + food.carbs == 0
-							? {
-									borderTopRightRadius: 8,
-									borderBottomRightRadius: 8,
-								}
-							: {},
-					]}
-				/>
-				<View
-					style={[
-						styles.progressBar,
-						{
-							backgroundColor: colors.carbs,
-							flex: food.carbs,
-						},
-						food.fat == 0
-							? {
-									borderTopRightRadius: 8,
-									borderBottomRightRadius: 8,
-								}
-							: {},
-						food.protein == 0
-							? {
-									borderTopLeftRadius: 8,
-									borderBottomLeftRadius: 8,
-								}
-							: {},
-					]}
-				/>
-				<View
-					style={[
-						styles.progressBar,
-						{
-							backgroundColor: colors.fat,
-							borderTopRightRadius: 8,
-							borderBottomRightRadius: 8,
-							flex: food.fat,
-						},
-						food.protein + food.carbs == 0
-							? {
-									borderTopLeftRadius: 8,
-									borderBottomLeftRadius: 8,
-								}
-							: {},
-					]}
-				/>
-			</View>
+			<MacroChart food={food} />
 			<View style={styles.macroInfo}>
 				<View style={styles.macroInfoSub}>
 					<H5_SemiBold>{calculateCalories(foodData)} cal</H5_SemiBold>

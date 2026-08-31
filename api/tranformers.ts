@@ -39,6 +39,7 @@ export function transformRecipeForAPI(data: RecipeData) {
 		cook_time: data.recipeData.cook_time ?? 0,
 		directions: data.recipeData.directions ?? [],
 		tags: data.recipeData.tags ?? [],
+		recipe_slug: data.recipeData.recipe_slug ?? undefined,
 		// IMPLEMENT THIS FOR IMAGES bannerImage: "https://example.com/image.jpg",
 		ingredients: data.ingredientItemsData.map((item) => ({
 			prep_notes: item.ingredientItem.prep_notes ?? undefined,
@@ -69,7 +70,7 @@ export function transformRecipesFromAPI(
 			cook_time: apiRecipe.cook_time,
 			note: apiRecipe.note,
 			bannerImage: apiRecipe.bannerImage ?? null,
-
+			author: apiRecipe.author,
 			directions: apiRecipe.directions,
 
 			tags: apiRecipe.tags,

@@ -17,6 +17,7 @@ import m0012 from './0012_normal_moon_knight.sql';
 import m0013 from './0013_flawless_hellcat.sql';
 import m0014 from './0014_yummy_grandmaster.sql';
 import m0015 from './0015_glamorous_mysterio.sql';
+import m0016 from './0016_lumpy_silver_sable.sql';
 
   export default {
     journal,
@@ -36,7 +37,8 @@ m0011,
 m0012,
 m0013,
 m0014,
-m0015
+m0015,
+m0016
     }
   }
   

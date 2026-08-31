@@ -89,9 +89,9 @@ export const BottomSheetCore = forwardRef<BottomSheet, Props>(
 
 const styles = StyleSheet.create({
 	sheet: {
-		shadowColor: "#000",
-		shadowOpacity: 1,
-		shadowRadius: 8,
+		//	shadowColor: "#000",
+		//	shadowOpacity: 1,
+		//	shadowRadius: 8,
 	},
 	content: {
 		flex: 1,

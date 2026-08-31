@@ -1,5 +1,13 @@
 import { usePostCredit } from "@/api/hooks/usePostCredit";
-import { updloadRecipe } from "@/api/uploadRecipe";
+import {
+	useCreateReview,
+	useCreatorResponse,
+	useRecipeReviews,
+	useReportRecipe,
+} from "@/api/hooks/useReview";
+import { useGetAuthorFromSlug } from "@/api/hooks/useSearchRecipe";
+import { useUploadRecipe } from "@/api/hooks/useUploadRecipe";
+
 import Bookmark from "@/assets/svg/bookmark.svg";
 import Share from "@/assets/svg/share.svg";
 import RecipeNav from "@/components/recipeComponents/RecipeNav";
@@ -23,19 +31,25 @@ import {
 } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
+import { RecipeReviews } from "@/types/review";
 import { useAuth } from "@clerk/expo";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+	Keyboard,
+	KeyboardAvoidingView,
+	KeyboardAvoidingViewProps,
 	Modal,
 	NativeScrollEvent,
 	NativeSyntheticEvent,
+	Platform,
 	ScrollView,
 	View,
 } from "react-native";
 import IconButton from "../UIComponents/Buttons/IconButton";
 import CreateRecipeBook from "../UIComponents/Modals/CreateRecipeBook";
 import SelectRecipeBook from "../UIComponents/Modals/SelectRecipeBook";
+import Reviews from "./View/Reviews";
 type MODETYPES = "draft" | "state";
 interface Props {
 	servings: number;
@@ -46,7 +60,7 @@ interface Props {
 	onUploadRecipe?: () => void;
 }
 
-type SectionKey = "ingredients" | "overview" | "directions";
+type SectionKey = "ingredients" | "overview" | "directions" | "reviews";
 const RecipeInfoCore = ({
 	servings,
 	canModifyIngredient = true,
@@ -57,9 +71,69 @@ const RecipeInfoCore = ({
 }: Props) => {
 	const { getToken, has } = useAuth();
 	const scrollViewRef = useRef<ScrollView>(null);
+	const scrollNavRef = useRef<ScrollView>(null);
 	const sectionPositions = useRef<Partial<Record<SectionKey, number>>>({});
-	const [scrollPositions, setScrollPositions] = useState(0);
+	const scrollPositionsRef = useRef(0);
 	const { mutate: giveCredit } = usePostCredit();
+	const reviews: RecipeReviews = {
+		reviews: [
+			{
+				review: {
+					id: 0,
+					recipe_id: 0,
+					username: "Jessica",
+					rating: 0,
+					content:
+						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
+					created_at: new Date(),
+					updated_at: new Date(),
+				},
+				response: {
+					id: 0,
+					review_id: 0,
+					creator_username: "Jessica",
+					content: "ERRRM NO",
+					created_at: new Date(),
+				},
+			},
+			{
+				review: {
+					id: 0,
+					recipe_id: 0,
+					username: "POOPOO",
+					rating: 0,
+					content:
+						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
+					created_at: new Date(),
+					updated_at: new Date(),
+				},
+				response: {
+					id: 0,
+					review_id: 0,
+					creator_username: "Jessica",
+					content: "SUREE",
+					created_at: new Date(),
+				},
+			},
+			{
+				review: {
+					id: 0,
+					recipe_id: 0,
+					username: "Shrimp",
+					rating: 0,
+					content:
+						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
+					created_at: new Date(),
+					updated_at: new Date(),
+				},
+				response: null,
+			},
+		],
+		stats: {
+			averageRating: "4.8",
+			totalReviews: 12,
+		},
+	};
 	const recipeFullData =
 		mode == "state"
 			? useRecipeStateStore((state) => state.data)
@@ -87,6 +161,21 @@ const RecipeInfoCore = ({
 	const router = useRouter();
 	const [selectedPage, setSelectedPage] = useState(0);
 	const [servingString, setServingString] = useState(servings.toString());
+	const { data: reviewData, isLoading } = useRecipeReviews(
+		recipeData?.recipe_slug ?? "",
+	);
+	const { data: authorData, isLoading: authorLoading } = useGetAuthorFromSlug(
+		recipeData?.recipe_slug ?? "",
+	);
+	const { mutate: createReview, isPending } = useCreateReview(
+		recipeData?.recipe_slug ?? "",
+	);
+	const { mutate: uploadRecipe } = useUploadRecipe();
+
+	const { mutate: respondToReview } = useCreatorResponse();
+	const { mutate: reportRecipe } = useReportRecipe(
+		recipeData?.recipe_slug ?? "",
+	);
 
 	const handleLogRecipe = () => {
 		onLogRecipe?.();
@@ -105,18 +194,28 @@ const RecipeInfoCore = ({
 	const scrollToSection = (key: SectionKey) => {
 		const y = sectionPositions.current[key];
 		if (y !== undefined) {
-			scrollViewRef.current?.scrollTo({ y, animated: false });
+			scrollViewRef.current?.scrollTo({ y: y + 350, animated: false });
 		}
 	};
 	const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-		const scrollY = event.nativeEvent.contentOffset.y;
-		setScrollPositions((prev) => scrollY);
-		if (scrollY >= (sectionPositions.current["directions"] ?? 0))
-			setSelectedPage(2);
-		else if (scrollY >= (sectionPositions.current["ingredients"] ?? 0))
-			setSelectedPage(1);
-		else setSelectedPage(0);
-		console.log("scroll position ub recipeInfoCore", scrollY);
+		const scrollY = event.nativeEvent.contentOffset.y - 350;
+		scrollPositionsRef.current = scrollY; // no re-render
+
+		let page = 0;
+		if (scrollY >= (sectionPositions.current["reviews"] ?? 0)) {
+			page = 3;
+		} else if (scrollY >= (sectionPositions.current["directions"] ?? 0)) {
+			page = 2;
+			if (selectedPage != page) {
+				scrollNavRef.current?.scrollToEnd();
+			}
+		} else if (scrollY >= (sectionPositions.current["ingredients"] ?? 0)) {
+			page = 1;
+			if (selectedPage != page) {
+				scrollNavRef.current?.scrollTo({ y: 0 });
+			}
+		}
+		setSelectedPage((prev) => (prev === page ? prev : page));
 	};
 
 	async function onUpload() {
@@ -128,11 +227,7 @@ const RecipeInfoCore = ({
 				directions: recipeFullData.recipeData.directions || [],
 			},
 		};
-		updloadRecipe(
-			recipeDataWithDirections as RecipeData,
-			clerk_token ?? "",
-		).catch((e) => console.log(e));
-		//.then(updateRecipe(recipe)); FOR MAKING SURE DUPLICATE RECIPES DON'T GET REUPLOADED
+		uploadRecipe(recipeDataWithDirections as RecipeData);
 	}
 	function createRecipeBook(newName: string) {
 		insertRecipeBook(
@@ -152,157 +247,225 @@ const RecipeInfoCore = ({
 		setServingString(newServings);
 		setServings(Number(newServings));
 	}
+	const defaultValue: KeyboardAvoidingViewProps["behavior"] =
+		Platform.OS === "ios" ? "padding" : "height";
+
+	const [behaviour, setBehaviour] =
+		useState<KeyboardAvoidingViewProps["behavior"]>(defaultValue);
+
+	useEffect(() => {
+		const showListener = Keyboard.addListener("keyboardDidShow", () => {
+			setBehaviour(defaultValue);
+		});
+		const hideListener = Keyboard.addListener("keyboardDidHide", () => {
+			setBehaviour(undefined);
+		});
+
+		return () => {
+			showListener.remove();
+			hideListener.remove();
+		};
+	}, []);
+	useEffect(() => {
+		console.log("author is", authorData);
+	}, [authorData]);
 
 	return (
-		<ScrollView
-			style={{ flex: 1, paddingHorizontal: 20 }}
-			stickyHeaderIndices={[mode == "state" ? 5 : 4]}
-			ref={scrollViewRef}
-			onScroll={handleScroll}
+		<KeyboardAvoidingView
+			behavior={behaviour}
+			style={{
+				flex: 1,
+			}}
+			keyboardVerticalOffset={100} // adjust if header is present
 		>
-			<View
-				style={{
-					backgroundColor: colors.primary_bg,
-					height: 160,
-					marginHorizontal: -20,
-					marginBottom: 20,
-				}}
-			></View>
-
-			<H2>{foodData.name}</H2>
-			<View
-				style={{
-					flexDirection: "row",
-					alignItems: "center",
-					marginBottom: 8,
-					marginTop: 10,
-					gap: 8,
-				}}
+			<ScrollView
+				style={{ flex: 1, paddingHorizontal: 20 }}
+				//scrollEventThrottle={16}
+				stickyHeaderIndices={[
+					(mode == "state" ? 5 : 4) + (authorData ? 1 : 0),
+				]}
+				nestedScrollEnabled={true}
+				ref={scrollViewRef}
+				onScroll={handleScroll}
 			>
-				<H5 style={{ color: colors.medium_gray }}>Private recipe</H5>
-				<SubButton>Shrimp</SubButton>
-				<SubButton>Chinese</SubButton>
-			</View>
-			<H5 style={{ color: colors.medium_gray, marginBottom: 8 }}>
-				{recipeData.description}
-			</H5>
-			{mode == "state" && (
+				<View
+					style={{
+						backgroundColor: colors.primary_bg,
+						height: 160,
+						marginHorizontal: -20,
+						marginBottom: 20,
+					}}
+				></View>
+
+				<H2>{foodData.name}</H2>
 				<View
 					style={{
 						flexDirection: "row",
-						paddingVertical: 12,
+						alignItems: "center",
+						marginBottom: 8,
+						marginTop: 10,
 						gap: 8,
 					}}
 				>
-					<PrimaryButton
-						style={{ flex: 1 }}
-						onPress={handleLogRecipe}
+					<H5 style={{ color: colors.medium_gray }}>
+						Private recipe
+					</H5>
+					<SubButton>Shrimp</SubButton>
+					<SubButton>Chinese</SubButton>
+				</View>
+				<H5 style={{ color: colors.medium_gray, marginBottom: 8 }}>
+					{recipeData.description}
+				</H5>
+				{authorData && (
+					<View
+						style={{
+							flexDirection: "row",
+							alignItems: "center",
+							gap: 4,
+						}}
 					>
-						Log
-					</PrimaryButton>
-					<IconButton
-						onPress={() => setShowSelectRecipe(true)}
-						icon={<Bookmark pointerEvents="none" />}
-					/>
-					<IconButton
-						onPress={onUpload}
-						icon={<Share pointerEvents="none" />}
-					/>
-				</View>
-			)}
-			<View
-				style={{
-					backgroundColor: colors.off_white,
-					paddingVertical: 5,
-					zIndex: 10,
-				}}
-				collapsable={false}
-			>
-				<RecipeNav
-					selectedValue={selectedPage}
-					onSelect={(selected) => (
-						setSelectedPage(selected),
-						scrollToSection(
-							selected == 0
-								? "overview"
-								: selected == 1
-									? "ingredients"
-									: "directions",
-						)
-					)}
-				/>
-			</View>
-			<View style={{ gap: 40, paddingTop: 20 }}>
+						<View
+							style={{
+								width: 40,
+								height: 40,
+								borderRadius: 20,
+								backgroundColor: colors.light_gray,
+							}}
+						></View>
+						<H5>By {authorData?.author?.display_name}</H5>
+					</View>
+				)}
+				{mode == "state" && (
+					<View
+						style={{
+							flexDirection: "row",
+							paddingVertical: 12,
+							gap: 8,
+						}}
+					>
+						<PrimaryButton
+							style={{ flex: 1 }}
+							onPress={handleLogRecipe}
+						>
+							Log
+						</PrimaryButton>
+						<IconButton
+							onPress={() => setShowSelectRecipe(true)}
+							icon={<Bookmark pointerEvents="none" />}
+						/>
+						<IconButton
+							onPress={onUpload}
+							icon={<Share pointerEvents="none" />}
+						/>
+					</View>
+				)}
 				<View
-					onLayout={(e) => {
-						sectionPositions.current["overview"] =
-							e.nativeEvent.layout.y;
+					style={{
+						backgroundColor: colors.off_white,
+						//paddingVertical: 5,
+						marginHorizontal: -20,
+						zIndex: 10,
 					}}
+					collapsable={false}
 				>
-					<Overview
-						mode={mode}
-						servings={servingString}
-						setServings={onServingChange}
-					/>
-				</View>
-				<View
-					onLayout={(e) => {
-						sectionPositions.current["ingredients"] =
-							e.nativeEvent.layout.y;
-					}}
-				>
-					<Ingredients
-						mode={mode}
-						servings={servingString}
-						setServings={onServingChange}
-						canModifyIngredient={canModifyIngredient}
-						addIngredient={() =>
-							router.push(
-								"/(tabs)/(logs)/HandleModifyRecipe/AddIngredientModify",
+					<RecipeNav
+						selectedValue={selectedPage}
+						scrollNavRef={scrollNavRef}
+						style={false ? { gap: 50 } : undefined}
+						onSelect={(selected) => (
+							setSelectedPage(selected),
+							scrollToSection(
+								selected == 0
+									? "overview"
+									: selected == 1
+										? "ingredients"
+										: selected == 2
+											? "directions"
+											: "reviews",
 							)
-						}
+						)}
 					/>
 				</View>
-				<View
-					onLayout={(e) => {
-						sectionPositions.current["directions"] =
-							e.nativeEvent.layout.y;
+				<View style={{ gap: 40, paddingTop: 20 }}>
+					<View
+						onLayout={(e) => {
+							sectionPositions.current["overview"] =
+								e.nativeEvent.layout.y;
+						}}
+					>
+						<Overview
+							mode={mode}
+							servings={servingString}
+							setServings={onServingChange}
+						/>
+					</View>
+					<View
+						onLayout={(e) => {
+							sectionPositions.current["ingredients"] =
+								e.nativeEvent.layout.y;
+						}}
+					>
+						<Ingredients
+							mode={mode}
+							servings={servingString}
+							setServings={onServingChange}
+							canModifyIngredient={canModifyIngredient}
+							addIngredient={() =>
+								router.push(
+									"/(tabs)/(logs)/HandleModifyRecipe/AddIngredientModify",
+								)
+							}
+						/>
+					</View>
+					<View
+						onLayout={(e) => {
+							sectionPositions.current["directions"] =
+								e.nativeEvent.layout.y;
+						}}
+					>
+						<Directions mode={mode} />
+					</View>
+					<View
+						onLayout={(e) => {
+							sectionPositions.current["reviews"] =
+								e.nativeEvent.layout.y;
+						}}
+					>
+						<Reviews reviews={reviews} />
+					</View>
+				</View>
+
+				<Modal
+					visible={showSelectRecipe}
+					transparent
+					animationType="fade"
+					onRequestClose={() => {
+						setShowSelectRecipe(false);
 					}}
 				>
-					<Directions mode={mode} />
-				</View>
-			</View>
-
-			<Modal
-				visible={showSelectRecipe}
-				transparent
-				animationType="fade"
-				onRequestClose={() => {
-					setShowSelectRecipe(false);
-				}}
-			>
-				<SelectRecipeBook
-					onSelect={(selected) => AddRecipeBookItem(selected?.id)}
-					onCreateNew={() => setShowCreateRecipe(true)}
-					recipeBookList={recipeBookList}
-					onClose={() => setShowSelectRecipe(false)}
-				/>
-			</Modal>
-			<Modal
-				visible={showCreateRecipe}
-				transparent
-				animationType="fade"
-				onRequestClose={() => {
-					setShowCreateRecipe(false);
-				}}
-			>
-				<CreateRecipeBook
-					setText={(newName) => createRecipeBook(newName)}
-					onClose={() => setShowCreateRecipe(false)}
-					error={""}
-				/>
-			</Modal>
-		</ScrollView>
+					<SelectRecipeBook
+						onSelect={(selected) => AddRecipeBookItem(selected?.id)}
+						onCreateNew={() => setShowCreateRecipe(true)}
+						recipeBookList={recipeBookList}
+						onClose={() => setShowSelectRecipe(false)}
+					/>
+				</Modal>
+				<Modal
+					visible={showCreateRecipe}
+					transparent
+					animationType="fade"
+					onRequestClose={() => {
+						setShowCreateRecipe(false);
+					}}
+				>
+					<CreateRecipeBook
+						setText={(newName) => createRecipeBook(newName)}
+						onClose={() => setShowCreateRecipe(false)}
+						error={""}
+					/>
+				</Modal>
+			</ScrollView>
+		</KeyboardAvoidingView>
 	);
 };
 

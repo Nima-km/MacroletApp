@@ -1,6 +1,5 @@
 import { useGetRecipeFromSlug } from "@/api/hooks/useSearchRecipe";
 import HeaderFood from "@/components/navComponents/HeaderFood";
-import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
 import { H1 } from "@/components/UIComponents/Typography";
 import { useCreateAndLogOnlineRecipe } from "@/db/hooks/recipe/useCreateRecipe";
@@ -69,7 +68,7 @@ const onlineRecipe = () => {
 		return <H1>Loading</H1>;
 	}
 	return (
-		<KeyboardAware>
+		<View style={{ flex: 1 }}>
 			<HeaderFood
 				title={"View Online Recipe"}
 				isEdit={edit}
@@ -80,6 +79,7 @@ const onlineRecipe = () => {
 			<View style={{ flex: 1 }}>
 				<FoodView
 					foodData={recipeStoreData.foodData}
+					//isOnline
 					foodItemData={foodItemDefault}
 					recipeData={recipeStoreData.recipeData}
 					servingData={[]}
@@ -90,7 +90,7 @@ const onlineRecipe = () => {
 					setEdit={setEdit}
 				/>
 			</View>
-		</KeyboardAware>
+		</View>
 	);
 };
 

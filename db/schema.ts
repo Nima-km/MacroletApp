@@ -34,6 +34,7 @@ export const recipe = sqliteTable("recipe", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	servings_yield: integer("servings_yield").default(0).notNull(),
 	recipe_slug: text("recipe_slug", { length: 50 }),
+	author: text("author", { length: 50 }),
 	description: text("description", { length: 250 }),
 	note: text("note", { length: 2000 }),
 	directions: text("directions", { mode: "json" }).$type<DirectionStep[]>(),

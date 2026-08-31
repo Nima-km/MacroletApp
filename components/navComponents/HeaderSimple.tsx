@@ -8,6 +8,7 @@ interface HeaderSimpleProps {
 	title?: string;
 
 	back?: boolean;
+	backAction?: () => void;
 	logo?: ReactNode;
 	dateSelector?: boolean;
 }
@@ -15,6 +16,7 @@ interface HeaderSimpleProps {
 const HeaderSimple = ({
 	title,
 	back = true,
+	backAction,
 	logo,
 	dateSelector = false,
 }: HeaderSimpleProps) => {
@@ -32,7 +34,9 @@ const HeaderSimple = ({
 							width: 70,
 							justifyContent: "center",
 						}}
-						onPress={() => router.back()}
+						onPress={() =>
+							!backAction ? router.back() : backAction()
+						}
 					>
 						<ArrowLeft color={colors.primary} />
 					</Pressable>

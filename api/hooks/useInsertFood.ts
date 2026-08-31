@@ -10,6 +10,7 @@ export const useInsertFood = () => {
 		mutationFn: async (food: FoodInsert) => {
 			const token = await getToken();
 			if (!token) throw new Error("Not authenticated");
+
 			return postFood(food, token);
 		},
 	});

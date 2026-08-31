@@ -1,31 +1,51 @@
 import { useAuth } from "@clerk/expo";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { fetchFilteredRecipes, fetchRecipeFromSlug } from "../searchRecipe";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+	fetchAuthorFromSlug,
+	fetchFilteredRecipes,
+	fetchRecipeFromSlug,
+} from "../searchRecipe";
+export type RecipeFilters = {
+	search?: string;
+	minCalories?: number;
+	maxCalories?: number;
+	minProtein?: number;
+	maxProtein?: number;
+	minCarbs?: number;
+	maxCarbs?: number;
+	minFat?: number;
+	maxFat?: number;
+	minServings?: number;
+	maxServings?: number;
+};
 
-export function useFilteredRecipes(filters: any, title: string) {
-	const { getToken, isSignedIn } = useAuth();
-	return useQuery({
-		queryKey: ["recipes", filters, title],
-		enabled: isSignedIn, // don't run if not signed in
-		placeholderData: keepPreviousData,
-		staleTime: 1000 * 60 * 5,
-		retry: (failureCount, error) => {
-			console.log("error in useFilterREcipes", error.message);
-			if (error.message === "No active subscription") return false; // don't retry expected errors
-			return failureCount < 3; // retry up to 3 times for unexpected errors
-		},
-		queryFn: async () => {
+export const useFilteredRecipes = (
+	filters: Record<string, any>,
+	committedSearch: string,
+) => {
+	const { getToken } = useAuth();
+
+	return useInfiniteQuery({
+		queryKey: ["recipes", "search", filters, committedSearch],
+		queryFn: async ({ pageParam = 1 }) => {
 			const token = await getToken();
-			if (!token) throw new Error("No auth token");
-
+			if (!token) throw new Error("Not authenticated");
 			return fetchFilteredRecipes({
 				filters,
-				title,
+				title: committedSearch,
 				token,
+				page: pageParam,
 			});
 		},
+		getNextPageParam: (lastPage) =>
+			lastPage.pagination?.hasNextPage
+				? lastPage.pagination.page + 1
+				: undefined,
+		initialPageParam: 1,
+		enabled: committedSearch.length >= 3,
+		retry: false,
 	});
-}
+};
 export function useGetRecipeFromSlug(recipe_slug: string) {
 	const { getToken, isSignedIn } = useAuth();
 	console.log("useGetRecipeFromSlug gets called", isSignedIn);
@@ -39,6 +59,22 @@ export function useGetRecipeFromSlug(recipe_slug: string) {
 			if (!token) throw new Error("No auth token");
 
 			return fetchRecipeFromSlug(recipe_slug);
+		},
+	});
+}
+export function useGetAuthorFromSlug(recipe_slug: string) {
+	const { getToken, isSignedIn } = useAuth();
+	console.log("useGetAuthorFromSlug gets called", isSignedIn);
+	return useQuery({
+		queryKey: ["online-authors", recipe_slug],
+		enabled: isSignedIn, // don't run if not signed in
+		staleTime: 1000 * 60 * 5,
+		queryFn: async () => {
+			const token = await getToken();
+
+			if (!token) throw new Error("No auth token");
+
+			return fetchAuthorFromSlug(recipe_slug);
 		},
 	});
 }
