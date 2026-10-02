@@ -1,10 +1,17 @@
+import {
+	useArchiveRecipe,
+	useCreatorOverview,
+	useDashboardRecipes,
+	useTopPerformingRecipes,
+} from "@/api/hooks/useCreatorDashboard";
 import Bars from "@/assets/svg/bar-chart.svg";
 import ChevronRight from "@/assets/svg/chevron-right.svg";
 import Dollar from "@/assets/svg/dollar-frame.svg";
 import Star from "@/assets/svg/star.svg";
+import RecipeBookCard from "@/components/chartComponents/Cards/RecipeBookCard";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import StyledRadioButton from "@/components/UIComponents/Buttons/RadioButton";
-import DropDownComment from "@/components/UIComponents/DropDown/DropDownComment";
+import DropDownRecipe from "@/components/UIComponents/DropDown/DropDownRecipe";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { FormInputSearch } from "@/components/UIComponents/TextInputs/FormInput";
 import { H1, H5, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
@@ -13,6 +20,11 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 const myRecipes = () => {
+	const { data: overview, isLoading: overviewLoading } = useCreatorOverview();
+	const { data: recipes, isLoading: recipesLoading } = useDashboardRecipes();
+	const { data: top } = useTopPerformingRecipes();
+	const { mutate: archive } = useArchiveRecipe();
+	const allRecipes = recipes?.pages.flatMap((page) => page.data) ?? [];
 	return (
 		<KeyboardAware>
 			<HeaderSimple title={"My Recipes"} />
@@ -28,7 +40,7 @@ const myRecipes = () => {
 						}}
 					>
 						<H5>Total Logs</H5>
-						<H1>769</H1>
+						<H1>{overview?.totalLogs}</H1>
 						<View style={{ flexDirection: "row" }}>
 							<H6 style={{ color: "green" }}>%9 </H6>
 							<H6>from last month</H6>
@@ -44,7 +56,7 @@ const myRecipes = () => {
 						}}
 					>
 						<H5>Total Impressions</H5>
-						<H1>12,382</H1>
+						<H1>{overview?.totalImpressions}</H1>
 						<View style={{ flexDirection: "row" }}>
 							<H6 style={{ color: "green" }}>%9 </H6>
 							<H6>from last month</H6>
@@ -62,7 +74,7 @@ const myRecipes = () => {
 						}}
 					>
 						<H5>Published Recipes</H5>
-						<H1>20</H1>
+						<H1>{overview?.totalRecipes}</H1>
 					</View>
 					<View
 						style={{
@@ -76,7 +88,9 @@ const myRecipes = () => {
 						<H5 style={{ color: colors.dark_blue }}>
 							Pending Payout
 						</H5>
-						<H1 style={{ color: colors.dark_blue }}>$15.43</H1>
+						<H1 style={{ color: colors.dark_blue }}>
+							{overview?.pendingBalanceCents}
+						</H1>
 					</View>
 				</View>
 				<Pressable
@@ -125,13 +139,7 @@ const myRecipes = () => {
 					</View>
 					<FlatList
 						scrollEnabled={false}
-						data={[
-							{ name: "Orange Honey Glazed Salmon", logs: 75 },
-							{ name: "Smash Cheeseburger", logs: 56 },
-							{ name: "Shrimp Fried Rice", logs: 44 },
-							{ name: "Beef Noodle Soup", logs: 40 },
-							{ name: "Easy Hummus", logs: 28 },
-						]}
+						data={top?.byLogs}
 						renderItem={({ item, index }) => (
 							<Pressable
 								style={{
@@ -180,13 +188,39 @@ const myRecipes = () => {
 												color: colors.medium_gray,
 											}}
 										>
-											{item.logs}
+											{item.totalLogs}
 										</H5>
 									</View>
 								</View>
 							</Pressable>
 						)}
 						ItemSeparatorComponent={<View style={{ height: 8 }} />}
+					/>
+				</View>
+				<View style={{ marginTop: 45, gap: 12 }}>
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							alignItems: "center",
+						}}
+					>
+						<View style={{ flex: 1 }}>
+							<H1>Cookbooks</H1>
+						</View>
+					</View>
+					<FlatList
+						data={undefined}
+						renderItem={({ item }) => (
+							<RecipeBookCard
+								recipeBookData={{
+									id: 2,
+									name: "test",
+									pictures: null,
+									items: [],
+								}}
+							/>
+						)}
 					/>
 				</View>
 				<View style={{ marginTop: 45, gap: 12 }}>
@@ -226,43 +260,7 @@ const myRecipes = () => {
 					/>
 					<FlatList
 						scrollEnabled={false}
-						data={[
-							{
-								name: "Orange Honey Glazed Salmon",
-								logs: 75,
-								avgRating: 4.7,
-								totalRating: 675,
-								isArchied: true,
-							},
-							{
-								name: "Smash Cheeseburger",
-								logs: 56,
-								avgRating: 4.7,
-								totalRating: 675,
-								isArchied: false,
-							},
-							{
-								name: "Shrimp Fried Rice",
-								logs: 44,
-								avgRating: 4.7,
-								totalRating: 675,
-								isArchied: false,
-							},
-							{
-								name: "Beef Noodle Soup",
-								logs: 40,
-								avgRating: 4.7,
-								totalRating: 675,
-								isArchied: true,
-							},
-							{
-								name: "Easy Hummus",
-								logs: 28,
-								avgRating: 4.7,
-								totalRating: 675,
-								isArchied: true,
-							},
-						]}
+						data={allRecipes}
 						renderItem={({ item, index }) => (
 							<Pressable
 								style={{
@@ -289,26 +287,33 @@ const myRecipes = () => {
 										alignItems: "flex-start",
 									}}
 								>
-									<H5_SemiBold>{item.name}</H5_SemiBold>
+									<H5_SemiBold>
+										{item.foodData.name}
+									</H5_SemiBold>
 									<View
 										style={{
 											paddingVertical: 7,
 											paddingHorizontal: 12,
 
 											borderRadius: 20,
-											backgroundColor: item.isArchied
-												? colors.light_yellow
-												: colors.light_blue,
+											backgroundColor:
+												item.recipeStats.status !=
+												"Archived"
+													? colors.light_yellow
+													: colors.light_blue,
 										}}
 									>
 										<H6
 											style={{
-												color: item.isArchied
-													? colors.dark_yellow
-													: colors.dark_blue,
+												color:
+													item.recipeStats.status !=
+													"Archived"
+														? colors.dark_yellow
+														: colors.dark_blue,
 											}}
 										>
-											{item.isArchied
+											{item.recipeStats.status ==
+											"archived"
 												? "Archived"
 												: "Public"}
 										</H6>
@@ -342,13 +347,13 @@ const myRecipes = () => {
 													color: colors.medium_gray,
 												}}
 											>
-												{item.logs}
+												{item.recipeStats.totalLogs}
 											</H5>
 										</View>
 									</View>
 								</View>
 								<View style={{ alignSelf: "flex-start" }}>
-									<DropDownComment />
+									<DropDownRecipe />
 								</View>
 							</Pressable>
 						)}

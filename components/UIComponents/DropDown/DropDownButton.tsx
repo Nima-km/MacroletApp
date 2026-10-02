@@ -42,7 +42,7 @@ export default function DropdownButton({
 	const toggle = () => {
 		setOpen(!open);
 		Animated.timing(height, {
-			toValue: open ? 0 : 100 + (extraButton ? 50 : 0), // auto size based on options
+			toValue: open ? 0 : 120 + (extraButton ? 50 : 0), // auto size based on options
 			duration: 200,
 			useNativeDriver: false,
 		}).start();
@@ -95,6 +95,7 @@ export default function DropdownButton({
 										styles.optionText,
 										{
 											color: item.color,
+											flexShrink: 1,
 										},
 									]}
 								>
@@ -142,9 +143,9 @@ const styles = StyleSheet.create({
 	},
 	dropdownOverlay: {
 		position: "absolute",
-		top: "100%",
+		top: -10,
 		//left: 0,
-		right: 0,
+		right: 50,
 		zIndex: 999, // stacks above siblings on iOS
 		elevation: 20, // Android needs elevation, zIndex alone won't work
 		backgroundColor: colors.white,
@@ -160,6 +161,7 @@ const styles = StyleSheet.create({
 	option: {
 		paddingVertical: 12,
 		flexDirection: "row",
+		alignItems: "center",
 		justifyContent: "space-between",
 		//paddingHorizontal: 18,
 		//backgroundColor: "red",
