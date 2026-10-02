@@ -1,3 +1,4 @@
+import { toApiError } from "../errors";
 import { useAuth } from "@clerk/expo";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
@@ -28,11 +29,7 @@ export const useCreatorOnboarding = () => {
 				body: JSON.stringify({ username, display_name, about }),
 			});
 
-			if (!res.ok) {
-				const error = await res.json();
-				console.log("got error", error.error);
-				throw new Error(error.error);
-			}
+			if (!res.ok) throw await toApiError(res);
 
 			return res.json(); // { creator, onboarding_url }
 		},
@@ -54,7 +51,7 @@ export const useOnboardingStatus = () => {
 			const res = await fetch(`${API_URL}/creator/onboard/status`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-			if (!res.ok) throw new Error("Failed to check onboarding status");
+			if (!res.ok) throw await toApiError(res);
 			return res.json(); // { is_complete: boolean }
 		},
 	});

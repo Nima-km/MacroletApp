@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { ReviewType } from "@/types/review";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -11,10 +12,7 @@ export const fetchRecipeReviews = async (
 			Authorization: `Bearer ${token}`,
 		},
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -31,10 +29,7 @@ export const postReview = async (
 		},
 		body: JSON.stringify(body),
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -76,10 +71,7 @@ export const postCreatorResponse = async (
 			body: JSON.stringify({ content }),
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -96,9 +88,6 @@ export const postReport = async (
 		},
 		body: JSON.stringify(body),
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };

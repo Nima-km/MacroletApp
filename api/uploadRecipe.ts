@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { RecipeData } from "@/types/recipe";
 import { transformRecipeForAPI } from "./tranformers";
 
@@ -21,10 +22,7 @@ export async function updloadRecipe(
 			body: JSON.stringify(payload),
 		},
 	);
-	if (!response.ok) {
-		const error = await response.json();
-		throw new Error(JSON.stringify(error));
-	}
+	if (!response.ok) throw await toApiError(response);
 
 	const apiRecipe = await response.json();
 	const result = apiRecipe;

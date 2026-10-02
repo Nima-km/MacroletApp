@@ -1,10 +1,11 @@
+import AlertTriangle from "@/assets/svg/alert-triangle.svg";
 import Recipes from "@/assets/svg/recipe-book.svg";
 import { colors } from "@/theme";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { BaseToast } from "react-native-toast-message";
 import { H5_SemiBold } from "../Typography";
-type ToastType = "success" | "error" | "info";
+type ToastType = "success" | "error" | "warning" | "info";
 
 interface ToastProps {
     text1?: string;
@@ -37,6 +38,15 @@ export const toastConfig: Record<
         </View>
     ),
 
+    // Anything the backend rejected: not signed in, no active subscription,
+    // or a business rule (e.g. "must log this recipe before reviewing").
+    warning: (props) => (
+        <View style={[styles.warningContainer, styles.boxWithShadow]}>
+            <AlertTriangle width={24} height={24} pointerEvents="none" />
+            <H5_SemiBold style={styles.warningText}>{props.text1}</H5_SemiBold>
+        </View>
+    ),
+
     info: (props) => (
         <BaseToast
             {...props}
@@ -60,6 +70,24 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         backgroundColor: colors.white,
         borderRadius: 8,
+    },
+    warningContainer: {
+        flexDirection: "row",
+        width: 350,
+        maxWidth: "92%",
+        gap: 14,
+        alignItems: "center",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#EFE7E2",
+    },
+    warningText: {
+        flex: 1,
+        color: colors.primary,
+        lineHeight: 21,
     },
     boxWithShadow: {
         //   shadowColor: "#433b39",

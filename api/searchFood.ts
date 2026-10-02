@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { FoodInsert } from "@/types/food";
 
 export const fetchSearchFood = async (
@@ -14,10 +15,7 @@ export const fetchSearchFood = async (
 		},
 	);
 
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 
 	return res.json();
 };

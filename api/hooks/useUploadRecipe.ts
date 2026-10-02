@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { updateRecipeSlug } from "@/db/queries/recipe";
 import { RecipeData } from "@/types/recipe";
 import { useAuth } from "@clerk/expo";
@@ -11,7 +12,7 @@ export const useUploadRecipe = () => {
 	return useMutation({
 		mutationFn: async (recipe: RecipeData) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			try {
 				const result_slug = await updloadRecipe(recipe, token);
 				if (recipe.recipeData.id)

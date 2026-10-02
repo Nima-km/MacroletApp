@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { FoodInsert } from "@/types/food";
 import { RecipeInsert } from "@/types/recipe";
 
@@ -69,10 +70,7 @@ export const fetchDiscoverFeed = async (
 		headers: { Authorization: `Bearer ${token}` },
 	});
 
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 
 	const data: {
 		sections: { title: string; type: string; recipes: DiscoverRecipe[] }[];

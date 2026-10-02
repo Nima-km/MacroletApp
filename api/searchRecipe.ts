@@ -1,3 +1,4 @@
+import { toApiError, apiErrorFrom } from "./errors";
 import { RecipeData } from "@/types/recipe";
 import { transformRecipesFromAPI } from "./tranformers";
 
@@ -32,7 +33,7 @@ export async function fetchFilteredRecipes({
 
 	const data = await response.json();
 
-	if (!response.ok) throw new Error(data.error);
+	if (!response.ok) throw apiErrorFrom(response.status, data);
 
 	return {
 		data: transformRecipesFromAPI(data.data), // data.data since response is now { data, pagination }
@@ -46,7 +47,7 @@ export const fetchRecipeFromSlug = async (
 		`${process.env.EXPO_PUBLIC_API_URL}/recipes/${recipe_slug}`,
 	);
 
-	if (!res.ok) throw new Error(`Failed to fetch recipe: ${res.status}`);
+	if (!res.ok) throw await toApiError(res);
 
 	return res.json();
 };
@@ -62,7 +63,7 @@ export const fetchAuthorFromSlug = async (
 		`${process.env.EXPO_PUBLIC_API_URL}/creator/${recipe_slug}`,
 	);
 
-	if (!res.ok) throw new Error(`Failed to fetch recipe: ${res.status}`);
+	if (!res.ok) throw await toApiError(res);
 
 	return res.json();
 };
@@ -73,7 +74,7 @@ export const TESTBACKEND = async (token: string) => {
 		},
 	});
 
-	if (!res.ok) throw new Error(`FAILED TO CONNECT TO SERVER: ${res.status}`);
+	if (!res.ok) throw await toApiError(res);
 	//console.log("response", res);
 	return res.json();
 };

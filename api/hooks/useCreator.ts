@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { fetchCreatorProfile, fetchCreatorRecipes } from "@/api/creator";
 import { useAuth } from "@clerk/expo";
 
@@ -10,7 +11,7 @@ export const useCreatorProfile = (username: string) => {
 		queryKey: ["creator", "profile", username],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchCreatorProfile(username, token);
 		},
 		enabled: !!username,
@@ -26,7 +27,7 @@ export const useCreatorRecipes = (username: string) => {
 		queryKey: ["creator", "recipes", username],
 		queryFn: async ({ pageParam = 1 }) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchCreatorRecipes(username, token, pageParam);
 		},
 		getNextPageParam: (lastPage) =>

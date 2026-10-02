@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { RecipeBook, RecipeBookItem } from "@/types/recipe";
 import { RecipeCardData } from "./fetchDiscoverFeed";
 
@@ -15,10 +16,7 @@ export const postRecipeBook = async (
 		},
 		body: JSON.stringify(body),
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -30,10 +28,7 @@ export const deleteRecipeBookApi = async (
 		method: "DELETE",
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -50,10 +45,7 @@ export const postRecipeToBook = async (
 		},
 		body: JSON.stringify({ recipe_slug }),
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -69,10 +61,7 @@ export const deleteRecipeFromBook = async (
 			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -89,10 +78,7 @@ export const fetchCreatorRecipeBooks = async (
 	const res = await fetch(`${API_URL}/recipebooks/creator/${username}`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -103,9 +89,6 @@ export const fetchRecipesFromRecipeBook = async (
 	const res = await fetch(`${API_URL}/recipebooks/${recipeBook_slug}`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };

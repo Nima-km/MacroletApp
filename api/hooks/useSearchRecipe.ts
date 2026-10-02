@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { useAuth } from "@clerk/expo";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
@@ -29,7 +30,7 @@ export const useFilteredRecipes = (
 		queryKey: ["recipes", "search", filters, committedSearch],
 		queryFn: async ({ pageParam = 1 }) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchFilteredRecipes({
 				filters,
 				title: committedSearch,

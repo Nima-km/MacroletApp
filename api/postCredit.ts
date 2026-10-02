@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 export const postCredit = async (
 	recipe_slug: string,
 	token: string,
@@ -14,5 +15,5 @@ export const postCredit = async (
 		},
 	);
 
-	if (!res.ok) throw new Error(`Failed to record credit : ${res.status}`);
+	if (!res.ok) throw await toApiError(res);
 };

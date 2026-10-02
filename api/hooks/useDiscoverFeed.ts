@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { DiscoverType, fetchDiscoverFeed } from "@/api/fetchDiscoverFeed";
 
 import { useAuth } from "@clerk/expo";
@@ -13,7 +14,7 @@ export const useDiscoverFeed = (
 		queryKey: ["discover", mandatory_tags, optional_tags],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchDiscoverFeed(mandatory_tags, optional_tags, token);
 		},
 		enabled: optional_tags.length > 0, // only fetch if user has optional tags set

@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { RecipeCardData } from "./fetchDiscoverFeed";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -36,10 +37,7 @@ export const fetchCreatorProfile = async (
 	const res = await fetch(`${API_URL}/recipes/creator/${username}`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -57,9 +55,6 @@ export const fetchCreatorRecipes = async (
 		`${API_URL}/recipes/creator/allrecipes/${username}?${params.toString()}`,
 		{ headers: { Authorization: `Bearer ${token}` } },
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };

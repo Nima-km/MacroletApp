@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { FoodInsert } from "@/types/food";
 import { useAuth } from "@clerk/expo";
 import { useMutation } from "@tanstack/react-query";
@@ -9,7 +10,7 @@ export const useInsertFood = () => {
 	return useMutation({
 		mutationFn: async (food: FoodInsert) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 
 			return postFood(food, token);
 		},

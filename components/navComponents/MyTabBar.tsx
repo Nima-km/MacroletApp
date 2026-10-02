@@ -10,8 +10,7 @@ import {
 	useQuickMenuStore,
 } from "@/store/useStore";
 import { colors } from "@/theme";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useRouter } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, {
@@ -21,7 +20,13 @@ import Animated, {
 	withSpring,
 } from "react-native-reanimated";
 import { H4, H5, H5_SemiBold } from "../UIComponents/Typography";
-const MyNavBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+
+// Derived from expo-router's own Tabs (SDK 56+ deprecates importing React
+// Navigation types directly in app code) so the prop shape cannot drift.
+type TabBarProps = Parameters<
+	NonNullable<React.ComponentProps<typeof Tabs>["tabBar"]>
+>[0];
+const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 	const router = useRouter();
 	const isFocused = (index: number) => state.index === index;
 	const [open, setOpen] = useState(false);

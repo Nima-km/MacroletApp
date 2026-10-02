@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { insertFoodList } from "@/db/queries/food";
 import { useAuth } from "@clerk/expo";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +11,7 @@ export const useSearchFood = (query: string) => {
 		queryKey: ["food", "search", query],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			try {
 				const apiResult = await fetchSearchFood(query, token);
 				const processed = apiResult.map((item) => {

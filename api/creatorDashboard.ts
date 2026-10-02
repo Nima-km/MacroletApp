@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import {
 	CreatorOverview,
 	CreatorPayout,
@@ -15,10 +16,7 @@ export const fetchCreatorOverview = async (
 	const res = await fetch(`${API_URL}/dashboard/overview`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -37,10 +35,7 @@ export const fetchCreatorRecipes = async (
 			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -54,10 +49,7 @@ export const fetchRecipeAnalytics = async (
 			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -67,10 +59,7 @@ export const fetchPayoutHistory = async (
 	const res = await fetch(`${API_URL}/dashboard/payouts`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -80,10 +69,7 @@ export const fetchTopPerformingRecipes = async (
 	const res = await fetch(`${API_URL}/dashboard/recipes/top`, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -98,10 +84,7 @@ export const archiveRecipe = async (
 			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 
@@ -116,10 +99,7 @@ export const publishRecipe = async (
 			headers: { Authorization: `Bearer ${token}` },
 		},
 	);
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };
 /*

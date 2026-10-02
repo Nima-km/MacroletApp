@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { useAuth } from "@clerk/expo";
 import {
 	useInfiniteQuery,
@@ -24,7 +25,7 @@ export const useCreatorOverview = () => {
 		queryKey: ["dashboard", "overview"],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchCreatorOverview(token);
 		},
 		staleTime: 1000 * 60 * 5,
@@ -38,7 +39,7 @@ export const useDashboardRecipes = () => {
 		queryKey: ["dashboard", "recipes"],
 		queryFn: async ({ pageParam = 1 }) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchCreatorRecipes(token, pageParam as number);
 		},
 		getNextPageParam: (lastPage) =>
@@ -57,7 +58,7 @@ export const useRecipeAnalytics = (recipe_slug: string) => {
 		queryKey: ["dashboard", "analytics", recipe_slug],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchRecipeAnalytics(recipe_slug, token);
 		},
 		enabled: !!recipe_slug,
@@ -72,7 +73,7 @@ export const usePayoutHistory = () => {
 		queryKey: ["dashboard", "payouts"],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchPayoutHistory(token);
 		},
 		staleTime: 1000 * 60 * 5,
@@ -86,7 +87,7 @@ export const useTopPerformingRecipes = () => {
 		queryKey: ["dashboard", "top"],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchTopPerformingRecipes(token);
 		},
 		staleTime: 1000 * 60 * 5,
@@ -100,7 +101,7 @@ export const useArchiveRecipe = () => {
 	return useMutation({
 		mutationFn: async (recipe_slug: string) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return archiveRecipe(recipe_slug, token);
 		},
 		onSuccess: () => {
@@ -121,7 +122,7 @@ export const usePublishRecipe = () => {
 	return useMutation({
 		mutationFn: async (recipe_slug: string) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return publishRecipe(recipe_slug, token);
 		},
 		onSuccess: () => {

@@ -1,3 +1,4 @@
+import { toApiError } from "./errors";
 import { FoodInsert } from "@/types/food";
 
 export const postFood = async (food: FoodInsert, token: string) => {
@@ -10,10 +11,7 @@ export const postFood = async (food: FoodInsert, token: string) => {
 		body: JSON.stringify(food),
 	});
 
-	if (!res.ok) {
-		const error = await res.json();
-		throw new Error(error.error);
-	}
+	if (!res.ok) throw await toApiError(res);
 
 	return res.json();
 };

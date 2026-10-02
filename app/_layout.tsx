@@ -6,7 +6,13 @@ import migrations from "@/drizzle/migrations";
 import { colors } from "@/theme";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { onMutationError, onQueryError } from "@/api/errors";
+import {
+	MutationCache,
+	QueryCache,
+	QueryClient,
+	QueryClientProvider,
+} from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 //import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useFonts } from "expo-font";
@@ -22,7 +28,12 @@ import {
 import Toast from "react-native-toast-message";
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-const queryClient = new QueryClient();
+// Failed requests surface here rather than being swallowed: mutations always
+// toast, queries only for auth/premium failures (see api/errors.ts).
+const queryClient = new QueryClient({
+	queryCache: new QueryCache({ onError: onQueryError }),
+	mutationCache: new MutationCache({ onError: onMutationError }),
+});
 
 export default function RootLayout() {
 	const { success, error } = useMigrations(db, migrations);

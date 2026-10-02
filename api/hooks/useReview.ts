@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import {
 	fetchRecipeReviews,
 	postCreatorResponse,
@@ -15,7 +16,7 @@ export const useRecipeReviews = (recipe_slug: string) => {
 		queryKey: ["reviews", recipe_slug],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchRecipeReviews(recipe_slug, token);
 		},
 		enabled: !!recipe_slug,
@@ -30,7 +31,7 @@ export const useCreateReview = (recipe_slug: string) => {
 	return useMutation({
 		mutationFn: async (body: { rating: number; content?: string }) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return postReview(recipe_slug, body, token);
 		},
 		onSuccess: () => {
@@ -76,7 +77,7 @@ export const useCreatorResponse = () => {
 			content: string;
 		}) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return postCreatorResponse(review_id, content, token);
 		},
 		onSuccess: (_, { recipe_slug }) => {
@@ -96,7 +97,7 @@ export const useReportRecipe = (recipe_slug: string) => {
 			details?: string | null;
 		}) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return postReport(recipe_slug, body, token);
 		},
 	});

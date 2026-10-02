@@ -1,3 +1,4 @@
+import { notSignedIn } from "../errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -19,7 +20,7 @@ export const useCreateRecipeBook = () => {
 	return useMutation({
 		mutationFn: async (body: { name: string; pictures?: string[] }) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return postRecipeBook(body, token);
 		},
 		onSuccess: () => {
@@ -35,7 +36,7 @@ export const useDeleteRecipeBook = () => {
 	return useMutation({
 		mutationFn: async (recipeBook_id: number) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return deleteRecipeBookApi(recipeBook_id, token);
 		},
 		onSuccess: () => {
@@ -57,7 +58,7 @@ export const useAddRecipeToBook = () => {
 			recipe_slug: string;
 		}) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return postRecipeToBook(recipeBook_id, recipe_slug, token);
 		},
 		onSuccess: () => {
@@ -79,7 +80,7 @@ export const useRemoveRecipeFromBook = () => {
 			recipe_slug: string;
 		}) => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return deleteRecipeFromBook(recipeBook_id, recipe_slug, token);
 		},
 		onSuccess: () => {
@@ -95,7 +96,7 @@ export const useCreatorRecipeBooks = (username: string) => {
 		queryKey: ["recipebooks", "creator", username],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchCreatorRecipeBooks(username, token);
 		},
 		enabled: !!username,
@@ -110,7 +111,7 @@ export const useRecipeBookRecipes = (recipeBook_slug: string) => {
 		queryKey: ["recipebooks", recipeBook_slug],
 		queryFn: async () => {
 			const token = await getToken();
-			if (!token) throw new Error("Not authenticated");
+			if (!token) throw notSignedIn();
 			return fetchRecipesFromRecipeBook(recipeBook_slug, token);
 		},
 		enabled: !!recipeBook_slug,
