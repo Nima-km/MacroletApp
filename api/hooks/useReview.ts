@@ -5,13 +5,21 @@ import {
 	postReport,
 	postReview,
 } from "@/api/review";
-import { useAuth } from "@clerk/expo";
+import { useAuth, useUser } from "@clerk/expo";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+/** Display name sent alongside a review; the server prefers Clerk's record. */
+function usernameFromUser(user: ReturnType<typeof useUser>["user"]) {
+	const fullName = [user?.firstName, user?.lastName]
+		.filter(Boolean)
+		.join(" ")
+		.trim();
+	return user?.username ?? user?.fullName ?? (fullName || undefined);
+}
+
 export const useRecipeReviews = (recipe_slug: string) => {
 	const { getToken } = useAuth();
-	const queryClient = useQueryClient();
 	return useQuery({
 		queryKey: ["reviews", recipe_slug],
 		queryFn: async () => {
@@ -26,13 +34,18 @@ export const useRecipeReviews = (recipe_slug: string) => {
 
 export const useCreateReview = (recipe_slug: string) => {
 	const { getToken } = useAuth();
+	const { user } = useUser();
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (body: { rating: number; content?: string }) => {
 			const token = await getToken();
 			if (!token) throw notSignedIn();
-			return postReview(recipe_slug, body, token);
+			return postReview(
+				recipe_slug,
+				{ ...body, username: usernameFromUser(user) },
+				token,
+			);
 		},
 		onSuccess: () => {
 			// Invalidate so the reviews list refreshes

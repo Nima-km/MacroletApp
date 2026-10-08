@@ -1,6 +1,7 @@
 import { toApiError } from "./errors";
 import { RecipeBook, RecipeBookItem } from "@/types/recipe";
 import { RecipeCardData } from "./fetchDiscoverFeed";
+import type { Pagination } from "./creator";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -85,10 +86,19 @@ export const fetchCreatorRecipeBooks = async (
 export const fetchRecipesFromRecipeBook = async (
 	recipeBook_slug: string,
 	token: string,
-): Promise<RecipeCardData[]> => {
-	const res = await fetch(`${API_URL}/recipebooks/${recipeBook_slug}`, {
-		headers: { Authorization: `Bearer ${token}` },
-	});
+	page = 1,
+	limit = 20,
+): Promise<{ recipes: RecipeCardData[]; pagination: Pagination }> => {
+	const params = new URLSearchParams();
+	params.append("page", String(page));
+	params.append("limit", String(limit));
+
+	// Two segments, so it cannot be swallowed by `GET /recipebooks/:username`
+	// (which is one segment and was what the old single-segment call hit).
+	const res = await fetch(
+		`${API_URL}/recipebooks/${recipeBook_slug}/recipes?${params.toString()}`,
+		{ headers: { Authorization: `Bearer ${token}` } },
+	);
 	if (!res.ok) throw await toApiError(res);
 	return res.json();
 };

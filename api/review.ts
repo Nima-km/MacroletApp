@@ -1,12 +1,12 @@
 import { toApiError } from "./errors";
-import { ReviewType } from "@/types/review";
+import { RecipeReview, RecipeReviews } from "@/types/review";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export const fetchRecipeReviews = async (
 	recipe_slug: string,
 	token: string,
-): Promise<ReviewType> => {
+): Promise<RecipeReviews> => {
 	const res = await fetch(`${API_URL}/recipes/${recipe_slug}/reviews`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
@@ -18,9 +18,9 @@ export const fetchRecipeReviews = async (
 
 export const postReview = async (
 	recipe_slug: string,
-	body: { rating: number; content?: string },
+	body: { rating: number; content?: string; username?: string },
 	token: string,
-) => {
+): Promise<RecipeReview> => {
 	const res = await fetch(`${API_URL}/recipes/${recipe_slug}/reviews`, {
 		method: "POST",
 		headers: {

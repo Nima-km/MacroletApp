@@ -27,6 +27,18 @@ const DiscoverFeed = ({ feedData }: Props) => {
 			});
 	}
 
+	// TEMP DIAGNOSTIC (remove with the ones in useDiscoverFeed): runs after the
+	// first commit, so the gap from "discover screen mounted" is the render cost.
+	const cardCount =
+		feedData?.reduce((n, section) => n + section.recipes.length, 0) ?? 0;
+	React.useEffect(() => {
+		const t =
+			typeof performance !== "undefined"
+				? Math.round(performance.now())
+				: 0;
+		console.log(`[startup] feed rendered @${t}ms (${cardCount} cards)`);
+	}, [cardCount]);
+
 	return (
 		<View style={{ flex: 1, paddingHorizontal: 20 }}>
 			<View style={{ gap: 40 }}>
@@ -36,6 +48,12 @@ const DiscoverFeed = ({ feedData }: Props) => {
 						<FlatList
 							data={item.recipes}
 							horizontal
+							// Only ~2 cards fit on screen, so FlatList's default of
+							// building 10 per section put ~20 cards (and ~20 image
+							// requests) through the first paint for nothing.
+							initialNumToRender={4}
+							maxToRenderPerBatch={4}
+							windowSize={3}
 							renderItem={({ item }) => (
 								<Pressable
 									onPress={() =>

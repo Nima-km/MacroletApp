@@ -1,5 +1,6 @@
 import { toastConfig } from "@/components/UIComponents/Toasts/toastConfig";
 import { FontProvider } from "@/context/FontProvider";
+import RevenueCatProvider from "@/context/RevenueCatProvider";
 import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 
@@ -68,6 +69,8 @@ export default function RootLayout() {
 							publishableKey={publishableKey}
 							tokenCache={tokenCache}
 						>
+							{/* Keeps the RevenueCat customer tied to the Clerk user */}
+							<RevenueCatProvider />
 							<SafeAreaProvider
 								initialMetrics={initialWindowMetrics}
 							>

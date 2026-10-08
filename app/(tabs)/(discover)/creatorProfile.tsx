@@ -10,7 +10,7 @@ import { FormInputSearch } from "@/components/UIComponents/TextInputs/FormInput"
 import { H2, H3, H4, H5, H6 } from "@/components/UIComponents/Typography";
 import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
@@ -42,6 +42,17 @@ const creatorProfile = () => {
 		isFetchingNextPage,
 	} = useCreatorRecipes(username);
 	const allRecipes = recipes?.pages.flatMap((page) => page.recipes) ?? [];
+
+	const router = useRouter();
+
+	/** Same navigation DiscoverFeed uses when a recipe card is tapped. */
+	function onOnlineRecipe(recipeSlug: string | undefined | null) {
+		if (recipeSlug)
+			router.push({
+				pathname: "/(tabs)/(discover)/onlineRecipe",
+				params: { recipeSlug },
+			});
+	}
 
 	const currentPagerPage = useRef(selectedPage);
 	const pagerRef = useRef<PagerView>(null);
@@ -76,18 +87,6 @@ const creatorProfile = () => {
 			hideListener.remove();
 		};
 	}, []);
-	const flatListRefs = useRef(new Map()).current;
-	const scrollOffsets = useRef(new Map()).current;
-
-	const scrollBookList = (name: string, amount = 150) => {
-		const ref = flatListRefs.get(name);
-		if (!ref) return;
-		const currentOffset = scrollOffsets.get(name) || 0;
-		const newOffset = currentOffset + amount;
-
-		ref.scrollToOffset({ offset: newOffset, animated: true });
-		scrollOffsets.set(name, newOffset);
-	};
 	useEffect(() => {
 		console.log("all recupes", recipes?.pages[0]);
 	}, [allRecipes]);
@@ -281,7 +280,15 @@ const creatorProfile = () => {
 													alignItems: "center",
 												}}
 												onPress={() =>
-													scrollBookList(item.name)
+													router.push({
+														pathname:
+															"/(tabs)/(discover)/onlineRecipeBook",
+														params: {
+															recipeBook_slug:
+																item.recipeBook_slug,
+															bookName: item.name,
+														},
+													})
 												}
 											>
 												<ArrowRight />
@@ -291,29 +298,23 @@ const creatorProfile = () => {
 											<FlatList
 												horizontal
 												data={item.recipes}
-												ref={(ref) => {
-													if (ref)
-														flatListRefs.set(
-															item.name,
-															ref,
-														);
-												}}
 												renderItem={({
 													item: recipeItem,
 												}) => (
-													<Pressable>
+													<Pressable
+														onPress={() =>
+															onOnlineRecipe(
+																recipeItem
+																	.recipeData
+																	.recipe_slug,
+															)
+														}
+													>
 														<RecipeCardSmall
 															recipe={recipeItem}
 														/>
 													</Pressable>
 												)}
-												onMomentumScrollEnd={(e) => {
-													scrollOffsets.set(
-														item.name,
-														e.nativeEvent
-															.contentOffset.x,
-													);
-												}}
 												ItemSeparatorComponent={
 													<View
 														style={{
@@ -361,7 +362,13 @@ const creatorProfile = () => {
 								}
 								showsHorizontalScrollIndicator={false}
 								renderItem={({ item: recipeItem }) => (
-									<Pressable>
+									<Pressable
+										onPress={() =>
+											onOnlineRecipe(
+												recipeItem.recipeData.recipe_slug,
+											)
+										}
+									>
 										<RecipeCardSmall
 											recipe={recipeItem}
 											scale={1.15}

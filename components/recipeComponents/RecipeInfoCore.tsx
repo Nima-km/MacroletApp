@@ -1,10 +1,4 @@
 import { usePostCredit } from "@/api/hooks/usePostCredit";
-import {
-	useCreateReview,
-	useCreatorResponse,
-	useRecipeReviews,
-	useReportRecipe,
-} from "@/api/hooks/useReview";
 import { useGetAuthorFromSlug } from "@/api/hooks/useSearchRecipe";
 import { useUploadRecipe } from "@/api/hooks/useUploadRecipe";
 
@@ -31,7 +25,6 @@ import {
 } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
-import { RecipeReviews } from "@/types/review";
 import { useAuth } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -47,6 +40,7 @@ import {
 	View,
 } from "react-native";
 import IconButton from "../UIComponents/Buttons/IconButton";
+import ImageView from "../UIComponents/Image/ImageView";
 import CreateRecipeBook from "../UIComponents/Modals/CreateRecipeBook";
 import SelectRecipeBook from "../UIComponents/Modals/SelectRecipeBook";
 import Reviews from "./View/Reviews";
@@ -75,65 +69,6 @@ const RecipeInfoCore = ({
 	const sectionPositions = useRef<Partial<Record<SectionKey, number>>>({});
 	const scrollPositionsRef = useRef(0);
 	const { mutate: giveCredit } = usePostCredit();
-	const reviews: RecipeReviews = {
-		reviews: [
-			{
-				review: {
-					id: 0,
-					recipe_id: 0,
-					username: "Jessica",
-					rating: 0,
-					content:
-						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
-					created_at: new Date(),
-					updated_at: new Date(),
-				},
-				response: {
-					id: 0,
-					review_id: 0,
-					creator_username: "Jessica",
-					content: "ERRRM NO",
-					created_at: new Date(),
-				},
-			},
-			{
-				review: {
-					id: 0,
-					recipe_id: 0,
-					username: "POOPOO",
-					rating: 0,
-					content:
-						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
-					created_at: new Date(),
-					updated_at: new Date(),
-				},
-				response: {
-					id: 0,
-					review_id: 0,
-					creator_username: "Jessica",
-					content: "SUREE",
-					created_at: new Date(),
-				},
-			},
-			{
-				review: {
-					id: 0,
-					recipe_id: 0,
-					username: "Shrimp",
-					rating: 0,
-					content:
-						"This is just a test review made by someone idk man why are you questioning me, anyway i liked the recipe and i would like to do the chef if possible",
-					created_at: new Date(),
-					updated_at: new Date(),
-				},
-				response: null,
-			},
-		],
-		stats: {
-			averageRating: "4.8",
-			totalReviews: 12,
-		},
-	};
 	const recipeFullData =
 		mode == "state"
 			? useRecipeStateStore((state) => state.data)
@@ -161,21 +96,10 @@ const RecipeInfoCore = ({
 	const router = useRouter();
 	const [selectedPage, setSelectedPage] = useState(0);
 	const [servingString, setServingString] = useState(servings.toString());
-	const { data: reviewData, isLoading } = useRecipeReviews(
-		recipeData?.recipe_slug ?? "",
-	);
 	const { data: authorData, isLoading: authorLoading } = useGetAuthorFromSlug(
 		recipeData?.recipe_slug ?? "",
 	);
-	const { mutate: createReview, isPending } = useCreateReview(
-		recipeData?.recipe_slug ?? "",
-	);
 	const { mutate: uploadRecipe } = useUploadRecipe();
-
-	const { mutate: respondToReview } = useCreatorResponse();
-	const { mutate: reportRecipe } = useReportRecipe(
-		recipeData?.recipe_slug ?? "",
-	);
 
 	const handleLogRecipe = () => {
 		onLogRecipe?.();
@@ -288,14 +212,18 @@ const RecipeInfoCore = ({
 				ref={scrollViewRef}
 				onScroll={handleScroll}
 			>
+				{/* The banner. This used to be an empty View painted `primary_bg`, so a
+				    recipe with an image still showed a blank block. ImageView paints the
+				    same fill when there is no banner, so nothing changes for those. */}
 				<View
 					style={{
-						backgroundColor: colors.primary_bg,
 						height: 160,
 						marginHorizontal: -20,
 						marginBottom: 20,
 					}}
-				></View>
+				>
+					<ImageView source={recipeData?.bannerImage} />
+				</View>
 
 				<H2>{foodData.name}</H2>
 				<View
@@ -431,7 +359,7 @@ const RecipeInfoCore = ({
 								e.nativeEvent.layout.y;
 						}}
 					>
-						<Reviews reviews={reviews} />
+						<Reviews recipe_slug={recipeData?.recipe_slug ?? ""} />
 					</View>
 				</View>
 

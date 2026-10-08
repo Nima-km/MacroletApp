@@ -21,7 +21,7 @@ export const toastConfig: Record<
             <Recipes
                 width={28}
                 height={28}
-                style={{ color: colors.primary }}
+                fill={colors.primary}
                 pointerEvents="none"
             />
             <H5_SemiBold style={{ color: colors.primary }}>
@@ -42,7 +42,12 @@ export const toastConfig: Record<
     // or a business rule (e.g. "must log this recipe before reviewing").
     warning: (props) => (
         <View style={[styles.warningContainer, styles.boxWithShadow]}>
-            <AlertTriangle width={24} height={24} pointerEvents="none" />
+            <AlertTriangle
+                width={24}
+                height={24}
+                fill={colors.primary}
+                pointerEvents="none"
+            />
             <H5_SemiBold style={styles.warningText}>{props.text1}</H5_SemiBold>
         </View>
     ),

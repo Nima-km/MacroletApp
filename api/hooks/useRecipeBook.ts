@@ -1,5 +1,10 @@
 import { notSignedIn } from "../errors";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 
 import {
 	deleteRecipeBookApi,
@@ -104,17 +109,30 @@ export const useCreatorRecipeBooks = (username: string) => {
 	});
 };
 
+/**
+ * A cookbook's recipes, paginated for infinite scroll — the same shape and
+ * paging behaviour as `useCreatorRecipes`.
+ */
 export const useRecipeBookRecipes = (recipeBook_slug: string) => {
 	const { getToken } = useAuth();
 
-	return useQuery<RecipeCardData[], Error>({
-		queryKey: ["recipebooks", recipeBook_slug],
-		queryFn: async () => {
+	return useInfiniteQuery({
+		queryKey: ["recipebooks", recipeBook_slug, "recipes"],
+		queryFn: async ({ pageParam = 1 }) => {
 			const token = await getToken();
 			if (!token) throw notSignedIn();
-			return fetchRecipesFromRecipeBook(recipeBook_slug, token);
+			return fetchRecipesFromRecipeBook(
+				recipeBook_slug,
+				token,
+				pageParam,
+			);
 		},
+		getNextPageParam: (lastPage) =>
+			lastPage.pagination.hasNextPage
+				? lastPage.pagination.page + 1
+				: undefined,
+		initialPageParam: 1,
 		enabled: !!recipeBook_slug,
-		staleTime: 1000 * 60 * 5,
+		retry: false,
 	});
 };

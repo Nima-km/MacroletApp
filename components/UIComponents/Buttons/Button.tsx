@@ -11,13 +11,30 @@ import { H2, H3, H4, H5 } from "../Typography";
 type ButtonProps = PropsWithChildren<TouchableOpacityProps> & {
     style?: any; // or StyleProp<ViewStyle>
     icon?: ReactNode; // or StyleProp<ViewStyle>
+    /**
+     * Tightens padding for an action that sits inline with content (a row, a
+     * card) rather than anchoring the bottom of a screen. Same label style, so it
+     * stays recognisably the same button - a defined variant instead of a
+     * per-screen padding override.
+     */
+    compact?: boolean;
 };
 
-export function PrimaryButton({ children, style, ...props }: ButtonProps) {
+export function PrimaryButton({
+    children,
+    style,
+    compact,
+    ...props
+}: ButtonProps) {
     return (
         <TouchableOpacity
             {...props}
-            style={[style, styles.button, styles.primary]}
+            style={[
+                style,
+                styles.button,
+                compact && styles.buttonCompact,
+                styles.primary,
+            ]}
         >
             <H4 style={styles.primaryText}>{children}</H4>
         </TouchableOpacity>
@@ -99,6 +116,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
+    },
+    buttonCompact: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
     },
     sub_button: {
         padding: 12,

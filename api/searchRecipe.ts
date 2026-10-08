@@ -42,9 +42,13 @@ export async function fetchFilteredRecipes({
 }
 export const fetchRecipeFromSlug = async (
 	recipe_slug: string,
+	token: string,
 ): Promise<RecipeData> => {
 	const res = await fetch(
 		`${process.env.EXPO_PUBLIC_API_URL}/recipes/${recipe_slug}`,
+		{
+			headers: { Authorization: `Bearer ${token}` },
+		},
 	);
 
 	if (!res.ok) throw await toApiError(res);

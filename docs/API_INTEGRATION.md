@@ -30,7 +30,7 @@ Status: **OK** = works · **BROKEN** = cannot succeed as written · **PARTIAL** 
 | Client function (file) | Method + path | Hook | Backend handler | Status |
 | --- | --- | --- | --- | --- |
 | `fetchFilteredRecipes` (`api/searchRecipe.ts:4`) | `GET /recipes/search/` | `useFilteredRecipes` | `routes/recipe.ts:17` | PARTIAL — no `tags` in response (§4.7); search needs ≥3 chars, so filters alone cannot query |
-| `fetchRecipeFromSlug` (`api/searchRecipe.ts:42`) | `GET /recipes/${slug}` | `useGetRecipeFromSlug` | `routes/recipe.ts:44` | **BROKEN** — no auth header → 401 |
+| `fetchRecipeFromSlug` (`api/searchRecipe.ts:43`) | `GET /recipes/${slug}` | `useGetRecipeFromSlug` | `routes/recipe.ts:44` | OK — the hook now passes the Clerk token (§3.1 fixed) |
 | `fetchAuthorFromSlug` (`api/searchRecipe.ts:58`) | `GET /creator/${slug}` | `useGetAuthorFromSlug` | `routes/creator.ts:34` | OK (route is public) |
 | `TESTBACKEND` (`api/searchRecipe.ts:69`) | `GET /debug` | — | `server.ts:55` | Debug only; unused (call site commented out) |
 | `fetchCreatorProfile` (`api/creator.ts:32`) | `GET /recipes/creator/${username}` | `useCreatorProfile` | `routes/recipe.ts:57` | OK |
@@ -43,10 +43,10 @@ Status: **OK** = works · **BROKEN** = cannot succeed as written · **PARTIAL** 
 | `postCredit` (`api/postCredit.ts:1`) | `POST /creator/credit` | `usePostCredit` | `routes/creator.ts:77` | OK — called on recipe log |
 | `useCreatorOnboarding` (`api/hooks/useCreatorOnboarding.ts:22`) | `POST /creator/onboard` | itself | `routes/creator.ts:16` | OK. `GET /creator/onboard/refresh` is never called; the Stripe return deep link has no route in `app/` |
 | `useOnboardingStatus` (`api/hooks/useCreatorOnboarding.ts:54`) | `GET /creator/onboard/status` | itself | `routes/creator.ts:65` | OK |
-| `fetchRecipeReviews` (`api/review.ts:5`) | `GET /recipes/${slug}/reviews` | `useRecipeReviews` | **unmounted** | **BROKEN** |
-| `postReview` (`api/review.ts:21`) | `POST /recipes/${slug}/reviews` | `useCreateReview` | **unmounted** | **BROKEN**; hook has no call |
-| `postCreatorResponse` (`api/review.ts:63`) | `POST /recipes/reviews/${id}/response` | `useCreatorResponse` | **unmounted** | **BROKEN**; hook has no call |
-| `postReport` (`api/review.ts:86`) | `POST /recipes/${slug}/report` | `useReportRecipe` | **unmounted** | **BROKEN**; hook has no call |
+| `fetchRecipeReviews` (`api/review.ts:6`) | `GET /recipes/${slug}/reviews` | `useRecipeReviews` | `routes/review.ts:25` | OK — rendered by `components/recipeComponents/View/Reviews.tsx` |
+| `postReview` (`api/review.ts:22`) | `POST /recipes/${slug}/reviews` | `useCreateReview` | `routes/review.ts:35` | OK — called from the reviews form |
+| `postCreatorResponse` (`api/review.ts:63`) | `POST /recipes/reviews/${id}/response` | `useCreatorResponse` | `routes/review.ts:79` | OK — called from the reply box, shown only when `viewer.isCreator` |
+| `postReport` (`api/review.ts:86`) | `POST /recipes/${slug}/report` | `useReportRecipe` | `routes/review.ts:100` | Backend OK; **NO CALLER** — report UI not built yet |
 | `postRecipeBook` (`api/recipeBook.ts:6`) | `POST /recipebooks` | `useCreateRecipeBook` | `routes/recipeBook.ts:18` | NO CALLER (the bookmark UI uses local SQLite) |
 | `deleteRecipeBookApi` (`api/recipeBook.ts:25`) | `DELETE /recipebooks/${id}` | `useDeleteRecipeBook` | `routes/recipeBook.ts:29` | NO CALLER |
 | `postRecipeToBook` (`api/recipeBook.ts:40`) | `POST /recipebooks/${id}/recipes` | `useAddRecipeToBook` | `routes/recipeBook.ts:43` | NO CALLER |
@@ -68,7 +68,7 @@ Status: **OK** = works · **BROKEN** = cannot succeed as written · **PARTIAL** 
 
 ## 3. Blocking defects
 
-**3.1 Missing auth on a gated endpoint.** `fetchRecipeFromSlug` (`api/searchRecipe.ts:42-52`) sends no headers, yet `GET /recipes/:recipe_slug` is wrapped in `requireSubscription` (`Macrolet-Express/src/routes/recipe.ts:44`), which needs both a Clerk session and a `gold` plan. Every "open an online recipe" flow therefore 401s. Its caller, `useGetRecipeFromSlug` (`api/hooks/useSearchRecipe.ts:49`), obtains a token and then does not pass it.
+**3.1 ✅ Fixed.** `fetchRecipeFromSlug` (`api/searchRecipe.ts:43-56`) now takes a `token` and sends `Authorization: Bearer <token>`; `useGetRecipeFromSlug` (`api/hooks/useSearchRecipe.ts:50`) passes the Clerk token it already obtained. The discover → online-recipe flow authenticates, which is also what makes the reviews section reachable.
 
 **3.2 Three routes the backend does not have.**
 
@@ -90,7 +90,7 @@ Status: **OK** = works · **BROKEN** = cannot succeed as written · **PARTIAL** 
 
 ## 4. Field-level mismatches
 
-1. **Reviews** (`types/review.ts`) declare `review.username` and `response.creator_username`; the backend selects raw `review` rows (`user_id`) and a `creator_review_response` row (`creator_id`), so both are `undefined`. `created_at` is typed `Date` but arrives as a string, and `ReviewCard` calls `.toDateString()` on it.
+1. ✅ **Reviews** (`types/review.ts`) now match the backend: `review.user_id`/`username`, `response.creator_username`, `stats.averageRating` as a number, and a new `viewer.isCreator` flag. Timestamps are typed as ISO **strings** and formatted by `helper/formatDate` via `new Date(...)` in `ReviewCard`. Create-only: `PATCH` is implemented server-side but has no client call, so the form hides once you have reviewed.
 2. **Search results** omit `tags` — `/recipes/search` returns raw `recipe` rows (`services/recipe.ts:196-217`) and `transformRecipesFromAPI` (`api/tranformers.ts:76`) copies `apiRecipe.tags`, which is always `undefined`. Tags only exist on `GET /recipes/:slug` (`services/recipe.ts:263`).
 3. **`GET /recipes/:slug` has no `recipeData.id`** (`services/recipe.ts:254-264`), but the client's `RecipeInsert` type requires one and bookmarking gates on `recipeData.id`. `foodData` likewise lacks `id`, `barcode`, `serving_100g`, `volume_100ml` and `micro_nutriants`.
 4. **Discover cards have no `author`** — the cached payload (`services/scoring.ts:106-124`) never includes it, and `fetchDiscoverFeed`'s `toRecipeCardData` does not set it, yet `RecipeCard`/`RecipeCardSmall` render `recipeData.author`. `calories`, `avg_rating`, `score` and `creator_id` are also dropped by the transformer.
@@ -112,8 +112,8 @@ Status: **OK** = works · **BROKEN** = cannot succeed as written · **PARTIAL** 
 
 ## 6. Suggested fix order
 
-1. Pass the token in `fetchRecipeFromSlug` (one line) — unblocks the main online flow.
-2. Decide the review mount (`app.use('/recipes', reviewRouter)`) and start the router; the client paths are already correct.
+1. ✅ Done — `fetchRecipeFromSlug` now sends the bearer token.
+2. ✅ Done — review router mounted at `app.use('/recipes', reviewRouter)`; the client paths were already correct and the reviews UI is wired.
 3. Fix the `POST /recipes` payload: `tags.map(t => t.tag)`, guarantee a barcode string, coerce `servings_yield` to an integer.
 4. Call `updateRecipeSlug` from the live preview path and stop resetting the draft when the upload fails.
 5. Fix or delete the three non-existent routes; align `/recipebooks/*` on one convention.

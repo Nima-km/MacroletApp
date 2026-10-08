@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	Text,
 	TextInput,
+	TextInputProps,
 	TextStyle,
 	View,
 	ViewStyle,
@@ -29,6 +30,10 @@ interface FormInputProps {
 	selectTextOnFocus?: boolean;
 	error?: string | null;
 	secureTextEntry?: boolean;
+	/** Passed through to the TextInput. */
+	autoCapitalize?: TextInputProps["autoCapitalize"];
+	autoCorrect?: boolean;
+	maxLength?: number;
 	Icon?: FC<SvgProps>;
 	numeric?: boolean;
 	upperLimit?: number;
@@ -50,6 +55,9 @@ export function FormInput({
 	viewStyle,
 	error,
 	secureTextEntry,
+	autoCapitalize,
+	autoCorrect,
+	maxLength,
 	selectTextOnFocus = false,
 	multiline = false,
 	Icon,
@@ -68,7 +76,6 @@ export function FormInput({
 		<Pressable
 			onPress={() => {
 				inputRef.current?.focus();
-				inputRef.current?.setSelection(0, 10);
 				onFocus?.();
 			}}
 		>
@@ -121,6 +128,9 @@ export function FormInput({
 						placeholder={placeholder}
 						keyboardType={keyboardType}
 						secureTextEntry={secureTextEntry}
+						autoCapitalize={autoCapitalize}
+						autoCorrect={autoCorrect}
+						maxLength={maxLength}
 						style={[
 							{
 								padding: 0,
@@ -149,6 +159,7 @@ export function FormInputLong({
 	onChangeText,
 	placeholder,
 	error,
+	maxLength,
 }: FormInputProps) {
 	return (
 		<FormInput
@@ -157,6 +168,7 @@ export function FormInputLong({
 			onChangeText={onChangeText}
 			placeholder={placeholder}
 			error={error}
+			maxLength={maxLength}
 			multiline
 		/>
 	);

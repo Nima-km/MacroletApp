@@ -1,40 +1,28 @@
-import {
-	useCreatorOnboarding,
-	useOnboardingStatus,
-} from "@/api/hooks/useCreatorOnboarding";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import GoogleSignInButton from "@/components/UIComponents/Buttons/authButtons/GoogleSignInButton";
 import SignOutButton from "@/components/UIComponents/Buttons/authButtons/SignOutButton";
-import SubscribeButton from "@/components/UIComponents/Buttons/authButtons/SubscribeButton";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { useAuth } from "@clerk/expo";
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
 
+/**
+ * Account settings.
+ *
+ * The subscription and creator-onboarding controls that used to live here were
+ * testing scaffolding. Subscriptions now have a real screen
+ * (`(profile)/subscription`) and creator onboarding its own flow, so this screen
+ * is back to sign-in state only.
+ */
 const account = () => {
-	const { isSignedIn, isLoaded, getToken } = useAuth();
-	const [username, setUsername] = useState("");
-	const {
-		mutate: startOnboarding,
-		isPending,
-		error,
-	} = useCreatorOnboarding();
-	const { data: status } = useOnboardingStatus();
+	const { isSignedIn } = useAuth();
 
 	return (
 		<KeyboardAware>
 			<View style={{ flex: 1 }}>
 				<HeaderSimple title="User Settings" />
 				<View style={{ flex: 1, padding: 20, gap: 12 }}>
-					{isSignedIn ? (
-						<View>
-							<SignOutButton />
-
-							<SubscribeButton planId="gold" />
-						</View>
-					) : (
-						<GoogleSignInButton />
-					)}
+					{isSignedIn ? <SignOutButton /> : <GoogleSignInButton />}
 				</View>
 			</View>
 		</KeyboardAware>
@@ -42,5 +30,3 @@ const account = () => {
 };
 
 export default account;
-
-const styles = StyleSheet.create({});

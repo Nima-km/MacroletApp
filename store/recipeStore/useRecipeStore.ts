@@ -275,9 +275,9 @@ export function validateRecipeDraft(draft: RecipeDraft): ValidationResult {
 			const ingredientPrefix = `Ingredient ${index + 1}`;
 
 			// Validate food data
-			if (typeof ingredient.food.id !== "number") {
+			/*if (typeof ingredient.food.id !== "number") {
 				errors.push(`${ingredientPrefix}: Food ID must be a number`);
-			}
+			}*/
 			if (typeof ingredient.food.protein !== "number") {
 				errors.push(`${ingredientPrefix}: Protein must be a number`);
 			}

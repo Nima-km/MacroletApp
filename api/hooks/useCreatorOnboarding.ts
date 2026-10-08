@@ -1,58 +1,88 @@
-import { toApiError } from "../errors";
+import {
+	fetchCreatorStatus,
+	saveCreatorProfile,
+	startPayoutSetup,
+	type CreatorProfileInput,
+	type CreatorStatus,
+} from "../creator";
+import { notSignedIn } from "../errors";
 import { useAuth } from "@clerk/expo";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+export const CREATOR_STATUS_KEY = ["creator", "status"] as const;
 
-export const useCreatorOnboarding = () => {
-	const { getToken } = useAuth();
+/**
+ * Where the user is in the creator flow. One query drives every entry point, so
+ * "Become a Creator" / "Finish payouts setup" / "Creator Studio" can never
+ * disagree with each other.
+ */
+export const useCreatorStatus = () => {
+	const { getToken, isLoaded, isSignedIn } = useAuth();
 
-	return useMutation({
-		mutationFn: async ({
-			username,
-			display_name,
-			about,
-		}: {
-			username?: string;
-			display_name?: string;
-			about?: string;
-		}) => {
-			console.log("display name is", display_name);
+	return useQuery({
+		queryKey: CREATOR_STATUS_KEY,
+		enabled: isLoaded && Boolean(isSignedIn),
+		queryFn: async (): Promise<CreatorStatus> => {
 			const token = await getToken();
-			const res = await fetch(`${API_URL}/creator/onboard`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({ username, display_name, about }),
-			});
-
-			if (!res.ok) throw await toApiError(res);
-
-			return res.json(); // { creator, onboarding_url }
-		},
-		onSuccess: async (data) => {
-			// Open Stripe onboarding in browser
-			console.log("ON BROWSER");
-			await WebBrowser.openBrowserAsync(data.onboarding_url);
+			if (!token) throw notSignedIn();
+			return fetchCreatorStatus(token);
 		},
 	});
 };
 
-export const useOnboardingStatus = () => {
+/**
+ * Create or update the profile. Publishes immediately - no Stripe step is
+ * involved, which is the whole point (docs/PAYOUT_MODEL.md D7).
+ */
+export const useSaveCreatorProfile = () => {
 	const { getToken } = useAuth();
+	const queryClient = useQueryClient();
 
-	return useQuery({
-		queryKey: ["creator", "onboarding", "status"],
-		queryFn: async () => {
+	return useMutation({
+		mutationFn: async (profile: CreatorProfileInput) => {
 			const token = await getToken();
-			const res = await fetch(`${API_URL}/creator/onboard/status`, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (!res.ok) throw await toApiError(res);
-			return res.json(); // { is_complete: boolean }
+			if (!token) throw notSignedIn();
+			return saveCreatorProfile(token, profile);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: CREATOR_STATUS_KEY });
+		},
+	});
+};
+
+/**
+ * Open Stripe's hosted onboarding.
+ *
+ * The browser work happens inside `mutationFn` because it *is* the mutation:
+ * fetch a link, show it, and report how the user left. `openAuthSessionAsync`
+ * (not `openBrowserAsync`) resolves when the browser reaches our return URL, so
+ * the sheet closes itself and the status can be refreshed immediately instead of
+ * leaving a stale browser tab behind.
+ */
+export const useStartPayoutSetup = () => {
+	const { getToken } = useAuth();
+	const queryClient = useQueryClient();
+	const returnUrl = Linking.createURL("/creator/onboarding/complete");
+
+	return useMutation({
+		mutationFn: async () => {
+			const token = await getToken();
+			if (!token) throw notSignedIn();
+
+			const { onboarding_url } = await startPayoutSetup(token);
+
+			const browser = await WebBrowser.openAuthSessionAsync(
+				onboarding_url,
+				returnUrl,
+			);
+
+			// Whether they finished or backed out, the answer is on the server.
+			await queryClient.invalidateQueries({ queryKey: CREATOR_STATUS_KEY });
+			await queryClient.refetchQueries({ queryKey: CREATOR_STATUS_KEY });
+
+			return { onboarding_url, browser };
 		},
 	});
 };

@@ -59,7 +59,7 @@ export function useGetRecipeFromSlug(recipe_slug: string) {
 
 			if (!token) throw new Error("No auth token");
 
-			return fetchRecipeFromSlug(recipe_slug);
+			return fetchRecipeFromSlug(recipe_slug, token);
 		},
 	});
 }

@@ -6,6 +6,7 @@ import { useCreateAndLogOnlineRecipe } from "@/db/hooks/recipe/useCreateRecipe";
 import {
 	isValidRecipeDraft,
 	useRecipeStateStore,
+	validateRecipeDraft,
 } from "@/store/recipeStore/useRecipeStore";
 import { FoodItemDefault } from "@/tests/testData";
 import { FoodInsert, FoodItemData } from "@/types/food";
@@ -65,7 +66,11 @@ const onlineRecipe = () => {
 		}
 	}
 	if (!isValidRecipeDraft(recipeStoreData)) {
-		return <H1>Loading</H1>;
+		return (
+			<H1>
+				{recipeStoreData.foodData.name} {}
+			</H1>
+		);
 	}
 	return (
 		<View style={{ flex: 1 }}>

@@ -7,11 +7,22 @@ import Toast from "react-native-toast-message";
  */
 export class ApiError extends Error {
 	readonly status: number;
+	/**
+	 * Per-field messages from a validation failure. The API returns
+	 * `{ error: "Validation failed", issues: { username: ["..."] } }`, and the
+	 * useful part is `issues` - without it a form can only say "it failed".
+	 */
+	readonly issues?: Record<string, string[]>;
 
-	constructor(message: string, status: number) {
+	constructor(
+		message: string,
+		status: number,
+		issues?: Record<string, string[]>,
+	) {
 		super(message);
 		this.name = "ApiError";
 		this.status = status;
+		this.issues = issues;
 	}
 }
 
@@ -41,6 +52,20 @@ function pickMessage(body: any): string | undefined {
 	}
 }
 
+/** Field-level messages, when the server rejected specific fields. */
+function pickIssues(body: any): Record<string, string[]> | undefined {
+	const issues = body?.issues;
+	if (!issues || typeof issues !== "object") return undefined;
+
+	const cleaned: Record<string, string[]> = {};
+	for (const [field, messages] of Object.entries(issues)) {
+		if (Array.isArray(messages) && messages.length > 0) {
+			cleaned[field] = messages.map(String);
+		}
+	}
+	return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+}
+
 /** Build an ApiError from a response whose body has not been read yet. */
 export async function toApiError(res: ErrorResponse): Promise<ApiError> {
 	let body: any;
@@ -49,12 +74,33 @@ export async function toApiError(res: ErrorResponse): Promise<ApiError> {
 	} catch {
 		// Non-JSON body (HTML error page, empty 502, aborted request...).
 	}
-	return new ApiError(pickMessage(body) ?? defaultMessageFor(res.status), res.status);
+	return new ApiError(
+		pickMessage(body) ?? defaultMessageFor(res.status),
+		res.status,
+		pickIssues(body),
+	);
 }
 
 /** Build an ApiError when the body was already parsed (`res.json()` pattern). */
 export function apiErrorFrom(status: number, body?: any): ApiError {
-	return new ApiError(pickMessage(body) ?? defaultMessageFor(status), status);
+	return new ApiError(
+		pickMessage(body) ?? defaultMessageFor(status),
+		status,
+		pickIssues(body),
+	);
+}
+
+/**
+ * The message the server attached to one form field, if any. Lets a screen show
+ * "That username is already taken" under the username input instead of a
+ * generic failure banner.
+ */
+export function fieldErrorFor(
+	error: unknown,
+	field: string,
+): string | undefined {
+	if (!isApiError(error)) return undefined;
+	return error.issues?.[field]?.[0];
 }
 
 /**

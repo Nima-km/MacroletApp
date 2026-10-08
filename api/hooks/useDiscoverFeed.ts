@@ -4,20 +4,48 @@ import { DiscoverType, fetchDiscoverFeed } from "@/api/fetchDiscoverFeed";
 import { useAuth } from "@clerk/expo";
 import { useQuery } from "@tanstack/react-query";
 
+/**
+ * Placeholder Discover preferences.
+ *
+ * `discover.tsx` still hardcodes these rather than reading the user's saved tags.
+ * They live here so the screen and the app-start warm-up cannot drift apart and
+ * start populating two different cache entries.
+ */
+export const DISCOVER_DEFAULT_MANDATORY = ["high-protein"];
+export const DISCOVER_DEFAULT_OPTIONAL = ["high-protein"];
+
 export const useDiscoverFeed = (
 	mandatory_tags: string[],
 	optional_tags: string[],
+	/** Lets the app-start warm-up in `(tabs)/_layout` stay idle until signed in. */
+	enabled = true,
 ) => {
 	const { getToken } = useAuth();
 
 	return useQuery<DiscoverType, Error>({
 		queryKey: ["discover", mandatory_tags, optional_tags],
 		queryFn: async () => {
+			// TEMP DIAGNOSTIC (remove once the cold-start delay is explained):
+			// splits the wait into Clerk's token versus the request itself.
+			const startedAt = Date.now();
 			const token = await getToken();
+			const tokenMs = Date.now() - startedAt;
 			if (!token) throw notSignedIn();
-			return fetchDiscoverFeed(mandatory_tags, optional_tags, token);
+			const result = await fetchDiscoverFeed(
+				mandatory_tags,
+				optional_tags,
+				token,
+			);
+			console.log(
+				`[discover] token ${tokenMs}ms + request ${Date.now() - startedAt - tokenMs}ms = ${Date.now() - startedAt}ms`,
+			);
+			return result;
 		},
-		enabled: optional_tags.length > 0, // only fetch if user has optional tags set
+		// Fetch when the user has expressed *any* preference. Gating on optional
+		// tags alone meant a user who set only dietary (mandatory) filters never
+		// requested a feed, so the screen stayed empty no matter what.
+		enabled:
+			enabled && (mandatory_tags.length > 0 || optional_tags.length > 0),
 		staleTime: 1000 * 60 * 30, // 30 minutes — feed is rebuilt nightly anyway
 		retry: false,
 	});
