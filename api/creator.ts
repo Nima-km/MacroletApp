@@ -17,6 +17,14 @@ type RecipeBookType = {
 };
 type CreatorProfileType = {
 	author: AuthorType;
+	/** Whether the signed-in viewer already follows them. Computed server-side. */
+	is_following: boolean;
+	stats: {
+		recipes: number;
+		followers: number;
+		/** `null` until the creator has been reviewed at least once. */
+		avg_rating: number | null;
+	};
 	recipeBooks: RecipeBookType[];
 };
 type CreatorRecipesType = {

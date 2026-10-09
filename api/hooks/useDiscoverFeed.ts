@@ -17,7 +17,7 @@ export const DISCOVER_DEFAULT_OPTIONAL = ["high-protein"];
 export const useDiscoverFeed = (
 	mandatory_tags: string[],
 	optional_tags: string[],
-	/** Lets the app-start warm-up in `(tabs)/_layout` stay idle until signed in. */
+	/** Set false by a caller that is not ready yet; the feed still needs a tag. */
 	enabled = true,
 ) => {
 	const { getToken } = useAuth();
@@ -25,21 +25,9 @@ export const useDiscoverFeed = (
 	return useQuery<DiscoverType, Error>({
 		queryKey: ["discover", mandatory_tags, optional_tags],
 		queryFn: async () => {
-			// TEMP DIAGNOSTIC (remove once the cold-start delay is explained):
-			// splits the wait into Clerk's token versus the request itself.
-			const startedAt = Date.now();
 			const token = await getToken();
-			const tokenMs = Date.now() - startedAt;
 			if (!token) throw notSignedIn();
-			const result = await fetchDiscoverFeed(
-				mandatory_tags,
-				optional_tags,
-				token,
-			);
-			console.log(
-				`[discover] token ${tokenMs}ms + request ${Date.now() - startedAt - tokenMs}ms = ${Date.now() - startedAt}ms`,
-			);
-			return result;
+			return fetchDiscoverFeed(mandatory_tags, optional_tags, token);
 		},
 		// Fetch when the user has expressed *any* preference. Gating on optional
 		// tags alone meant a user who set only dietary (mandatory) filters never

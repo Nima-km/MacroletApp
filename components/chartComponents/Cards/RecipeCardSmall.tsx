@@ -79,10 +79,19 @@ const RecipeCardSmall = ({ recipe, scale = 1 }: Props) => {
 				<H5 style={{ color: colors.medium_gray }}>
 					{recipe.recipeData.author}
 				</H5>
-				<View style={{ flexDirection: "row", gap: 4 }}>
-					<Star pointerEvents="none" />
-					<H6>4.5 (1,437)</H6>
-				</View>
+				{/* Was a hardcoded "4.5 (1,437)" on every card. Shows the real
+				    average now, with the review count when there is one. */}
+				{recipe.recipeData.avg_rating ? (
+					<View style={{ flexDirection: "row", gap: 4 }}>
+						<Star pointerEvents="none" />
+						<H6>
+							{recipe.recipeData.avg_rating.toFixed(1)}
+							{recipe.recipeData.review_count
+								? ` (${recipe.recipeData.review_count})`
+								: ""}
+						</H6>
+					</View>
+				) : null}
 				<MacroChart food={recipe.foodData} height={12} />
 				<View
 					style={{

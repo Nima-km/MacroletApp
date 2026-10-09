@@ -1,6 +1,6 @@
 import { toApiError } from "./errors";
 import { FoodInsert } from "@/types/food";
-import { RecipeInsert } from "@/types/recipe";
+import { RecipeInsert, RecipeOnlineFields } from "@/types/recipe";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,11 +18,13 @@ type DiscoverRecipe = {
 	prep_time: number;
 	cook_time: number;
 	avg_rating: number;
+	review_count: number;
+	author: string | null;
 	score?: number;
 	creator_id?: number | null;
 };
 export type RecipeCardData = {
-	recipeData: RecipeInsert;
+	recipeData: RecipeInsert & RecipeOnlineFields;
 	foodData: FoodInsert;
 };
 
@@ -45,6 +47,11 @@ function toRecipeCardData(item: DiscoverRecipe): RecipeCardData {
 			servings_yield: item.servings_yield,
 			prep_time: item.prep_time,
 			cook_time: item.cook_time,
+			// Both were missing, so the card rendered a blank author line and a
+			// hardcoded star rating.
+			author: item.author,
+			avg_rating: item.avg_rating,
+			review_count: item.review_count,
 		},
 		foodData: {
 			name: item.name,

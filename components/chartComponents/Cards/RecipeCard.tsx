@@ -50,16 +50,24 @@ const RecipeCard = ({ recipe }: Props) => {
 						<H5 style={{ color: colors.medium_gray }}>
 							{recipe.recipeData.author ?? "by You"}
 						</H5>
-						<View
-							style={{
-								flexDirection: "row",
-								gap: 4,
-								alignItems: "center",
-							}}
-						>
-							<Star pointerEvents="none" />
-							<H6>4.5 (1,437)</H6>
-						</View>
+						{/* Was a hardcoded "4.5 (1,437)" on every card. */}
+						{recipe.recipeData.avg_rating ? (
+							<View
+								style={{
+									flexDirection: "row",
+									gap: 4,
+									alignItems: "center",
+								}}
+							>
+								<Star pointerEvents="none" />
+								<H6>
+									{recipe.recipeData.avg_rating.toFixed(1)}
+									{recipe.recipeData.review_count
+										? ` (${recipe.recipeData.review_count})`
+										: ""}
+								</H6>
+							</View>
+						) : null}
 					</View>
 					<View style={{ flexDirection: "row", gap: 12 }}>
 						<View

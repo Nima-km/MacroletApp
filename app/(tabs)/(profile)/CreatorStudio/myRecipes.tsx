@@ -7,7 +7,6 @@ import {
 import Bars from "@/assets/svg/bar-chart.svg";
 import ChevronRight from "@/assets/svg/chevron-right.svg";
 import Dollar from "@/assets/svg/dollar-frame.svg";
-import Star from "@/assets/svg/star.svg";
 import RecipeBookCard from "@/components/chartComponents/Cards/RecipeBookCard";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import StyledRadioButton from "@/components/UIComponents/Buttons/RadioButton";
@@ -324,16 +323,10 @@ const myRecipes = () => {
 											gap: 12,
 										}}
 									>
-										<View
-											style={{
-												flexDirection: "row",
-												gap: 4,
-												alignItems: "center",
-											}}
-										>
-											<Star pointerEvents="none" />
-											<H6>4.5 (1,437)</H6>
-										</View>
+										{/* Rating row removed: it was a hardcoded "4.5 (1,437)"
+										    on every recipe, and this screen's payload
+										    (GET /dashboard/recipes) carries no rating at
+										    all, so there is nothing real to show. */}
 										<View
 											style={{
 												flexDirection: "row",

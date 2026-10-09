@@ -1,47 +1,54 @@
-import ChevronRight from "@/assets/svg/chevron-right.svg";
 import ProfileIcon from "@/assets/svg/user.svg";
 import { colors } from "@/theme";
 import { useClerk } from "@clerk/expo";
-import * as Linking from "expo-linking";
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { H3 } from "../../Typography";
+
+/**
+ * Log out.
+ *
+ * Destructive, so it confirms first and uses the `error` ink the style guide
+ * reserves for destructive affordances (§2). It previously signed out on a single
+ * tap while wearing a `ChevronRight`, which implies navigation rather than
+ * destruction, and afterwards fired `Linking.openURL` at the app's own root.
+ *
+ * `(profile)/account` shares this component and so inherits the confirmation.
+ */
 const SignOutButton = () => {
-	// Use `useClerk()` to access the `signOut()` function
 	const { signOut } = useClerk();
+
 	const handleSignOut = async () => {
 		try {
 			await signOut();
-			// Redirect to your desired page
-			Linking.openURL(Linking.createURL("/"));
-		} catch (err) {
-			// See https://clerk.com/docs/custom-flows/error-handling
-			// for more info on error handling
-			console.error(JSON.stringify(err, null, 2));
+			// No redirect needed: signing out flips `isSignedIn`, and the screens
+			// that require a session already branch on it.
+		} catch (error) {
+			console.error("Sign out failed", error);
 		}
 	};
+
+	const confirmSignOut = () =>
+		Alert.alert("Log out?", "You'll need to sign in again to sync your logs.", [
+			{ text: "Cancel", style: "cancel" },
+			{
+				text: "Log out",
+				style: "destructive",
+				onPress: () => void handleSignOut(),
+			},
+		]);
+
 	return (
 		<Pressable
-			style={{
-				paddingVertical: 16,
-				flexDirection: "row",
-				justifyContent: "space-between",
-				borderBottomWidth: 1,
-				borderColor: colors.primary_bg,
-			}}
-			onPress={handleSignOut}
+			onPress={confirmSignOut}
+			accessibilityRole="button"
+			accessibilityLabel="Log out"
+			style={({ pressed }) => [styles.row, pressed && styles.pressed]}
 		>
-			<View
-				style={{
-					flexDirection: "row",
-					gap: 8,
-					alignItems: "center",
-				}}
-			>
-				<ProfileIcon color={colors.primary} />
-				<H3>Log Out</H3>
+			<View style={styles.left}>
+				<ProfileIcon color={colors.error} />
+				<H3 style={styles.label}>Log Out</H3>
 			</View>
-			<ChevronRight color={colors.primary} />
 		</Pressable>
 	);
 };
@@ -49,11 +56,21 @@ const SignOutButton = () => {
 export default SignOutButton;
 
 const styles = StyleSheet.create({
-	button: {
-		backgroundColor: colors.white, // Google blue
-		paddingVertical: 14,
-		borderRadius: 8,
+	row: {
+		flexDirection: "row",
+		justifyContent: "space-between",
 		alignItems: "center",
-		marginTop: 10,
+		paddingVertical: 16,
+	},
+	pressed: {
+		backgroundColor: colors.off_white,
+	},
+	left: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+	},
+	label: {
+		color: colors.error,
 	},
 });

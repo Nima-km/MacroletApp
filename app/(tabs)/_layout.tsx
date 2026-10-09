@@ -1,43 +1,21 @@
-import {
-	DISCOVER_DEFAULT_MANDATORY,
-	DISCOVER_DEFAULT_OPTIONAL,
-	useDiscoverFeed,
-} from "@/api/hooks/useDiscoverFeed";
 import MyTabBar from "@/components/navComponents/MyTabBar";
 import { prefetchGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
 import { prefetchGetAllRecipeList } from "@/db/hooks/recipeBook/getRecipeBookList";
 import { colors } from "@/theme";
-import { useAuth } from "@clerk/expo";
 import { Tabs } from "expo-router";
 import { useEffect } from "react";
 
 export default function Layout() {
-	const { isSignedIn } = useAuth();
-
 	useEffect(() => {
 		prefetchGetFoodItemRecent();
 		prefetchGetAllRecipeList();
-		// TEMP DIAGNOSTIC (remove with the one in useDiscoverFeed).
-		console.log(
-			`[startup] tabs layout mounted @${
-				typeof performance !== "undefined"
-					? Math.round(performance.now())
-					: 0
-			}ms`,
-		);
 	}, []);
 
-	// Warms the feed *data*, starting a few ms before the Discover screen's own hook
-	// fires (the screen itself is now built at startup via `lazy: false` below,
-	// which covers its module graph, first render and image downloads). React Query
-	// dedupes on the key, so this is still one request - and gating on `isSignedIn`
-	// keeps a signed-out launch from firing a request that can only 401.
-	// Same warm-up pattern as the two local prefetches above.
-	useDiscoverFeed(
-		DISCOVER_DEFAULT_MANDATORY,
-		DISCOVER_DEFAULT_OPTIONAL,
-		!!isSignedIn,
-	);
+	// The Discover feed is no longer warmed up from here. The tags come from the
+	// local `tagPreference` table, and a read of SQLite is async - so this would have
+	// fetched with the placeholder tags and then fetched again with the user's real
+	// ones. `lazy: false` on the tabs below already builds those screens during
+	// startup, so Discover fires the request itself, once, with the right tags.
 
 	return (
 		<Tabs
@@ -49,23 +27,33 @@ export default function Layout() {
 			}}
 			tabBar={(props) => <MyTabBar {...props} />}
 		>
+			{/*
+				`lazy: false` builds a tab during startup rather than on first tap, so
+				switching to it is instant: its module graph, first render, images and
+				queries are already done. Set on all four real tabs.
+
+				The cost is honest and worth stating: app launch now carries that work.
+				Home and Logs only read the local database, Discover fetches its feed
+				(premium-gated), and Profile asks for creator status - so launch pays
+				for one feed request and one status request, plus four screens' first
+				render instead of one.
+
+				`test` and `test1` stay lazy on purpose: they are scaffolding, and
+				preloading them would add their work to every launch for no benefit.
+			*/}
 			<Tabs.Screen
 				name="(Home)"
-				options={{ title: "Home", headerShown: false }}
+				options={{ title: "Home", headerShown: false, lazy: false }}
 			/>
-			{/*
-				`lazy: false` builds the Discover screen during startup instead of on
-				first tap, so its module graph, first render and 12 image downloads
-				are already done by the time the user gets there. Deliberately not set
-				navigator-wide: that would mount every tab (including test/test1) and
-				fire each one's queries at launch.
-			*/}
 			<Tabs.Screen
 				name="(discover)"
 				options={{ title: "Discover", lazy: false }}
 			/>
-			<Tabs.Screen name="(logs)" options={{ title: "Logs" }} />
-			<Tabs.Screen name="(profile)" options={{ title: "Profile" }} />
+			<Tabs.Screen name="(logs)" options={{ title: "Logs", lazy: false }} />
+			<Tabs.Screen
+				name="(profile)"
+				options={{ title: "Profile", lazy: false }}
+			/>
 			<Tabs.Screen name="test" options={{ title: "test" }} />
 			<Tabs.Screen name="test1" options={{ title: "test1" }} />
 		</Tabs>

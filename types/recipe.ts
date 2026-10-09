@@ -28,8 +28,19 @@ export type IngredientFullData = {
 	food: FoodGet;
 	ingredientItem: IngredientItemDetails;
 };
+/**
+ * Server-computed fields the local schema has no column for.
+ *
+ * Optional on purpose: a recipe created offline has never been rated, so `undefined`
+ * is the honest value rather than a fake zero.
+ */
+export type RecipeOnlineFields = {
+	avg_rating?: number | null;
+	review_count?: number | null;
+};
+
 export type RecipeData = {
-	recipeData: RecipeInsert;
+	recipeData: RecipeInsert & RecipeOnlineFields;
 	foodData: Omit<FoodInsert, "recipe_id">;
 	ingredientItemsData: Array<IngredientFullData>;
 };

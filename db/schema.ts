@@ -139,3 +139,20 @@ export const macroGoal = sqliteTable("macroGoal", {
 		.notNull()
 		.references(() => macroSplit.id),
 });
+
+/**
+ * The tags the user picked for the Discover feed.
+ *
+ * One row per tag rather than two JSON arrays: adding, removing or re-roling a tag
+ * is a single statement and nothing has to be parsed back. The two roles are the
+ * two the feed already has - `required` maps to the API's `mandatory` (a hard AND
+ * filter) and `preferred` to `optional` (which decides which sections appear).
+ *
+ * `tag_name` holds the server's `tag.name` slug verbatim (`high-protein`), never a
+ * display label: the API matches slugs exactly, and the vocabulary is free to
+ * change without touching this table.
+ */
+export const tagPreference = sqliteTable("tagPreference", {
+	tag_name: text("tag_name", { length: 50 }).primaryKey(),
+	role: text("role", { enum: ["required", "preferred"] }).notNull(),
+});

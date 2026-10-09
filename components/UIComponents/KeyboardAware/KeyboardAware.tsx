@@ -15,12 +15,20 @@ interface KeyboardScreenProps {
 	children: ReactNode;
 	scrollEnabled?: boolean;
 	contentPadding?: number;
+	/**
+	 * Optional. This wrapper owns the ScrollView, so a screen that wants
+	 * pull-to-refresh has to hand the control down rather than attach its own.
+	 * Typed off ScrollView itself, since its `refreshControl` wants a specific
+	 * element type rather than a bare ReactElement.
+	 */
+	refreshControl?: React.ComponentProps<typeof ScrollView>["refreshControl"];
 }
 
 const KeyboardAware = ({
 	children,
 	scrollEnabled = true,
 	contentPadding = 16,
+	refreshControl,
 }: KeyboardScreenProps) => {
 	const defaultValue: KeyboardAvoidingViewProps["behavior"] =
 		Platform.OS === "ios" ? "padding" : "height";
@@ -74,6 +82,7 @@ const KeyboardAware = ({
 				}}
 				scrollEnabled={scrollEnabled}
 				onTouchStart={() => setOpen()}
+				refreshControl={refreshControl}
 			>
 				{children}
 			</ScrollView>

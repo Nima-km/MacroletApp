@@ -36,6 +36,7 @@ import {
 	NativeScrollEvent,
 	NativeSyntheticEvent,
 	Platform,
+	Pressable,
 	ScrollView,
 	View,
 } from "react-native";
@@ -245,12 +246,20 @@ const RecipeInfoCore = ({
 					{recipeData.description}
 				</H5>
 				{authorData && (
-					<View
+					<Pressable
 						style={{
 							flexDirection: "row",
 							alignItems: "center",
 							gap: 4,
 						}}
+						onPress={() =>
+							router.push({
+								pathname: "/creatorProfile",
+								params: {
+									username: authorData.author.username,
+								},
+							})
+						}
 					>
 						<View
 							style={{
@@ -261,7 +270,7 @@ const RecipeInfoCore = ({
 							}}
 						></View>
 						<H5>By {authorData?.author?.display_name}</H5>
-					</View>
+					</Pressable>
 				)}
 				{mode == "state" && (
 					<View

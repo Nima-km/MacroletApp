@@ -1,4 +1,5 @@
 import { useCreatorProfile, useCreatorRecipes } from "@/api/hooks/useCreator";
+import { useToggleFollow } from "@/api/hooks/useFollowCreator";
 import ArrowRight from "@/assets/svg/arrow-right.svg";
 import InstagramIcon from "@/assets/svg/instagram.svg";
 import TiktokIcon from "@/assets/svg/tiktok.svg";
@@ -7,6 +8,7 @@ import RecipeCardSmall from "@/components/chartComponents/Cards/RecipeCardSmall"
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import TopNav from "@/components/navComponents/TopNav";
 import { FormInputSearch } from "@/components/UIComponents/TextInputs/FormInput";
+import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
 import { H2, H3, H4, H5, H6 } from "@/components/UIComponents/Typography";
 import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
@@ -34,9 +36,15 @@ type cookBookType = {
 const creatorProfile = () => {
 	const [selectedPage, setSelectedPage] = useState(0);
 	const { username } = useLocalSearchParams<{ username: string }>();
-	const { data: profile, isLoading } = useCreatorProfile(username);
+	const {
+		data: profile,
+		isLoading: profileLoading,
+		isError: profileError,
+		refetch: refetchProfile,
+	} = useCreatorProfile(username);
 	const {
 		data: recipes,
+		isLoading: recipesLoading,
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
@@ -44,6 +52,10 @@ const creatorProfile = () => {
 	const allRecipes = recipes?.pages.flatMap((page) => page.recipes) ?? [];
 
 	const router = useRouter();
+
+	// Follow is a toggle driven by the server's `is_following`, so the button can
+	// never be out of step with what the API thinks.
+	const { mutate: toggleFollow, isPending: followPending } = useToggleFollow();
 
 	/** Same navigation DiscoverFeed uses when a recipe card is tapped. */
 	function onOnlineRecipe(recipeSlug: string | undefined | null) {
@@ -87,16 +99,29 @@ const creatorProfile = () => {
 			hideListener.remove();
 		};
 	}, []);
-	useEffect(() => {
-		console.log("all recupes", recipes?.pages[0]);
-	}, [allRecipes]);
-	if (!allRecipes || allRecipes.length == 0) {
-		return <H2>LOADING</H2>;
+	// Loading is a query state; empty is a result. This screen used to answer "no
+	// recipes yet" with LOADING, so a creator who has published nothing - including
+	// your own profile before your first publish - spun forever and the header, the
+	// follow button and the cookbooks were never reachable.
+	if (profileLoading || recipesLoading) {
+		return (
+			<View style={styles.centre}>
+				<ActivityIndicator />
+			</View>
+		);
 	}
 
-	if (!profile) {
-		console.log(profile);
-		return <H2>LOADING PROFILE</H2>;
+	// There was no error branch at all: a failed request left `profile` undefined
+	// and looked exactly like loading.
+	if (profileError || !profile) {
+		return (
+			<View style={styles.centre}>
+				<H5 style={styles.muted}>Couldn't load this creator</H5>
+				<PrimaryButton onPress={() => refetchProfile()}>
+					Try again
+				</PrimaryButton>
+			</View>
+		);
 	}
 	return (
 		<KeyboardAvoidingView
@@ -153,23 +178,29 @@ const creatorProfile = () => {
 						style={{ flexDirection: "row", gap: 32, marginTop: 8 }}
 					>
 						<View style={{ gap: 4, alignItems: "center" }}>
-							<H3>13</H3>
+							<H3>{profile.stats.recipes}</H3>
 							<H5 style={{ color: colors.medium_gray }}>
 								Recipes
 							</H5>
 						</View>
 						<View style={{ gap: 4, alignItems: "center" }}>
-							<H3>905</H3>
+							<H3>{profile.stats.followers}</H3>
 							<H5 style={{ color: colors.medium_gray }}>
 								Followers
 							</H5>
 						</View>
-						<View style={{ gap: 4, alignItems: "center" }}>
-							<H3>4.8</H3>
-							<H5 style={{ color: colors.medium_gray }}>
-								rating
-							</H5>
-						</View>
+						{/* Omitted entirely rather than shown as a zero: nobody has
+						    reviewed yet, which is not the same as a bad rating. */}
+						{profile.stats.avg_rating != null ? (
+							<View style={{ gap: 4, alignItems: "center" }}>
+								<H3>
+									{profile.stats.avg_rating.toFixed(1)}
+								</H3>
+								<H5 style={{ color: colors.medium_gray }}>
+									rating
+								</H5>
+							</View>
+						) : null}
 					</View>
 					<View
 						style={{ flexDirection: "row", gap: 8, marginTop: 8 }}
@@ -222,15 +253,31 @@ const creatorProfile = () => {
 				</View>
 
 				<Pressable
+					disabled={followPending}
+					onPress={() =>
+						toggleFollow({
+							username: profile.author.username,
+							following: profile.is_following,
+						})
+					}
+					accessibilityRole="button"
+					accessibilityLabel={
+						profile.is_following
+							? `Unfollow ${profile.author.display_name}`
+							: `Follow ${profile.author.display_name}`
+					}
 					style={{
 						backgroundColor: colors.primary,
 						borderRadius: 8,
 						alignItems: "center",
 						margin: 20,
 						padding: 10,
+						opacity: followPending ? 0.6 : 1,
 					}}
 				>
-					<H4 style={{ color: colors.white }}>Follow</H4>
+					<H4 style={{ color: colors.white }}>
+						{profile.is_following ? "Following" : "Follow"}
+					</H4>
 				</Pressable>
 				<View
 					style={{
@@ -259,6 +306,11 @@ const creatorProfile = () => {
 								gap: 20,
 							}}
 						>
+							{profile.recipeBooks.length === 0 ? (
+								<H5 style={styles.muted}>
+									No cookbooks yet
+								</H5>
+							) : null}
 							{profile.recipeBooks.map((item) => {
 								return (
 									<View key={item.name} style={{ gap: 12 }}>
@@ -354,6 +406,11 @@ const creatorProfile = () => {
 							</View>
 							<FlatList
 								data={allRecipes}
+								ListEmptyComponent={
+									<H5 style={styles.muted}>
+										No recipes yet
+									</H5>
+								}
 								numColumns={2}
 								scrollEnabled={false}
 								showsVerticalScrollIndicator={false}
@@ -402,4 +459,16 @@ const creatorProfile = () => {
 
 export default creatorProfile;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+	centre: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		gap: 16,
+		padding: 20,
+	},
+	muted: {
+		color: colors.medium_gray,
+		textAlign: "center",
+	},
+});
