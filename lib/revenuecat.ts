@@ -28,6 +28,10 @@ export type SubscriptionPeriod = "monthly" | "annual";
 /**
  * Platform public key, falling back to the Test Store key so the purchase flow
  * can be exercised before the App Store / Play Store apps exist.
+ *
+ * Note the fallback only helps in a **Debug** build: RevenueCat refuses a Test
+ * Store key in a release build ("Wrong API Key", and the SDK closes the app), so a
+ * distributable build needs a real `appl_…` / `goog_…` key.
  */
 function publicApiKey(): string | undefined {
 	const platformKey =
@@ -37,11 +41,25 @@ function publicApiKey(): string | undefined {
 				? process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY
 				: undefined;
 
-	return platformKey ?? process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY;
+	// `||`, not `??`: a defined-but-empty variable - an easy slip when wiring a build
+	// profile - is not a key, and configuring the SDK with "" fails obscurely rather
+	// than falling back to the Test Store key this function exists to provide.
+	return (
+		platformKey ||
+		process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY ||
+		undefined
+	);
 }
 
 let configured = false;
 let warnedUnavailable = false;
+/** TEMPORARY DIAGNOSTIC - the last RevenueCat failure, for the membership screen. */
+let lastError: string | null = null;
+
+/** TEMPORARY DIAGNOSTIC - record a failure so `revenueCatDiagnostics()` can show it. */
+export function recordRevenueCatError(error: unknown) {
+	lastError = error instanceof Error ? error.message : String(error);
+}
 
 /**
  * Mirrors the SDK's own environment check (`shouldUseBrowserMode`).
@@ -109,6 +127,29 @@ export function configureRevenueCat(): boolean {
 		console.warn("[revenuecat] configure failed:", error);
 		return false;
 	}
+}
+
+/**
+ * TEMPORARY DIAGNOSTIC - remove once purchases are confirmed working in a build.
+ *
+ * `configureRevenueCat()` returns false for two unrelated reasons - no native
+ * module, or no SDK key - and the membership screen can only say "not available",
+ * which in a release build (no console) leaves no way to tell them apart in the
+ * field. Key shown as prefix and length only, never in full.
+ */
+export function revenueCatDiagnostics(): string {
+	const key = publicApiKey() ?? "";
+	const expoGo = Boolean(
+		(globalThis as { expo?: { modules?: { ExpoGo?: unknown } } }).expo
+			?.modules?.ExpoGo
+	);
+	return [
+		`mod=${Boolean(NativeModules.RNPurchases)}`,
+		`expoGo=${expoGo}`,
+		`key=${key ? `${key.slice(0, 5)}…(len ${key.length})` : "none"}`,
+		`cfg=${configured}`,
+		`err=${lastError ?? "-"}`,
+	].join("  ");
 }
 
 export function isConfigured(): boolean {

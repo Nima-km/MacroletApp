@@ -33,6 +33,9 @@ import {
 	type PlanOption,
 	type SubscriptionPeriod,
 	type SubscriptionState,
+	revenueCatDiagnostics,
+	recordRevenueCatError,
+	isConfigured,
 } from "@/lib/revenuecat";
 import { colors } from "@/theme";
 import React, { useCallback, useEffect, useState } from "react";
@@ -112,6 +115,8 @@ const subscription = () => {
 			}
 		} catch (error) {
 			console.warn("[subscription] could not load:", error);
+			// TEMPORARY DIAGNOSTIC - remove with revenueCatDiagnostics().
+			recordRevenueCatError(error);
 			setState(EMPTY_SUBSCRIPTION_STATE);
 			setPlans([]);
 		}
@@ -346,10 +351,15 @@ const subscription = () => {
 						{unavailable ? (
 							<View style={styles.card}>
 								<H5 style={styles.muted}>
-									Subscriptions aren't available in this build. A
-									native rebuild is needed after adding the
-									payments SDK.
+									{isConfigured()
+										? "Couldn't load the subscription options. Please try again later."
+										: "Subscriptions aren't available in this build. A native rebuild is needed after adding the payments SDK."}
 								</H5>
+								{/* TEMPORARY DIAGNOSTIC - remove with
+								    revenueCatDiagnostics(). */}
+								<H6 style={styles.muted}>
+									{revenueCatDiagnostics()}
+								</H6>
 							</View>
 						) : plans.length > 0 ? (
 							<View style={styles.plans}>{plans.map(renderPlan)}</View>

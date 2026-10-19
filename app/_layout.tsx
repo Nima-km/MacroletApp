@@ -64,7 +64,7 @@ export default function RootLayout() {
 		<QueryClientProvider client={queryClient}>
 			<Suspense fallback={<ActivityIndicator size="large" />}>
 				<FontProvider>
-					<GestureHandlerRootView>
+					<GestureHandlerRootView style={{ flex: 1 }}>
 						<ClerkProvider
 							publishableKey={publishableKey}
 							tokenCache={tokenCache}

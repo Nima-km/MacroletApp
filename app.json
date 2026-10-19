@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MacroletApp",
+    "name": "Macrolet",
     "slug": "MacroletApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,14 +9,14 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nima-km2.MacroletApp",
+      "bundleIdentifier": "com.macroletapp.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "predictiveBackGestureEnabled": false,
-      "package": "com.nima_km2.MacroletApp",
+      "package": "com.macroletapp.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
