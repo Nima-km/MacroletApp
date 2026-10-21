@@ -1,6 +1,7 @@
 import { DirectionStep, RecipeTags } from "@/types/recipe";
 import { relations, sql } from "drizzle-orm";
 import {
+	index,
 	integer,
 	sqliteTable,
 	text,
@@ -55,7 +56,13 @@ export const foodItem = sqliteTable("foodItem", {
 	servings: integer("servings").notNull(),
 	serving_mult: integer("serving_mult").notNull(),
 	serving_type: text("serving_type", { length: 20 }).notNull(),
-});
+}, (table) => [
+	// The Recent list ranks foods by MAX(timestamp) GROUP BY food_id, and the
+	// history/sum queries filter on timestamp alone. Without these, the first scans
+	// and groups the whole table - invisible at 84 foods, obvious at 15,000 logs.
+	index("food_item_food_id_timestamp_idx").on(table.food_id, table.timestamp),
+	index("food_item_timestamp_idx").on(table.timestamp),
+]);
 
 export const ingredientItem = sqliteTable("IngredientItem", {
 	id: integer("id").primaryKey({ autoIncrement: true }),

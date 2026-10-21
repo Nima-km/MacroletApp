@@ -4,11 +4,8 @@ import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
 import RecentComponent from "@/components/findFoodTabs/RecentComponent";
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
-import { servingSizeProvider } from "@/helper/ServingSizeProvider";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
 import { FoodFullData, FoodItemData } from "@/types/food";
-import { IngredientFullData } from "@/types/recipe";
-import BottomSheet from "@gorhom/bottom-sheet";
 import React, {
 	useCallback,
 	useEffect,
@@ -22,9 +19,8 @@ import PagerView, {
 } from "react-native-pager-view";
 import HeaderSimple from "../navComponents/HeaderSimple";
 import NavSelector from "../navComponents/NavSelector";
-import FoodBottomSheet from "../UIComponents/BottomSheet/FoodBottomSheet";
-import IngredientBottomSheet from "../UIComponents/BottomSheet/IngredientBottomSheet";
-import QuickAddIngredientModal from "../UIComponents/Modals/QuickAddIngredientModal";
+import { useFoodSelectionStore } from "@/store/foodSelectionStore";
+import FoodSelectionSheets from "./FoodSelectionSheets";
 import { FormInputSearch } from "../UIComponents/TextInputs/FormInput";
 interface FindFoodProps {
 	onFoodCardID: (
@@ -33,33 +29,23 @@ interface FindFoodProps {
 		ingredientItemData?: FoodItemData,
 	) => void;
 	onLogFoodList: () => void;
-	setFoodList?: React.Dispatch<React.SetStateAction<FoodFullData[]>>;
-	setIngredientList?: React.Dispatch<
-		React.SetStateAction<IngredientFullData[]>
-	>;
-	foodList?: FoodFullData[];
-	ingredientList?: IngredientFullData[];
+	/** Log a food (true) or collect recipe ingredients (false). */
+	isNotRecipe?: boolean;
 	isNewRecipe?: boolean;
 }
 
 const FindFood = ({
 	onFoodCardID,
 	onLogFoodList,
-	setFoodList,
-	setIngredientList,
-	foodList,
-	ingredientList,
+	isNotRecipe = true,
 	isNewRecipe = false,
 }: FindFoodProps) => {
-	const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
-	const [quickSelectedIndex, setQuickSelectedIndex] = useState<number>();
-	const isNotRecipe =
-		ingredientList == undefined && setIngredientList == undefined;
+	const addFood = useFoodSelectionStore((s) => s.addFood);
+	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
 	const selectedPage = useFindFoodSelectedPageStore((s) => s.selectedPage);
 	const setSelectedPage = useFindFoodSelectedPageStore(
 		(s) => s.setSelectedPage,
 	);
-	const sheetRef = useRef<BottomSheet>(null);
 	const [search, setSearch] = useState("");
 	const [visitedPages, setVisitedPages] = useState<Set<number>>(
 		new Set([selectedPage]),
@@ -75,7 +61,7 @@ const FindFood = ({
 		data: history,
 		isLoading: loadingSectionList,
 		error: errorSectionList,
-	} = useGetFoodItemRecent(isNotRecipe);
+	} = useGetFoodItemRecent(isNotRecipe, search);
 	const pagerRef = useRef<PagerView>(null);
 	const currentPagerPage = useRef(selectedPage); // tracks the pager's actual current position
 
@@ -95,18 +81,17 @@ const FindFood = ({
 		}
 		console.log("page changed", selectedPage);
 	}, [selectedPage]);
+	// Store actions are stable references, so FindFood does not re-render when the
+	// selection changes - only FoodSelectionSheets, which displays it, does.
 	const onAddFood = useCallback(
 		(item: FoodFullData) => {
-			if (setFoodList) setFoodList((prev) => [...prev, item]);
-			if (setIngredientList) {
-				const processed = {
-					food: item.food,
-					ingredientItem: item.foodItem,
-				};
-				setIngredientList((prev) => [...prev, processed]);
+			if (isNotRecipe) {
+				addFood(item);
+				return;
 			}
+			addIngredient({ food: item.food, ingredientItem: item.foodItem });
 		},
-		[setFoodList, setIngredientList],
+		[isNotRecipe, addFood, addIngredient],
 	);
 	const handleSearch = useCallback(() => {
 		setCommittedQuery(search.trim());
@@ -122,12 +107,8 @@ const FindFood = ({
 			}));
 		}
 
-		// Otherwise fall back to local filtering of recent/history items
-		return history
-			?.filter((item) =>
-				item.food.name.toLowerCase().includes(search.toLowerCase()),
-			)
-			.slice(0, 4);
+		// Otherwise the recent list: filtering and the row limit happen in SQL.
+		return history;
 	}, [search, history, data, committedQuery]);
 
 	/*useFocusEffect(
@@ -217,78 +198,13 @@ const FindFood = ({
 					)}
 				</View>
 			</View>
-			{foodList && setFoodList && (
-				<FoodBottomSheet
-					onLogAll={onLogFoodList}
-					ref={sheetRef}
-					foodFullData={foodList}
-					onRemove={(i) =>
-						setFoodList((prev) =>
-							prev.filter((_, index) => index !== i),
-						)
-					}
-					onModify={(index, food_id, ingredientItemData) => (
-						setQuickSelectedIndex(index),
-						setIngredientModalVisible(true),
-						console.log("hi")
-					)}
-				/>
-			)}
-			{ingredientList && setIngredientList && (
-				<IngredientBottomSheet
-					onLogAll={onLogFoodList}
-					ref={sheetRef}
-					ingredientFullData={ingredientList}
-					isNewRecipe={isNewRecipe}
-					onRemove={(i) =>
-						setIngredientList((prev) =>
-							prev.filter((_, index) => index !== i),
-						)
-					}
-					onModify={(index, food_id, ingredientItemData) =>
-						onFoodCardID(food_id, index, ingredientItemData)
-					}
-				/>
-			)}
-			{foodList &&
-				setFoodList &&
-				quickSelectedIndex != undefined &&
-				foodList[quickSelectedIndex] && (
-					<Modal
-						visible={ingredientModalVisible}
-						transparent
-						animationType="fade"
-						onRequestClose={() => {
-							setIngredientModalVisible(false);
-						}}
-					>
-						<QuickAddIngredientModal
-							foodData={foodList[quickSelectedIndex].food}
-							foodItemData={foodList[quickSelectedIndex].foodItem}
-							options={servingSizeProvider({
-								servingData: [],
-								serving_100g:
-									foodList[quickSelectedIndex].food
-										.serving_100g,
-							})}
-							setFoodItem={(item) =>
-								setFoodList((prev) => [...prev, item])
-							}
-							cleanUp={() =>
-								quickSelectedIndex !== undefined
-									? setFoodList((prev) =>
-											prev.filter(
-												(_, index) =>
-													index !==
-													quickSelectedIndex,
-											),
-										)
-									: console.log("didnt run")
-							}
-							onClose={() => setIngredientModalVisible(false)}
-						/>
-					</Modal>
-				)}
+			{/* Only this subtree subscribes to the selection, so a swipe updates the
+			    sheet without re-rendering the PagerView or the recent list. */}
+			<FoodSelectionSheets
+				onLogFoodList={onLogFoodList}
+				onFoodCardID={onFoodCardID}
+				isNewRecipe={isNewRecipe}
+			/>
 		</View>
 	);
 };

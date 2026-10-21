@@ -3,9 +3,9 @@ import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware
 import QuickAddIngredientModal from "@/components/UIComponents/Modals/QuickAddIngredientModal";
 import { useGetFood } from "@/db/hooks/food/useFood";
 import { servingSizeProvider } from "@/helper/ServingSizeProvider";
+import { useFoodSelectionStore } from "@/store/foodSelectionStore";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
 import { FoodItemData } from "@/types/food";
-import { IngredientFullData } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet } from "react-native";
@@ -14,7 +14,12 @@ const AddIngredient = () => {
 	const router = useRouter();
 	const [selectedFoodID, setSelectedFoodID] = useState<number | null>(null);
 	const [servingsData, setServingsData] = useState([]);
-	const [foodList, setFoodList] = useState<IngredientFullData[]>([]);
+	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
+	const removeIngredient = useFoodSelectionStore((s) => s.removeIngredient);
+	const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
+	useEffect(() => {
+		clearIngredient();
+	}, [clearIngredient]);
 	const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
 	const [ingredientIndex, setIngredientIndex] = useState<number>();
 	const setSelectedPage = useFindFoodSelectedPageStore(
@@ -46,18 +51,12 @@ const AddIngredient = () => {
 			console.log("food data in AddIngredient", foodData[0]);
 		}
 	}, [foodData]);
-	useEffect(() => {
-		if (foodList) {
-			console.log("food data in AddIngredient", foodList[0]);
-		}
-	}, [foodList]);
 	return (
 		<KeyboardAware>
 			<FindFood
 				onFoodCardID={onFoodCardID}
 				onLogFoodList={onLogFoodList}
-				ingredientList={foodList}
-				setIngredientList={setFoodList}
+				isNotRecipe={false}
 				isNewRecipe
 			/>
 			{foodData && (
@@ -77,18 +76,11 @@ const AddIngredient = () => {
 								servingData: servingsData,
 								serving_100g: foodData[0].serving_100g,
 							})}
-							setIngredient={(item) =>
-								setFoodList((prev) => [...prev, item])
-							}
+							setIngredient={addIngredient}
 							cleanUp={() =>
 								ingredientIndex !== undefined
-									? setFoodList((prev) =>
-											prev.filter(
-												(_, index) =>
-													index !== ingredientIndex,
-											),
-										)
-									: console.log("didnt run")
+									? removeIngredient(ingredientIndex)
+									: undefined
 							}
 							onClose={() => setIngredientModalVisible(false)}
 						/>

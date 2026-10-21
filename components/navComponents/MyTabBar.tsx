@@ -49,6 +49,35 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 			stiffness: 3000,
 		});
 	};
+	/**
+	 * Switch tabs through the navigator, not by navigating to a path.
+	 *
+	 * These buttons used to call `router.navigate` with deep paths: "/" for Home,
+	 * "/(tabs)/discover" for Discover - a route that does not exist, since that tab's
+	 * screen is `(discover)/discover` - and a *nested stack* path for Logs and
+	 * Profile. Navigating into a tab's stack pushes or rebuilds the screen instead of
+	 * resuming the one already mounted, which is why switching to Logs took seconds:
+	 * the screen remounted and restarted the calorie chart's 1.25s animation.
+	 *
+	 * This is the logic the stock tab bar uses: emit `tabPress` so a screen can
+	 * prevent it, bail out if it did, and only navigate when the tab isn't the
+	 * current one. Tapping the active tab does nothing.
+	 */
+	const onTabPress = (index: number) => {
+		const route = state.routes[index];
+		if (!route) return;
+
+		const event = navigation.emit({
+			type: "tabPress",
+			target: route.key,
+			canPreventDefault: true,
+		});
+		if (event.defaultPrevented) return;
+		if (state.index === index) return;
+
+		navigation.navigate(route.name, route.params);
+	};
+
 	const option1Style = useAnimatedStyle(() => ({
 		transform: [
 			{ translateY: interpolate(progress.value, [0, 1], [0, -10]) },
@@ -89,7 +118,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 		>
 			<Pressable
 				onPress={() => {
-					(router.navigate("/"), closeMenu());
+					(onTabPress(0), closeMenu());
 				}}
 				style={{ height: 48, alignItems: "center", width: 65 }}
 			>
@@ -107,7 +136,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 			</Pressable>
 			<Pressable
 				onPress={() => {
-					(router.navigate("/(tabs)/discover"), closeMenu());
+					(onTabPress(1), closeMenu());
 				}}
 				style={{ height: 48, alignItems: "center", width: 68 }}
 			>
@@ -255,7 +284,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 			</View>
 			<Pressable
 				onPress={() => {
-					(router.navigate("/(tabs)/(logs)/logs"), closeMenu());
+					(onTabPress(2), closeMenu());
 				}}
 				style={{ height: 48, alignItems: "center", width: 68 }}
 			>
@@ -273,7 +302,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 			</Pressable>
 			<Pressable
 				onPress={() => {
-					(router.navigate("/(tabs)/(profile)/profile"), closeMenu());
+					(onTabPress(3), closeMenu());
 				}}
 				style={{ height: 48, alignItems: "center", width: 65 }}
 			>

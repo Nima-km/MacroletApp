@@ -2,8 +2,8 @@ import FindFood from "@/components/findFoodTabs/FindFood";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import QuickAddIngredientModal from "@/components/UIComponents/Modals/QuickAddIngredientModal";
 import { useGetFood } from "@/db/hooks/food/useFood";
+import { useFoodSelectionStore } from "@/store/foodSelectionStore";
 import { DefaultServings } from "@/tests/testData";
-import { IngredientFullData } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet, View } from "react-native";
@@ -12,7 +12,11 @@ const AddIngredientModify = () => {
     const router = useRouter();
     const [selectedFoodID, setSelectedFoodID] = useState<number | null>(null);
     const [servingsData, setServingsData] = useState([]);
-    const [foodList, setFoodList] = useState<IngredientFullData[]>([]);
+    const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
+    const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
+    useEffect(() => {
+        clearIngredient();
+    }, [clearIngredient]);
     const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
     const {
         data: foodData,
@@ -33,19 +37,13 @@ const AddIngredientModify = () => {
             console.log("food data in AddIngredient", foodData[0]);
         }
     }, [foodData]);
-    useEffect(() => {
-        if (foodList) {
-            console.log("food data in AddIngredient", foodList[0]);
-        }
-    }, [foodList]);
     return (
         <View style={{ flex: 1 }}>
             <HeaderSimple title={"Add Ingredient"} />
             <FindFood
                 onFoodCardID={onFoodCardID}
                 onLogFoodList={onLogFoodList}
-                ingredientList={foodList}
-                setIngredientList={setFoodList}
+                isNotRecipe={false}
             />
             {foodData && (
                 <Modal
@@ -59,9 +57,7 @@ const AddIngredientModify = () => {
                     <QuickAddIngredientModal
                         foodData={foodData[0]}
                         options={[...DefaultServings, ...(servingsData ?? [])]}
-                        setIngredient={(item) =>
-                            setFoodList((prev) => [...prev, item])
-                        }
+                        setIngredient={addIngredient}
                         onClose={() => setIngredientModalVisible(false)}
                     />
                 </Modal>

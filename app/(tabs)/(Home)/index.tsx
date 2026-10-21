@@ -41,8 +41,16 @@ export default function Index() {
 	const router = useRouter();
 	const date = useDateStore((state) => state.date);
 	const [newWeightLog, setNewWeightLog] = useState("");
+	// The weight query keys on `toISOString()`, which includes milliseconds. A range
+	// built from `new Date()` therefore had a new identity on every render, so React
+	// Query saw a brand-new query each time: fetch, render, new key, fetch again. That
+	// loop is what put a pause in front of everything else on the JS thread - most
+	// visibly the date selector, which rebuilds along with this screen.
+	//
+	// Anchoring the upper bound to midnight makes the key stable for the whole day
+	// and still rolls over at midnight. The span is unchanged: eight days.
 	const now = new Date();
-	now.setDate(now.getDate() + 1);
+	now.setHours(24, 0, 0, 0);
 	const sevenDaysAgo = new Date(now);
 	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 8);
 	const {

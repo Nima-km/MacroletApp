@@ -6,7 +6,7 @@ import {
 	getFoodItemSum,
 	Period,
 } from "@/db/queries/history";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 // for retrieving the total sum of macros logged in foodItem from-to date
 export const useGetFoodItemSum = (from: Date, to: Date) => {
@@ -47,16 +47,18 @@ export const useGetFoodItemList = (from: Date, to: Date) => {
 };
 
 // for retreving recently logged foods
-export const useGetFoodItemRecent = (showRecipe?: boolean) => {
+export const useGetFoodItemRecent = (showRecipe?: boolean, term = "") => {
 	return useQuery({
-		queryKey: ["food-history", "recent", showRecipe],
-		queryFn: () => getFoodItemRecent({ showRecipe }),
-		//  staleTime: 1000 * 60 * 5,
+		queryKey: ["food-history", "recent", showRecipe, term],
+		queryFn: () => getFoodItemRecent({ showRecipe, term }),
+		// Keeps the previous rows on screen while a new term is queried, so typing
+		// doesn't flash an empty list between keystrokes.
+		placeholderData: keepPreviousData,
 	});
 };
 export const prefetchGetFoodItemRecent = async () => {
 	await queryClient.prefetchQuery({
-		queryKey: ["food-history", "recent", true],
-		queryFn: () => getFoodItemRecent({ showRecipe: true }),
+		queryKey: ["food-history", "recent", true, ""],
+		queryFn: () => getFoodItemRecent({ showRecipe: true, term: "" }),
 	});
 };

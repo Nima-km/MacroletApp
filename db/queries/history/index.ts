@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
 import { MacroDateType, RecentFoodFullData } from "@/types/food";
-import { and, desc, eq, gte, isNull, lt, max, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, like, lt, max, sql } from "drizzle-orm";
 
 // for retreving the history of foods ate from-to date
 
@@ -21,11 +21,25 @@ export const getFoodItemHistory = async (from: Date, to: Date) => {
 };
 
 // for retreving recently logged foods
+/** How many rows the Recent list displays. */
+export const RECENT_LIST_LIMIT = 4;
+
 interface RecentProps {
 	showRecipe?: boolean;
+	/**
+	 * Name filter, applied in SQL. Filtering in JS afterwards would force the query
+	 * to return every food for a search to reach an old one - which is exactly what
+	 * made this unbounded.
+	 */
+	term?: string;
+	limit?: number;
+	offset?: number;
 }
 export const getFoodItemRecent = async ({
 	showRecipe = true,
+	term = "",
+	limit = RECENT_LIST_LIMIT,
+	offset = 0,
 }: RecentProps): Promise<RecentFoodFullData[]> => {
 	const latest = db
 		.select({
@@ -37,44 +51,35 @@ export const getFoodItemRecent = async ({
 		.groupBy(foodItem.food_id)
 		.as("latests");
 
-	const result = showRecipe
-		? db
-				.select({
-					food: food,
-					foodItem: foodItem,
-				})
-				.from(food)
-				.leftJoin(latest, eq(latest.food_id, food.id))
-				.leftJoin(
-					foodItem,
-					and(
-						eq(foodItem.id, latest.foodItem_id),
-						eq(foodItem.timestamp, latest.max_timestamp),
-					),
-				)
-				.orderBy(
-					desc(foodItem.timestamp),
-					desc(foodItem.id), // fallback for nulls (sqlite doesn't support NULLS LAST)
-				)
-		: db
-				.select({
-					food: food,
-					foodItem: foodItem,
-				})
-				.from(food)
-				.leftJoin(latest, eq(latest.food_id, food.id))
-				.leftJoin(
-					foodItem,
-					and(
-						eq(foodItem.id, latest.foodItem_id),
-						eq(foodItem.timestamp, latest.max_timestamp),
-					),
-				)
-				.where(isNull(food.recipe_id))
-				.orderBy(
-					desc(foodItem.timestamp),
-					desc(foodItem.id), // fallback for nulls
-				);
+	const search = term.trim();
+
+	const result = db
+		.select({
+			food: food,
+			foodItem: foodItem,
+		})
+		.from(food)
+		.leftJoin(latest, eq(latest.food_id, food.id))
+		.leftJoin(
+			foodItem,
+			and(
+				eq(foodItem.id, latest.foodItem_id),
+				eq(foodItem.timestamp, latest.max_timestamp),
+			),
+		)
+		.where(
+			and(
+				// `and` drops undefined terms, so an empty filter is no filter.
+				showRecipe ? undefined : isNull(food.recipe_id),
+				search ? like(food.name, `%${search}%`) : undefined,
+			),
+		)
+		.orderBy(
+			desc(foodItem.timestamp),
+			desc(foodItem.id), // fallback for nulls (sqlite sorts NULLs first on ASC)
+		)
+		.limit(limit)
+		.offset(offset);
 
 	return result;
 };

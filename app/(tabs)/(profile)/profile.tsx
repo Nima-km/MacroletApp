@@ -20,7 +20,7 @@ import { colors } from "@/theme";
 import { useAuth, useUser } from "@clerk/expo";
 import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
@@ -118,7 +118,6 @@ const profile = () => {
 		isLoading,
 		isError,
 		refetch,
-		isRefetching,
 	} = useCreatorStatus();
 
 	const creator = status?.creator ?? null;
@@ -136,10 +135,22 @@ const profile = () => {
 		}, [subscription.refetch]),
 	);
 
-	const onRefresh = useCallback(() => {
-		refetch();
-		subscription.refetch();
-		followers.refetch();
+	// Local state rather than the queries' `isRefetching`: this screen refetches the
+	// subscription on every focus, so binding the spinner to that made the
+	// pull-to-refresh indicator flash each time the tab was opened. Now it only shows
+	// when the user actually pulls.
+	const [refreshing, setRefreshing] = useState(false);
+	const onRefresh = useCallback(async () => {
+		setRefreshing(true);
+		try {
+			await Promise.all([
+				refetch(),
+				subscription.refetch(),
+				followers.refetch(),
+			]);
+		} finally {
+			setRefreshing(false);
+		}
 	}, [refetch, subscription.refetch, followers.refetch]);
 
 	const displayName =
@@ -174,7 +185,7 @@ const profile = () => {
 				contentContainerStyle={styles.content}
 				refreshControl={
 					<RefreshControl
-						refreshing={isRefetching || subscription.isRefetching}
+						refreshing={refreshing}
 						onRefresh={onRefresh}
 					/>
 				}
