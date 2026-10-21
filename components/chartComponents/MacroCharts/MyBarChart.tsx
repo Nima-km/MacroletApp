@@ -8,7 +8,7 @@ import {
     RoundedRect,
     Text,
 } from "@shopify/react-native-skia";
-import React, { useEffect } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
     Easing,
@@ -162,10 +162,21 @@ const MyBarChart = ({ goal, progress }: BarChartProps) => {
         5,
         5,
     );
+    // Depend on `progress` by reference, not `goal`: the screen rebuilt `goal` as a
+    // fresh object on every render, so this effect fired every time and restarted a
+    // 1.25s tween. A day's data is a stable object from the query, so this now runs
+    // only when the numbers it animates actually change.
+    const hasAnimated = useRef(false);
     useEffect(() => {
-        console.log(goal);
-        animateChart();
-    }, [goal]);
+        if (!progress) return;
+        if (!hasAnimated.current) {
+            hasAnimated.current = true;
+            animateChart();
+            return;
+        }
+        // Later days snap into place; only the first paint animates.
+        progressDaily.value = progress;
+    }, [progress]);
     return (
         <Canvas style={{ width: width, height: height }}>
             <Text x={0} y={20} text={calorieDayText} font={h1} />
@@ -189,6 +200,6 @@ const MyBarChart = ({ goal, progress }: BarChartProps) => {
     );
 };
 
-export default MyBarChart;
+export default memo(MyBarChart);
 
 const styles = StyleSheet.create({});

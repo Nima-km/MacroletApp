@@ -1,6 +1,6 @@
 import Plus from "@/assets/svg/plus.svg";
 import { colors } from "@/theme";
-import React, { ReactNode } from "react";
+import React, { memo, ReactNode, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import SwipeableCore from "./SwipeableCore";
 
@@ -10,24 +10,31 @@ type SwipeableCoreProps = {
 	onSwipe?: () => void;
 };
 
-const SwipeableAdd = ({
+const NOOP = () => {};
+
+function SwipeableAdd({
 	children,
-	onPress = () => {},
+	onPress = NOOP,
 	onSwipe,
-}: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) => {
+}: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) {
+	// Stable element: SwipeableCore memoises on this reference.
+	const underChildren = useMemo(
+		() => (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<Plus pointerEvents="none" />
+			</View>
+		),
+		[],
+	);
 	return (
 		<SwipeableCore
-			underChildren={
-				<View
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-					}}
-				>
-					<Plus pointerEvents="none" />
-				</View>
-			}
+			underChildren={underChildren}
 			onPress={onPress}
 			onSwipe={onSwipe}
 			backgroundColor={colors.primary}
@@ -38,6 +45,6 @@ const SwipeableAdd = ({
 	);
 };
 
-export default SwipeableAdd;
+export default memo(SwipeableAdd);
 
 const styles = StyleSheet.create({});

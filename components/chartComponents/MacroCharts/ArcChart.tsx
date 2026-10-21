@@ -9,7 +9,7 @@ import {
 	Text,
 	vec,
 } from "@shopify/react-native-skia";
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
 	Easing,
@@ -181,6 +181,6 @@ const ArcChart = ({ targetPercentage, dailyProgress }: ArcProgressProps) => {
 	);
 };
 
-export default ArcChart;
+export default memo(ArcChart);
 
 const styles = StyleSheet.create({});

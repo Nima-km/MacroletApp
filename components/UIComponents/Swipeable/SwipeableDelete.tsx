@@ -1,6 +1,6 @@
 import Bin from "@/assets/svg/bin.svg";
 import { colors } from "@/theme";
-import React, { ReactNode } from "react";
+import React, { memo, ReactNode, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import SwipeableCore from "./SwipeableCore";
 type SwipeableCoreProps = {
@@ -8,23 +8,28 @@ type SwipeableCoreProps = {
     onPress: () => void;
 };
 
-const SwipeableDelete = ({
+function SwipeableDelete({
     children,
     onPress,
-}: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) => {
+}: Omit<SwipeableCoreProps, "underChildren" | "backgroundColor">) {
+    // Stable element: SwipeableCore memoises on this reference.
+    const underChildren = useMemo(
+        () => (
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <Bin style={{ color: colors.white }} pointerEvents="none" />
+            </View>
+        ),
+        [],
+    );
     return (
         <SwipeableCore
-            underChildren={
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
-                    <Bin style={{ color: colors.white }} pointerEvents="none" />
-                </View>
-            }
+            underChildren={underChildren}
             onPress={onPress}
             backgroundColor={colors.error}
         >
@@ -33,6 +38,6 @@ const SwipeableDelete = ({
     );
 };
 
-export default SwipeableDelete;
+export default memo(SwipeableDelete);
 
 const styles = StyleSheet.create({});

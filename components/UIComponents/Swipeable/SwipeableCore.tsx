@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from "react";
+import React, { memo, ReactNode, useCallback, useRef } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -21,7 +21,7 @@ type RightActionProps = {
 	onPress: () => void;
 };
 
-function RightAction({
+const RightAction = memo(function RightAction({
 	prog,
 	drag,
 	children,
@@ -56,9 +56,11 @@ function RightAction({
 			</View>
 		</Pressable>
 	);
-}
+});
 
-export default function SwipeableCore({
+const CONTAINER_STYLE = { paddingHorizontal: 20 };
+
+function SwipeableCore({
 	children,
 	onPress,
 	underChildren,
@@ -72,29 +74,36 @@ export default function SwipeableCore({
 		onSwipe();
 		autoClose && swipeableRef.current?.close();
 	}
+	const renderRightActions = useCallback(
+		(prog: SharedValue<number>, drag: SharedValue<number>) => (
+			<RightAction
+				prog={prog}
+				drag={drag}
+				onPress={onPress}
+				backgroundColor={backgroundColor}
+			>
+				{underChildren}
+			</RightAction>
+		),
+		[onPress, backgroundColor, underChildren],
+	);
+
 	return (
 		<ReanimatedSwipeable
 			rightThreshold={30}
-			containerStyle={{ paddingHorizontal: 20 }}
+			containerStyle={CONTAINER_STYLE}
 			ref={swipeableRef}
 			overshootFriction={5}
 			friction={1}
-			renderRightActions={(prog, drag) => (
-				<RightAction
-					prog={prog}
-					drag={drag}
-					onPress={onPress}
-					backgroundColor={backgroundColor}
-				>
-					{underChildren}
-				</RightAction>
-			)}
+			renderRightActions={renderRightActions}
 			onSwipeableOpen={onSwipped}
 		>
 			{children}
 		</ReanimatedSwipeable>
 	);
 }
+
+export default memo(SwipeableCore);
 
 const styles = StyleSheet.create({
 	rightAction: { width: 50, height: 50, backgroundColor: "red" },
