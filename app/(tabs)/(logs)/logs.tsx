@@ -37,7 +37,7 @@ const LogRow = memo(function LogRow({
 	onPressCard,
 }: LogRowProps) {
 	return (
-		<View style={{ paddingVertical: 10 }}>
+		<View style={{ paddingVertical: 10, paddingHorizontal: 20 }}>
 			<SwipeableDelete onPress={() => onDelete(item.foodItem.id)}>
 				<Pressable
 					onPress={() => onPressCard(item.food.id, item.foodItem.id)}
@@ -226,9 +226,18 @@ const logs = () => {
 						</View>
 					</View>
 				}
-				contentContainerStyle={{ paddingBottom: 40 }}
+				contentContainerStyle={{
+					paddingBottom: 40,
+					//paddingHorizontal: 20,
+				}}
 				sections={slData}
 				renderItem={renderItem}
+				// Keep fewer rows alive. Every mounted row is a ReanimatedSwipeable - two
+				// native gesture handlers in the touch path - so the count is what costs,
+				// not any single row.
+				initialNumToRender={3}
+				maxToRenderPerBatch={6}
+				windowSize={3}
 				// flex:1 bounds the list to the screen. Without it a list has no implicit
 				// height and its frame grows to its content - nothing to scroll.
 				style={[{ flex: 1, paddingTop: 30, paddingBottom: 12 }]}
@@ -239,6 +248,7 @@ const logs = () => {
 							{
 								alignItems: "center",
 								flexDirection: "row",
+								paddingVertical: 12,
 								paddingHorizontal: 20,
 							},
 						]}
