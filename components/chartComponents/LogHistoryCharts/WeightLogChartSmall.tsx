@@ -15,10 +15,11 @@ const formatWeightForChart = (
 ) => {
 	return weightData.map((item) => ({
 		value: item.weight,
+		// getDate() is already 1-based - the old +1 rendered every label a day late.
 		label:
 			(item.timestamp.getMonth() + 1).toString() +
 			"/" +
-			(item.timestamp.getDate() + 1).toString(),
+			item.timestamp.getDate().toString(),
 	}));
 };
 const calculateStepValue = (
@@ -33,7 +34,8 @@ const calculateStepValue = (
 };
 const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 	const lineData = weightData
-		? formatWeightForChart(weightData).slice(0, 7)
+		// The newest seven, not the oldest: the query returns ascending order.
+		? formatWeightForChart(weightData).slice(-7)
 		: [];
 	const customDataPoint = () => {
 		return (

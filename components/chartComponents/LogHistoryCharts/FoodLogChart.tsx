@@ -59,7 +59,7 @@ const formatWeightForChart = (
         label:
             (item.timestamp.getMonth() + 1).toString() +
             "/" +
-            (item.timestamp.getDate() + 1).toString(),
+            (item.timestamp.getDate()).toString(),
     }));
 };
 const FoodLogChart = ({

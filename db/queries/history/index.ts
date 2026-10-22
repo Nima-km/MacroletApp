@@ -101,35 +101,66 @@ export const getFoodItemSum = async (from: Date, to: Date) => {
 		.where(and(gte(foodItem.timestamp, from), lt(foodItem.timestamp, to)));
 };
 
-// for retrieving daily sums of macros, from a date to a date (used to display daily history)
+// for retrieving daily sums of macros across a range (used to display daily history)
 export type Period = "day" | "week" | "month";
+
+/** Local `YYYY-MM-DD`, matching SQLite's `date(..., 'localtime')` output. */
+function toDayKey(date: Date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+/**
+ * Daily macro totals for a range.
+ *
+ * This used to loop over the range and call `getFoodItemSum` once per day: a 90-day
+ * view meant 90 sequential queries, which is why the range was capped at 21 days.
+ * One grouped query does the whole range in a single pass, and the
+ * `food_item_timestamp_idx` index lets SQLite walk the range rather than the table.
+ *
+ * Days with nothing logged are still returned, at zero - the chart needs a
+ * continuous series or gaps collapse into a single point.
+ */
 export const getDailyFoodSums = async (
 	from: Date,
 	to: Date,
-	type: Period,
 ): Promise<MacroDateType[]> => {
-	const results = [];
-	// Start from the 'from' date
-	const currentDate = new Date(from);
-	currentDate.setHours(0, 0, 0, 0);
+	const dayBucket = sql<string>`date(${foodItem.timestamp}, 'unixepoch', 'localtime')`;
 
-	// Loop until we reach the 'to' date
-	while (currentDate < to) {
-		const nextDate = new Date(currentDate);
-		nextDate.setDate(nextDate.getDate() + 1);
+	const rows = await db
+		.select({
+			day: dayBucket,
+			fat: sql<number>`sum(${food.fat} * ${foodItem.servings} * ${foodItem.serving_mult})`,
+			carbs: sql<number>`sum(${food.carbs} * ${foodItem.servings} * ${foodItem.serving_mult})`,
+			fiber: sql<number>`sum(${food.fiber} * ${foodItem.servings} * ${foodItem.serving_mult})`,
+			protein: sql<number>`sum(${food.protein} * ${foodItem.servings} * ${foodItem.serving_mult})`,
+			calories: sql<number>`sum((${food.protein} * 4 + ${food.carbs} * 4 + ${food.fat} * 9 - ${food.fiber} * 2) * ${foodItem.servings} * ${foodItem.serving_mult})`,
+		})
+		.from(foodItem)
+		.innerJoin(food, eq(foodItem.food_id, food.id))
+		.where(and(gte(foodItem.timestamp, from), lt(foodItem.timestamp, to)))
+		.groupBy(dayBucket);
 
-		const row = await getFoodItemSum(currentDate, nextDate);
-		console.log("row is", currentDate);
+	const byDay = new Map(rows.map((row) => [row.day, row]));
+
+	const results: MacroDateType[] = [];
+	const cursor = new Date(from);
+	cursor.setHours(0, 0, 0, 0);
+
+	while (cursor < to) {
+		const row = byDay.get(toDayKey(cursor));
 		results.push({
-			date: new Date(currentDate),
-			fat: row[0]?.fat ?? 0,
-			carbs: row[0]?.carbs ?? 0,
-			fiber: row[0]?.fiber ?? 0,
-			protein: row[0]?.protein ?? 0,
-			calories: row[0]?.calories ?? 0,
+			date: new Date(cursor),
+			fat: row?.fat ?? 0,
+			carbs: row?.carbs ?? 0,
+			fiber: row?.fiber ?? 0,
+			protein: row?.protein ?? 0,
+			calories: row?.calories ?? 0,
 		});
-
-		currentDate.setDate(currentDate.getDate() + 1);
+		cursor.setDate(cursor.getDate() + 1);
 	}
+
 	return results;
 };

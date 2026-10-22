@@ -21,7 +21,7 @@ export const useGetFoodItemSum = (from: Date, to: Date) => {
 	});
 };
 // for retrieving daily sums of macros, from a date to a date (used to display daily history)
-export const useGetDailyFoodSums = (from: Date, to: Date, period: Period) => {
+export const useGetDailyFoodSums = (from: Date, to: Date) => {
 	return useQuery({
 		queryKey: [
 			"food-history",
@@ -29,7 +29,7 @@ export const useGetDailyFoodSums = (from: Date, to: Date, period: Period) => {
 			from.toISOString(),
 			to.toISOString(),
 		],
-		queryFn: () => getDailyFoodSums(from, to, period),
+		queryFn: () => getDailyFoodSums(from, to),
 	});
 };
 // for retreving the history of foods ate from-to date

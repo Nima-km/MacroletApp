@@ -1,6 +1,5 @@
 import Logo from "@/assets/svg/logo.svg";
 import Plus from "@/assets/svg/plus-empty.svg";
-import WeightLogChartSmall from "@/components/chartComponents/LogHistoryCharts/WeightLogChartSmall";
 import ArcChart from "@/components/chartComponents/MacroCharts/ArcChart";
 import {
 	SimpleChartCarbsGoal,
@@ -8,6 +7,7 @@ import {
 	SimpleChartProteinGoal,
 } from "@/components/chartComponents/SimpleChart/SimpleChartGoal";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
+import WeightCard from "@/components/UIComponents/Cards/WeightCard";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import { H1, H2, H3, H5 } from "@/components/UIComponents/Typography";
 import { useInsertFoodAndItem } from "@/db/hooks/food/useFood";
@@ -135,41 +135,15 @@ export default function Index() {
 				</View>
 			</Pressable>
 			<View style={{ padding: 20 }}>
-				<Pressable
-					onPress={() => router.push("/(tabs)/(Home)/weightHistory")}
-				>
-					<View
-						style={{
-							backgroundColor: colors.white,
-							borderRadius: 8,
-							padding: 20,
-							gap: 20,
-						}}
-					>
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-							}}
-						>
-							<H2>Weight</H2>
-							<Plus
-								color={colors.primary}
-								height={25}
-								width={25}
-							/>
-						</View>
-						<View style={{ alignItems: "center" }}>
-							<H3>Weekly Average</H3>
-						</View>
-						<H5>lbs</H5>
-						<WeightLogChartSmall
-							weightData={
-								WeightData?.length == 0 ? undefined : WeightData
-							}
-						/>
-					</View>
-				</Pressable>
+				<WeightCard
+					data={WeightData}
+					onOpenHistory={() =>
+						router.push("/(tabs)/(Home)/weightHistory")
+					}
+					onLogWeight={() =>
+						router.push("/(tabs)/(Home)/weightHistory")
+					}
+				/>
 			</View>
 		</KeyboardAware>
 	);

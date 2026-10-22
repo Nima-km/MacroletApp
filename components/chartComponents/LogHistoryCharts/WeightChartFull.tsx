@@ -36,7 +36,8 @@ const formatWeightForChart = (
 		label:
 			(item.timestamp.getMonth() + 1).toString() +
 			"/" +
-			(item.timestamp.getDate() + 1).toString(),
+			// getDate() is already 1-based; the old +1 dated every point a day late.
+			item.timestamp.getDate().toString(),
 		customDataPoint: () => customDataPoint(item),
 		dataPointLabelComponent: () => (
 			<H6 style={{ textAlign: "center" }}>{item.weight}</H6>
