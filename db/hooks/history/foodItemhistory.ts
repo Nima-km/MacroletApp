@@ -5,8 +5,13 @@ import {
 	getFoodItemRecent,
 	getFoodItemSum,
 	Period,
+	RECENT_LIST_LIMIT,
 } from "@/db/queries/history";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useInfiniteQuery,
+	useQuery,
+} from "@tanstack/react-query";
 
 // for retrieving the total sum of macros logged in foodItem from-to date
 export const useGetFoodItemSum = (from: Date, to: Date) => {
@@ -47,18 +52,43 @@ export const useGetFoodItemList = (from: Date, to: Date) => {
 };
 
 // for retreving recently logged foods
+/**
+ * Rows per page. The empty term is the short "recent" list; a typed search is a
+ * browsing list, so it gets a real page size and infinite scroll.
+ */
+export const RECENT_SEARCH_PAGE_SIZE = 20;
+
 export const useGetFoodItemRecent = (showRecipe?: boolean, term = "") => {
-	return useQuery({
+	const pageSize = term.trim() ? RECENT_SEARCH_PAGE_SIZE : RECENT_LIST_LIMIT;
+
+	return useInfiniteQuery({
 		queryKey: ["food-history", "recent", showRecipe, term],
-		queryFn: () => getFoodItemRecent({ showRecipe, term }),
+		queryFn: ({ pageParam }) =>
+			getFoodItemRecent({
+				showRecipe,
+				term,
+				limit: pageSize,
+				offset: pageParam,
+			}),
+		initialPageParam: 0,
+		// A short page means the end; otherwise the next starts after what we have.
+		getNextPageParam: (lastPage, pages) =>
+			lastPage.length < pageSize ? undefined : pages.length * pageSize,
 		// Keeps the previous rows on screen while a new term is queried, so typing
 		// doesn't flash an empty list between keystrokes.
 		placeholderData: keepPreviousData,
 	});
 };
 export const prefetchGetFoodItemRecent = async () => {
-	await queryClient.prefetchQuery({
+	await queryClient.prefetchInfiniteQuery({
 		queryKey: ["food-history", "recent", true, ""],
-		queryFn: () => getFoodItemRecent({ showRecipe: true, term: "" }),
+		queryFn: () =>
+			getFoodItemRecent({
+				showRecipe: true,
+				term: "",
+				limit: RECENT_LIST_LIMIT,
+				offset: 0,
+			}),
+		initialPageParam: 0,
 	});
 };

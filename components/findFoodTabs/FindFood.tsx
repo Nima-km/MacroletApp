@@ -58,9 +58,12 @@ const FindFood = ({
 	const [committedQuery, setCommittedQuery] = useState("");
 	const { data, isLoading, error, refetch } = useSearchFood(committedQuery);
 	const {
-		data: history,
+		data: recentPages,
 		isLoading: loadingSectionList,
 		error: errorSectionList,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
 	} = useGetFoodItemRecent(isNotRecipe, search);
 	const pagerRef = useRef<PagerView>(null);
 	const currentPagerPage = useRef(selectedPage); // tracks the pager's actual current position
@@ -108,8 +111,14 @@ const FindFood = ({
 		}
 
 		// Otherwise the recent list: filtering and the row limit happen in SQL.
-		return history;
-	}, [search, history, data, committedQuery]);
+		return recentPages?.pages.flat();
+	}, [search, recentPages, data, committedQuery]);
+
+	// Only a typed search pages; the default recent list is deliberately short.
+	const loadMore = useMemo(
+		() => (hasNextPage ? () => fetchNextPage() : undefined),
+		[hasNextPage, fetchNextPage],
+	);
 
 	/*useFocusEffect(
 		useCallback(() => {
@@ -159,6 +168,8 @@ const FindFood = ({
 									filteredData={filteredData}
 									onFoodCardID={onFoodCardID}
 									onAddFood={onAddFood}
+									onEndReached={loadMore}
+									isFetchingNextPage={isFetchingNextPage}
 								/>
 							</View>
 
@@ -186,6 +197,8 @@ const FindFood = ({
 									filteredData={filteredData}
 									onFoodCardID={onFoodCardID}
 									onAddFood={onAddFood}
+									onEndReached={loadMore}
+									isFetchingNextPage={isFetchingNextPage}
 								/>
 							</View>
 
@@ -201,6 +214,7 @@ const FindFood = ({
 			{/* Only this subtree subscribes to the selection, so a swipe updates the
 			    sheet without re-rendering the PagerView or the recent list. */}
 			<FoodSelectionSheets
+				mode={isNotRecipe ? "food" : "ingredient"}
 				onLogFoodList={onLogFoodList}
 				onFoodCardID={onFoodCardID}
 				isNewRecipe={isNewRecipe}

@@ -1,5 +1,6 @@
 import { db } from "@/db/client";
 import { food, foodItem } from "@/db/schema";
+import { sql } from "drizzle-orm";
 import {
 	FoodInsert,
 	FoodItemData,
@@ -103,11 +104,35 @@ export const getFoodItem = async (foodItemID: number) => {
 export const insertFood = async (foodObject: FoodInsert) => {
 	return db.insert(food).values(foodObject).returning();
 };
+/**
+ * Insert foods coming from the server, keyed on the nickname it assigns them.
+ *
+ * This used `onConflictDoNothing`, which has a trap: when a row already exists the
+ * statement inserts nothing, so `returning()` has nothing to return - and a repeated
+ * search for the same term came back with an empty list. Updating instead returns the
+ * existing row, which also refreshes its nutrition, so a corrected value on the server
+ * reaches the device rather than being frozen at first fetch.
+ *
+ * The contract this depends on: the server's nickname must be stable for a given food.
+ */
 export const insertFoodList = async (foodObjects: FoodInsert[]) => {
 	return db
 		.insert(food)
 		.values(foodObjects)
-		.onConflictDoNothing({ target: food.nickname })
+		.onConflictDoUpdate({
+			target: food.nickname,
+			set: {
+				name: sql`excluded.name`,
+				protein: sql`excluded.protein`,
+				fat: sql`excluded.fat`,
+				carbs: sql`excluded.carbs`,
+				fiber: sql`excluded.fiber`,
+				barcode: sql`excluded.barcode`,
+				serving_100g: sql`excluded.serving_100g`,
+				volume_100ml: sql`excluded.volume_100ml`,
+				micro_nutriants: sql`excluded.micro_nutriants`,
+			},
+		})
 		.returning();
 };
 export const insertFoodItem = async (foodItemObject: FoodItemInsert) => {

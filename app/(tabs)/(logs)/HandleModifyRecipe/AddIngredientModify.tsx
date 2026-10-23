@@ -13,10 +13,6 @@ const AddIngredientModify = () => {
     const [selectedFoodID, setSelectedFoodID] = useState<number | null>(null);
     const [servingsData, setServingsData] = useState([]);
     const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
-    const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
-    useEffect(() => {
-        clearIngredient();
-    }, [clearIngredient]);
     const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
     const {
         data: foodData,

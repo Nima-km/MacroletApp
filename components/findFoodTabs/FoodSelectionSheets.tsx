@@ -9,6 +9,13 @@ import IngredientBottomSheet from "../UIComponents/BottomSheet/IngredientBottomS
 import QuickAddIngredientModal from "../UIComponents/Modals/QuickAddIngredientModal";
 
 type Props = {
+	/**
+	 * Which drawer this flow owns. Logging a food shows only the food sheet, a recipe's
+	 * "add ingredient" shows only the ingredient sheet - otherwise navigating back to
+	 * LogFood mid-recipe revealed the half-built ingredient list, because the store
+	 * deliberately keeps it.
+	 */
+	mode: "food" | "ingredient";
 	onLogFoodList: () => void;
 	onFoodCardID: (
 		id: number,
@@ -31,6 +38,7 @@ type Props = {
  * outside this component reads them.
  */
 export default function FoodSelectionSheets({
+	mode,
 	onLogFoodList,
 	onFoodCardID,
 	isNewRecipe = false,
@@ -50,7 +58,7 @@ export default function FoodSelectionSheets({
 
 	return (
 		<>
-			{foodList.length > 0 ? (
+			{mode === "food" && foodList.length > 0 ? (
 				<FoodBottomSheet
 					onLogAll={onLogFoodList}
 					ref={sheetRef}
@@ -63,7 +71,7 @@ export default function FoodSelectionSheets({
 				/>
 			) : null}
 
-			{ingredientList.length > 0 ? (
+			{mode === "ingredient" && ingredientList.length > 0 ? (
 				<IngredientBottomSheet
 					onLogAll={onLogFoodList}
 					ref={sheetRef}
@@ -76,7 +84,7 @@ export default function FoodSelectionSheets({
 				/>
 			) : null}
 
-			{selected ? (
+			{mode === "food" && selected ? (
 				<Modal
 					visible={ingredientModalVisible}
 					transparent

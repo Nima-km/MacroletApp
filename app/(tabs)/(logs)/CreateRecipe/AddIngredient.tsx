@@ -16,10 +16,6 @@ const AddIngredient = () => {
 	const [servingsData, setServingsData] = useState([]);
 	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
 	const removeIngredient = useFoodSelectionStore((s) => s.removeIngredient);
-	const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
-	useEffect(() => {
-		clearIngredient();
-	}, [clearIngredient]);
 	const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
 	const [ingredientIndex, setIngredientIndex] = useState<number>();
 	const setSelectedPage = useFindFoodSelectedPageStore(

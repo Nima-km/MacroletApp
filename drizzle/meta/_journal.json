@@ -134,6 +134,13 @@
       "when": 1792555979801,
       "tag": "0018_salty_snowbird",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1792632230715,
+      "tag": "0019_crazy_goliath",
+      "breakpoints": true
     }
   ]
 }

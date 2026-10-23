@@ -28,7 +28,11 @@ export const food = sqliteTable(
 		recipe_id: integer("recipe_id").references(() => recipe.id),
 	},
 	(table) => ({
-		nicknameUnique: uniqueIndex("users_nickname_unique").on(table.nickname),
+		// The server assigns each food a stable nickname and the client upserts on it,
+		// so this is the dedupe key for anything fetched from the API. It used to be
+		// called `users_nickname_unique`, which reads as if it belonged to the users
+		// table and is easy to miss.
+		nicknameUnique: uniqueIndex("food_nickname_unique").on(table.nickname),
 	}),
 );
 export const recipe = sqliteTable("recipe", {
