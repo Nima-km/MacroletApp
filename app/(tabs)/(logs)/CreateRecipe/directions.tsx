@@ -17,7 +17,12 @@ import {
 import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
 import { colors } from "@/theme";
 import { DirectionStep } from "@/types/recipe";
+import {
+	directionsRequirements,
+	firstUnmet,
+} from "@/helper/recipeDraftValidation";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
@@ -29,21 +34,17 @@ const directions = () => {
 		recipeObject.data.recipeData.directions ?? [],
 	);
 	function goToPreview() {
-		if (
-			draft.foodData.name &&
-			draft.foodData.name.length > 3 &&
-			draft.recipeData.description &&
-			draft.recipeData.description?.length > 10 &&
-			/*draft.recipeData.tags &&
-			draft.recipeData.tags.length > 0 &&*/
-			draft.ingredientItemsData.length > 0 &&
-			draft.recipeData.servings_yield &&
-			draft.recipeData.servings_yield >= 1 &&
-			draft.recipeData.directions &&
-			draft.recipeData.directions?.length > 0
-		) {
-			router.push("/(tabs)/(logs)/CreateRecipe/preview");
-		} else console.log("complete all steps");
+		const unmet = firstUnmet(directionsRequirements(draft));
+		if (unmet) {
+			// This used to log to the console, so pressing the button looked broken.
+			Toast.show({
+				type: "warning",
+				text1: "Almost there",
+				text2: unmet.label,
+			});
+			return;
+		}
+		router.push("/(tabs)/(logs)/CreateRecipe/preview");
 	}
 	useEffect(() => {
 		recipeObject.updateRecipe("directions", directions);
@@ -73,10 +74,12 @@ const directions = () => {
 					<H4>Directions</H4>
 					<H5 style={{ color: colors.inactive }}>{"required"}</H5>
 				</View>
-				<FlatList
-					data={directions}
-					renderItem={({ item, index }) => (
+				{/* Mapped, not virtualised: a recipe has a handful of steps, and a
+				    FlatList here is nested in KeyboardAware's ScrollView. */}
+				<View style={{ gap: 12, marginBottom: 24 }}>
+					{directions.map((item, index) => (
 						<StepsCardEdit
+							key={item.id}
 							item={item}
 							index={index}
 							onChangeText={(text) =>
@@ -97,14 +100,8 @@ const directions = () => {
 								setDirections(deleteStep(directions, item.id))
 							}
 						/>
-					)}
-					style={{ flexGrow: 0, marginBottom: 24 }}
-					ItemSeparatorComponent={() => (
-						<View style={{ marginVertical: 12 }} />
-					)}
-					scrollEnabled={false}
-					keyExtractor={(item) => item.id}
-				/>
+					))}
+				</View>
 
 				<SecondaryAddButton
 					onPress={() =>

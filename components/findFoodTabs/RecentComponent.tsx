@@ -34,7 +34,8 @@ interface RecentComponentProps {
 	rows: FoodListRow[];
 	/** Heading above the list: "Recent" when idle, "Search" when typing. */
 	title: string;
-	onFoodCardID: (id: number) => void;
+	/** The whole row, because a server result needs saving before it has an id. */
+	onSelect: (item: RecentFoodFullData) => void;
 	onAddFood: (foodObject: FoodFullData) => void;
 	/** Infinite scroll: only meaningful for a typed search. */
 	onEndReached?: () => void;
@@ -44,7 +45,7 @@ interface RecentComponentProps {
 const RecentComponent = ({
 	rows,
 	title,
-	onFoodCardID,
+	onSelect,
 	onAddFood,
 	onEndReached,
 	isFetchingNextPage = false,
@@ -68,12 +69,13 @@ const RecentComponent = ({
 							onSwipe={() =>
 								onAddFood({
 									food: item.item.food,
-									foodItem: item.item.foodItem ?? FoodItemDefault,
+									foodItem:
+										item.item.foodItem ?? FoodItemDefault,
 								})
 							}
 						>
 							<Pressable
-								onPress={() => onFoodCardID(item.item.food.id)}
+								onPress={() => onSelect(item.item)}
 							>
 								<FoodCardSmall
 									food={item.item.food}
@@ -90,6 +92,7 @@ const RecentComponent = ({
 				// anything - scrollEnabled was false from when it sat inside a parent
 				// ScrollView.
 				onEndReached={onEndReached}
+				style={{ paddingHorizontal: 20 }}
 				onEndReachedThreshold={0.4}
 				keyboardShouldPersistTaps="handled"
 				ListFooterComponent={

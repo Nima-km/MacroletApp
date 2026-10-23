@@ -11,6 +11,8 @@ interface HeaderSimpleProps {
 	backAction?: () => void;
 	logo?: ReactNode;
 	dateSelector?: boolean;
+	/** Optional trailing control, e.g. a block action on a creator profile. */
+	right?: ReactNode;
 }
 
 const HeaderSimple = ({
@@ -19,6 +21,7 @@ const HeaderSimple = ({
 	backAction,
 	logo,
 	dateSelector = false,
+	right,
 }: HeaderSimpleProps) => {
 	const router = useRouter();
 	return (
@@ -26,6 +29,7 @@ const HeaderSimple = ({
 			title={title}
 			logo={logo}
 			dateSelector={dateSelector}
+			RightButton={right}
 			LeftButton={
 				back ? (
 					<Pressable

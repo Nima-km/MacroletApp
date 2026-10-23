@@ -8,6 +8,7 @@ import DollarIcon from "@/assets/svg/dollar-frame.svg";
 import RecipeIcon from "@/assets/svg/recipe-book.svg";
 import SettingsIcon from "@/assets/svg/settings.svg";
 import PreferencesIcon from "@/assets/svg/sliders.svg";
+import ProfileIcon2 from "@/assets/svg/user.svg";
 import SubscriptionIcon from "@/assets/svg/subscription.svg";
 import ProfileIcon from "@/assets/svg/user.svg";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
@@ -337,6 +338,13 @@ const profile = () => {
 				)}
 
 				<Card style={styles.rowCard}>
+					<Row
+						icon={<ProfileIcon2 color={colors.primary} />}
+						label="Blocked accounts"
+						onPress={() =>
+							router.push("/(tabs)/(profile)/blockedAccounts")
+						}
+					/>
 					<Row
 						icon={<SubscriptionIcon color={colors.primary} />}
 						label="Subscription"

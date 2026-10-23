@@ -12,23 +12,14 @@ export const useSearchFood = (query: string) => {
 		queryFn: async () => {
 			const token = await getToken();
 			if (!token) throw notSignedIn();
-			try {
-				const apiResult = await fetchSearchFood(query, token);
-				const processed = apiResult.map((item) => {
-					return { ...item, id: undefined };
-				});
-				if (processed) {
-					console.log("Found via API:", processed);
-					const savedResult = await insertFoodList(processed);
-					console.log("Found via API RESULT:", savedResult);
-					return savedResult;
-				} else {
-					throw new Error("No results from API");
-				}
-			} catch (apiError) {
-				console.warn("API lookup and cache save failed:", apiError);
-				throw apiError; // Throw to trigger error state instead of undefined
-			}
+			// Searching is read-only: a result is a candidate, not something the user
+			// has saved. The row is written when they tap it (see `FindFood`), which is
+			// what keeps the local library equal to "foods I chose".
+			const apiResult = await fetchSearchFood(query, token);
+			if (!apiResult) throw new Error("No results from API");
+			// The id here is the server's, not a local row id - `foodItem: null` marks
+			// these as unsaved in `FindFood`, which is what stops the two being confused.
+			return apiResult;
 		},
 		enabled: !!query.trim(),
 		staleTime: 1000 * 60 * 5,

@@ -6,6 +6,8 @@ import { ReviewType } from "@/types/review";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import RatedChart from "../RatedChart";
+import DropDownComment from "../../UIComponents/DropDown/DropDownComment";
+import ReportModal from "../../UIComponents/Modals/Report/ReportModal";
 
 type Props = {
 	review: ReviewType;
@@ -30,6 +32,7 @@ const ReviewCard = ({
 }: Props) => {
 	const [response, setResponse] = useState("");
 	const [showReply, setShowReply] = useState(false);
+	const [reportOpen, setReportOpen] = useState(false);
 
 	const trimmedResponse = response.trim();
 	const submitResponse = () => {
@@ -48,8 +51,13 @@ const ReviewCard = ({
 				</View>
 				<View style={styles.authorRow}>
 					<H5>{formatReviewDate(review.review.created_at)}</H5>
-					{/* Report/delete menu lands with the report phase; the report
-					    endpoint targets a recipe, not an individual review. */}
+					{/* Reporting is Guideline 1.2. Deleting your own review is a separate
+					    flow, so no delete handler is passed yet. */}
+					{!review.review.is_own && review.review.id ? (
+						<DropDownComment
+							onReport={() => setReportOpen(true)}
+						/>
+					) : null}
 				</View>
 			</View>
 			<RatedChart rating={review.review.rating} />
@@ -104,6 +112,19 @@ const ReviewCard = ({
 					<H5>{review.response.content}</H5>
 				</View>
 			)}
+			<ReportModal
+				visible={reportOpen}
+				onClose={() => setReportOpen(false)}
+				target={
+					review.review.id
+						? {
+								type: "review",
+								ref: String(review.review.id),
+								label: "this review",
+							}
+						: null
+				}
+			/>
 		</View>
 	);
 };

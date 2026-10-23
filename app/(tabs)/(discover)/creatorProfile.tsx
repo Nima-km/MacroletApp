@@ -6,6 +6,7 @@ import TiktokIcon from "@/assets/svg/tiktok.svg";
 import YoutubeIcon from "@/assets/svg/youtube.svg";
 import RecipeCardSmall from "@/components/chartComponents/Cards/RecipeCardSmall";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
+import { useBlockAccount } from "@/api/hooks/useBlocks";
 import TopNav from "@/components/navComponents/TopNav";
 import { FormInputSearch } from "@/components/UIComponents/TextInputs/FormInput";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
@@ -36,6 +37,7 @@ type cookBookType = {
 const creatorProfile = () => {
 	const [selectedPage, setSelectedPage] = useState(0);
 	const { username } = useLocalSearchParams<{ username: string }>();
+	const { mutate: blockAccount, isPending: blocking } = useBlockAccount();
 	const {
 		data: profile,
 		isLoading: profileLoading,
@@ -131,7 +133,24 @@ const creatorProfile = () => {
 			}}
 			keyboardVerticalOffset={100} // adjust if header is present
 		>
-			<HeaderSimple title="" />
+			<HeaderSimple
+				title=""
+				right={
+					username ? (
+						<Pressable
+							onPress={() => blockAccount(username)}
+							disabled={blocking}
+							accessibilityRole="button"
+							accessibilityLabel={`Block ${username}`}
+							style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+						>
+							<H5 style={{ color: colors.inactive }}>
+								{blocking ? "Blocking…" : "Block"}
+							</H5>
+						</Pressable>
+					) : undefined
+				}
+			/>
 			<ScrollView
 				style={{ flex: 1, paddingHorizontal: 0 }}
 				contentContainerStyle={{ flexGrow: 1 }}

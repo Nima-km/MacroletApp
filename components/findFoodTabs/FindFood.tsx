@@ -1,3 +1,4 @@
+import { insertFoodList } from "@/db/queries/food";
 import { useSearchFood } from "@/api/hooks/useSearchFood";
 import BarcodeComponent from "@/components/findFoodTabs/BarcodeComponent";
 import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
@@ -7,7 +8,11 @@ import RecentComponent, {
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
-import { FoodFullData, FoodItemData } from "@/types/food";
+import {
+	FoodFullData,
+	FoodItemData,
+	RecentFoodFullData,
+} from "@/types/food";
 import React, {
 	useCallback,
 	useEffect,
@@ -114,14 +119,56 @@ const FindFood = ({
 		[isNotRecipe, addFood, addIngredient],
 	);
 
+	/**
+	 * A row was chosen.
+	 *
+	 * A local row is already saved, so this is just navigation. A server result is not:
+	 * searching no longer writes anything, so choosing one upserts exactly that food,
+	 * takes the local id, and opens it.
+	 */
+	const onSelectResult = useCallback(
+		async (item: RecentFoodFullData) => {
+			if (item.foodItem) {
+				onFoodCardID(item.food.id);
+				return;
+			}
+			try {
+				const saved = await insertFoodList([item.food]);
+				const localId = saved?.[0]?.id;
+				if (localId) onFoodCardID(localId);
+			} catch (error) {
+				console.warn("saving the chosen food failed", error);
+			}
+		},
+		[onFoodCardID],
+	);
+
 	// One list, but each row says where it came from: what is already on the
 	// device, and what the server returned for the same term.
 	const rows = useMemo(() => {
 		const local = recentPages?.pages.flat() ?? [];
-		const server = (serverResults ?? []).map((item) => ({
-			food: { ...item },
-			foodItem: null,
-		}));
+		const server: RecentFoodFullData[] = (serverResults ?? []).map(
+			(item) => ({
+				// The API's nutrition fields are optional on the wire; a local food row
+				// needs them present, so they are normalised here rather than cast.
+				food: {
+					...item,
+					id: item.id ?? -1,
+					protein: item.protein ?? 0,
+					fat: item.fat ?? 0,
+					carbs: item.carbs ?? 0,
+					fiber: item.fiber ?? 0,
+					serving_100g: item.serving_100g ?? 0,
+					volume_100ml: item.volume_100ml ?? 0,
+					barcode: item.barcode ?? "",
+					brand: item.brand ?? null,
+					nickname: item.nickname ?? null,
+					recipe_id: item.recipe_id ?? null,
+					micro_nutriants: item.micro_nutriants ?? null,
+				},
+				foodItem: null,
+			}),
+		);
 
 		const built: FoodListRow[] = [];
 
@@ -236,7 +283,7 @@ const FindFood = ({
 								<RecentComponent
 									rows={rows}
 									title={debouncedSearch ? "Search" : "Recent"}
-									onFoodCardID={onFoodCardID}
+									onSelect={onSelectResult}
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}
@@ -266,7 +313,7 @@ const FindFood = ({
 								<RecentComponent
 									rows={rows}
 									title={debouncedSearch ? "Search" : "Recent"}
-									onFoodCardID={onFoodCardID}
+									onSelect={onSelectResult}
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}

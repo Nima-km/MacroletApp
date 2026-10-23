@@ -72,6 +72,12 @@ export const getFoodItemRecent = async ({
 				// `and` drops undefined terms, so an empty filter is no filter.
 				showRecipe ? undefined : isNull(food.recipe_id),
 				search ? like(food.name, `%${search}%`) : undefined,
+				// The default list is "what you eat", so a saved-but-never-eaten food
+				// does not belong in it. A typed search still looks at the whole
+				// library - that is what searching is for.
+				search
+					? undefined
+					: sql`exists (select 1 from ${foodItem} where ${foodItem.food_id} = ${food.id})`,
 			),
 		)
 		.orderBy(

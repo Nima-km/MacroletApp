@@ -14,7 +14,15 @@ import {
 	FormInputLong,
 } from "@/components/UIComponents/TextInputs/FormInput";
 import { H4, H5 } from "@/components/UIComponents/Typography";
+import {
+	firstUnmet,
+	MIN_DESCRIPTION_LENGTH,
+	MIN_NAME_LENGTH,
+	MIN_TAGS,
+	overviewRequirements,
+} from "@/helper/recipeDraftValidation";
 import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
+import Toast from "react-native-toast-message";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
 import { colors } from "@/theme";
 import { RecipeTags } from "@/types/recipe";
@@ -38,19 +46,32 @@ const overview = () => {
 		(s) => s.setSelectedPage,
 	);
 	const [tagList, setTagList] = useState<RecipeTags[]>([]);
+	const requirements = overviewRequirements(draft);
+	const [attempted, setAttempted] = useState(false);
+
 	function goNext() {
-		if (
-			draft.foodData.name &&
-			draft.foodData.name.length > 3 &&
-			draft.recipeData.description &&
-			draft.recipeData.description?.length > 10
-		) {
-			setSelectedPage(0);
-			router.push("/(tabs)/(logs)/CreateRecipe/ingredients");
-		} else {
-			console.log("finish the steps");
+		setAttempted(true);
+		const unmet = firstUnmet(requirements);
+		if (unmet) {
+			// The old code logged to the console here, so the button looked dead.
+			Toast.show({
+				type: "warning",
+				text1: "Almost there",
+				text2: unmet.label,
+			});
+			return;
 		}
+		setSelectedPage(0);
+		router.push("/(tabs)/(logs)/CreateRecipe/ingredients");
 	}
+
+	/** Field-level state: quiet until the first attempt, then specific. */
+	const state = (id: string) => {
+		const requirement = requirements.find((r) => r.id === id);
+		if (!requirement) return undefined;
+		if (!attempted) return undefined;
+		return requirement.met ? undefined : "error";
+	};
 	return (
 		<KeyboardAware>
 			<View>
@@ -90,6 +111,12 @@ const overview = () => {
 							value={draft.foodData.name ?? ""}
 							onChangeText={(text) => updateFood("name", text)}
 							placeholder="Enter Recipe Name"
+							// The input renders its own red border and message.
+							error={
+								state("name") === "error"
+									? `At least ${MIN_NAME_LENGTH} characters`
+									: undefined
+							}
 						/>
 					</View>
 					<View style={{ gap: 10 }}>
@@ -117,13 +144,28 @@ const overview = () => {
 								updateRecipe("description", text)
 							}
 							placeholder="Write a short description for your recipe."
+							// The input renders its own red border and message.
+							error={
+								state("description") === "error"
+									? `At least ${MIN_DESCRIPTION_LENGTH} characters`
+									: undefined
+							}
 						/>
 					</View>
 					<View style={{ gap: 10 }}>
 						<View style={{ flexDirection: "row", gap: 8 }}>
 							<H4>Tags</H4>
-							<H5 style={{ color: colors.inactive }}>
-								{"required (min. 3)"}
+							<H5
+								style={{
+									color:
+										state("tags") === "error"
+											? colors.error
+											: colors.inactive,
+								}}
+							>
+								{state("tags") === "error"
+									? `Add at least ${MIN_TAGS} tags`
+									: `required (min. ${MIN_TAGS})`}
 							</H5>
 						</View>
 						<ControlledTextInput
@@ -140,10 +182,13 @@ const overview = () => {
 								])
 							}
 						/>
-						<FlatList
-							data={tagList}
-							renderItem={({ item }) => (
+						{/* A mapped row, not a FlatList: this is a short horizontal set,
+						    and a virtualised list inside KeyboardAware's ScrollView is
+						    what triggers "VirtualizedLists should never be nested". */}
+						<View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+							{tagList.map((item) => (
 								<SubButton
+									key={item.tag}
 									onPress={() =>
 										setTagList((prev) =>
 											prev.filter((i) => i != item),
@@ -152,9 +197,8 @@ const overview = () => {
 								>
 									{item.tag}
 								</SubButton>
-							)}
-							horizontal
-						/>
+							))}
+						</View>
 					</View>
 					<PrimaryButton onPress={() => goNext()}>Next</PrimaryButton>
 				</View>
