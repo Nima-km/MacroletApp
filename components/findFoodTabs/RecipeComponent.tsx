@@ -102,25 +102,23 @@ const RecipeComponent = () => {
 					</View>
 					<View style={{ gap: 8 }}>
 						<H2>All Recipes</H2>
-						<FlatList
-							data={recipeList}
-							renderItem={({ item }) => (
-								<Pressable
-									onPress={() =>
-										router.push({
-											pathname: "/food",
-											params: {
-												food_id: item.foodData.id,
-											},
-										})
-									}
-									style={{ paddingVertical: 10 }}
-								>
-									<RecipeCard recipe={item} />
-								</Pressable>
-							)}
-							scrollEnabled={false}
-						/>
+						{/* Mapped, not virtualised: this is the local recipe list inside
+						    KeyboardAware's ScrollView, which is what triggers "VirtualizedLists should
+						    never be nested". A recipe collection is short enough not to need windowing. */}
+						{recipeList?.map((item) => (
+							<Pressable
+								key={item.foodData.id}
+								onPress={() =>
+									router.push({
+									    pathname: "/food",
+									    params: { food_id: item.foodData.id },
+								})
+								}
+								style={{ paddingVertical: 10 }}
+							>
+								<RecipeCard recipe={item} />
+							</Pressable>
+						))}
 					</View>
 				</View>
 				<Modal

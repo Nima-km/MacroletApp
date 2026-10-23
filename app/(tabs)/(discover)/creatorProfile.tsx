@@ -10,7 +10,14 @@ import { useBlockAccount } from "@/api/hooks/useBlocks";
 import TopNav from "@/components/navComponents/TopNav";
 import { FormInputSearch } from "@/components/UIComponents/TextInputs/FormInput";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
-import { H2, H3, H4, H5, H6 } from "@/components/UIComponents/Typography";
+import {
+	H2,
+	H3,
+	H4,
+	H5,
+	H6,
+	H5_SemiBold,
+} from "@/components/UIComponents/Typography";
 import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -423,52 +430,46 @@ const creatorProfile = () => {
 									onChangeText={() => {}}
 								/>
 							</View>
-							<FlatList
-								data={allRecipes}
-								ListEmptyComponent={
-									<H5 style={styles.muted}>
-										No recipes yet
-									</H5>
-								}
-								numColumns={2}
-								scrollEnabled={false}
-								showsVerticalScrollIndicator={false}
-								keyExtractor={(item) =>
-									item?.recipeData.recipe_slug!
-								}
-								showsHorizontalScrollIndicator={false}
-								renderItem={({ item: recipeItem }) => (
-									<Pressable
-										onPress={() =>
-											onOnlineRecipe(
-												recipeItem.recipeData.recipe_slug,
-											)
-										}
-									>
-										<RecipeCardSmall
-											recipe={recipeItem}
-											scale={1.15}
-										/>
-									</Pressable>
-								)}
-								onEndReached={() => {
-									if (hasNextPage && !isFetchingNextPage)
-										fetchNextPage();
-								}}
-								onEndReachedThreshold={0.5}
-								ListFooterComponent={
-									isFetchingNextPage ? (
+							{/* A mapped grid, not a FlatList.
+							    This list sat inside the page's ScrollView with scrollEnabled={false},
+							    which is what produced "VirtualizedLists should never be nested" - and it
+							    also meant onEndReached could never fire, so paging was dead. Rendering the
+							    grid directly lets the outer ScrollView size itself, and paging is driven by
+							    the button below. */}
+							{allRecipes.length === 0 ? (
+								<H5 style={styles.muted}>No recipes yet</H5>
+							) : (
+								<View style={styles.recipeGrid}>
+									{allRecipes.map((recipeItem) => (
+										<Pressable
+											key={recipeItem.recipeData.recipe_slug}
+											style={styles.recipeGridCell}
+											onPress={() =>
+												onOnlineRecipe(recipeItem.recipeData.recipe_slug)
+											}
+										>
+											<RecipeCardSmall recipe={recipeItem} scale={1.15} />
+										</Pressable>
+									))}
+								</View>
+							)}
+
+							{hasNextPage ? (
+								<Pressable
+									onPress={() => !isFetchingNextPage && fetchNextPage()}
+									style={styles.loadMore}
+									accessibilityRole="button"
+								>
+									{isFetchingNextPage ? (
 										<ActivityIndicator />
-									) : null
-								}
-								contentContainerStyle={{
-									gap: 12,
-								}}
-								columnWrapperStyle={{
-									gap: 12,
-								}}
-							/>
-						</View>
+									) : (
+										<H5_SemiBold style={{ color: colors.primary }}>
+											Load more
+										</H5_SemiBold>
+									)}
+								</Pressable>
+							) : null}
+															</View>
 					)}
 				</View>
 			</ScrollView>
@@ -479,6 +480,18 @@ const creatorProfile = () => {
 export default creatorProfile;
 
 const styles = StyleSheet.create({
+	recipeGrid: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		gap: 12,
+	},
+	recipeGridCell: {
+		width: "48%",
+	},
+	loadMore: {
+		alignItems: "center",
+		paddingVertical: 16,
+	},
 	centre: {
 		flex: 1,
 		justifyContent: "center",
