@@ -11,10 +11,12 @@ import {
 } from "@/store/useStore";
 import { colors } from "@/theme";
 import { Tabs, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	interpolate,
+	runOnJS,
 	useAnimatedStyle,
 	useSharedValue,
 	withSpring,
@@ -26,6 +28,26 @@ import { H4, H5, H5_SemiBold } from "../UIComponents/Typography";
 type TabBarProps = Parameters<
 	NonNullable<React.ComponentProps<typeof Tabs>["tabBar"]>
 >[0];
+type QuickOption = {
+	/** FindFood pager page this jumps to. */
+	page: number;
+	label: string;
+	icon: "barcode" | "quick" | "recent";
+	/** Degrees from straight up, positive to the right. */
+	angle: number;
+};
+
+const FAN_RADIUS = 74;
+/** Upward travel that fully opens the fan while swiping. */
+const DRAG_OPEN_DISTANCE = 58;
+/** Upward travel needed to commit a selection on release. */
+const DRAG_COMMIT_DISTANCE = 26;
+const FAN_OPTIONS: QuickOption[] = [
+	{ page: 2, label: "Scan barcode", icon: "barcode", angle: -52 },
+	{ page: 3, label: "Quick add", icon: "quick", angle: 0 },
+	{ page: 0, label: "Recent foods", icon: "recent", angle: 52 },
+];
+
 const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 	const router = useRouter();
 	const isFocused = (index: number) => state.index === index;
@@ -36,19 +58,98 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 	);
 	const progress = useSharedValue(0);
 	const toggleMenu = () => {
-		setOpen(!open);
-		progress.value = withSpring(open ? 0 : 1, {
-			damping: 3000,
-			stiffness: 3000,
-		});
+		if (open) closeMenu();
+		else openMenu();
 	};
-	const closeMenu = () => {
+	// The fan mounts the first time the menu opens and stays mounted, so the opening
+	// animation is preserved without paying for three animated views at rest.
+	const [hasOpened, setHasOpened] = useState(false);
+
+	const markOpened = useCallback(() => {
+		setHasOpened(true);
+	}, []);
+
+	const openMenu = useCallback(() => {
+		setHasOpened(true);
+		setOpen(true);
+		progress.value = withSpring(1, {
+			damping: 16,
+			stiffness: 180,
+			mass: 0.9,
+		});
+	}, [progress]);
+
+	const closeMenu = useCallback(() => {
 		setOpen(false);
 		progress.value = withSpring(0, {
-			damping: 3000,
-			stiffness: 3000,
+			damping: 18,
+			stiffness: 220,
+			mass: 0.9,
 		});
-	};
+	}, [progress]);
+
+	const chooseOption = useCallback(
+		(page: number) => {
+			router.navigate({ pathname: "/(tabs)/(logs)/logFood" });
+			setSelectedPage(page);
+			closeMenu();
+		},
+		[router, setSelectedPage, closeMenu],
+	);
+
+	/**
+	 * Hold-and-drag: opened by a long press, resolved by where the finger is released.
+	 * The maths runs once, on release - nothing happens on the JS thread while dragging.
+	 */
+	const commitDrag = useCallback(
+		(x: number, y: number) => {
+			const angle = (Math.atan2(x, -y) * 180) / Math.PI;
+			let nearest = FAN_OPTIONS[0];
+			for (const option of FAN_OPTIONS) {
+				if (
+					Math.abs(angle - option.angle) <
+					Math.abs(angle - nearest.angle)
+				) {
+					nearest = option;
+				}
+			}
+			if (Math.abs(angle - nearest.angle) <= 45) {
+				chooseOption(nearest.page);
+			} else {
+				closeMenu();
+			}
+		},
+		[chooseOption, closeMenu],
+	);
+
+	/**
+	 * Swipe up from the + to fan the menu open under the finger.
+	 *
+	 * The pan activates on upward travel alone - no hold - and its distance drives the
+	 * same shared value the opening animation uses, so the fan grows with the gesture
+	 * instead of animating after it. A tap never activates the pan, so `onPress` still
+	 * opens the menu the old way.
+	 */
+	const swipeUp = Gesture.Pan()
+		.activeOffsetY(-12)
+		.onStart(() => {
+			runOnJS(markOpened)();
+		})
+		.onUpdate((event) => {
+			const travel = -event.translationY;
+			progress.value = Math.min(
+				1,
+				Math.max(0, travel / DRAG_OPEN_DISTANCE),
+			);
+		})
+		.onEnd((event) => {
+			if (-event.translationY >= DRAG_COMMIT_DISTANCE) {
+				runOnJS(commitDrag)(event.translationX, event.translationY);
+			} else {
+				// A short, wobbly press still means "open", like a tap does.
+				runOnJS(openMenu)();
+			}
+		});
 	/**
 	 * Switch tabs through the navigator, not by navigating to a path.
 	 *
@@ -78,29 +179,15 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 		navigation.navigate(route.name, route.params);
 	};
 
-	const option1Style = useAnimatedStyle(() => ({
-		transform: [
-			{ translateY: interpolate(progress.value, [0, 1], [0, -10]) },
-		],
+	// One worklet for the whole fan. The options sit at fixed angles and the container
+	// scales, fades and swings into place, so they bloom out of the button together
+	// instead of each animating itself.
+	const menuStyle = useAnimatedStyle(() => ({
 		opacity: progress.value,
-		//   shadowColor: "black",
-	}));
-
-	// Option 2 animation
-	const option2Style = useAnimatedStyle(() => ({
 		transform: [
-			{ translateY: interpolate(progress.value, [0, 1], [0, -80]) },
+			{ scale: interpolate(progress.value, [0, 1], [0.4, 1]) },
+			{ rotate: `${interpolate(progress.value, [0, 1], [-40, 0])}deg` },
 		],
-		opacity: progress.value,
-		//   shadowColor: "white",
-	}));
-
-	// Option 3 animation
-	const option3Style = useAnimatedStyle(() => ({
-		transform: [
-			{ translateY: interpolate(progress.value, [0, 1], [0, -150]) },
-		],
-		opacity: progress.value,
 	}));
 	useEffect(() => {
 		closeMenu();
@@ -170,103 +257,79 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 						alignItems: "center",
 					}}
 				>
-					<Animated.View
-						style={[styles.option, option1Style]}
-						pointerEvents={open ? "auto" : "none"}
-					>
-						<TouchableOpacity
-							style={[
-								open ? styles.boxWithShadow : {},
-								{
-									width: 50,
-									height: 50,
-									borderRadius: 50,
-									backgroundColor: colors.white,
-									justifyContent: "center",
-									alignItems: "center",
-								},
-							]}
-							onPress={() => {
-								(router.navigate({
-									pathname: "/(tabs)/(logs)/logFood",
-								}),
-									setSelectedPage(2),
-									toggleMenu());
-							}}
+					{hasOpened ? (
+						<Animated.View
+							style={[styles.fan, menuStyle]}
+							pointerEvents={open ? "box-none" : "none"}
 						>
-							<Barcode
-								width={27}
-								height={27}
-								color={colors.primary}
-								pointerEvents="none"
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								open ? styles.boxWithShadow : {},
-								styles.optionBtn,
-							]}
-							onPress={() => {
-								(router.navigate({
-									pathname: "/(tabs)/(logs)/logFood",
-								}),
-									setSelectedPage(2),
-									toggleMenu());
-							}}
-						>
-							<H4 style={{ color: colors.primary }}>
-								Scan Barcode
-							</H4>
-						</TouchableOpacity>
-					</Animated.View>
-					<Animated.View
-						style={[styles.option, option2Style]}
-						pointerEvents={open ? "auto" : "none"}
-					>
-						<TouchableOpacity
-							style={[
-								open ? styles.boxWithShadow : {},
-								{
-									width: 50,
-									height: 50,
-									borderRadius: 50,
-									backgroundColor: colors.white,
-									justifyContent: "center",
-									alignItems: "center",
-								},
-							]}
-							onPress={() => {
-								(router.navigate({
-									pathname: "/(tabs)/(logs)/logFood",
-								}),
-									setSelectedPage(3),
-									toggleMenu());
-							}}
-						>
-							<Quick
-								width={27}
-								height={27}
-								color={colors.primary}
-								pointerEvents="none"
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								open ? styles.boxWithShadow : {},
-								styles.optionBtn,
-							]}
-							onPress={() => {
-								(router.navigate({
-									pathname: "/(tabs)/(logs)/logFood",
-								}),
-									setSelectedPage(3),
-									toggleMenu());
-							}}
-						>
-							<H4 style={{ color: colors.primary }}>Quick Add</H4>
-						</TouchableOpacity>
-					</Animated.View>
-
+							{FAN_OPTIONS.map((option) => (
+								<View
+									key={option.page}
+									style={[
+										styles.fanSlot,
+										{
+											transform: [
+												{
+													rotate: `${option.angle}deg`,
+												},
+												{
+													translateY: -FAN_RADIUS,
+												},
+											],
+										},
+									]}
+								>
+									<View
+										style={{
+											transform: [
+												{
+													rotate: `${-option.angle}deg`,
+												},
+											],
+										}}
+									>
+										<TouchableOpacity
+											style={[
+												styles.fanButton,
+												open
+													? styles.boxWithShadow
+													: {},
+											]}
+											onPress={() =>
+												chooseOption(option.page)
+											}
+											accessibilityRole="button"
+											accessibilityLabel={option.label}
+										>
+											{option.icon === "barcode" ? (
+												<Barcode
+													width={26}
+													height={26}
+													color={colors.primary}
+													pointerEvents="none"
+												/>
+											) : option.icon === "quick" ? (
+												<Quick
+													width={26}
+													height={26}
+													color={colors.primary}
+													pointerEvents="none"
+												/>
+											) : (
+												<Logs
+													width={26}
+													height={26}
+													color={colors.primary}
+													pointerEvents="none"
+												/>
+											)}
+										</TouchableOpacity>
+									</View>
+								</View>
+							))}
+						</Animated.View>
+					) : null}
+					<GestureDetector gesture={swipeUp}>
 					<TouchableOpacity
 						style={{
 							backgroundColor: colors.primary,
@@ -280,6 +343,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 					>
 						<Plus pointerEvents="none" color={colors.white} />
 					</TouchableOpacity>
+					</GestureDetector>
 				</View>
 			</View>
 			<Pressable
@@ -325,6 +389,24 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 export default MyNavBar;
 
 const styles = StyleSheet.create({
+	fan: {
+		position: "absolute",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	fanSlot: {
+		position: "absolute",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	fanButton: {
+		width: 48,
+		height: 48,
+		borderRadius: 24,
+		backgroundColor: colors.white,
+		alignItems: "center",
+		justifyContent: "center",
+	},
 	option: {
 		flexDirection: "row",
 		position: "absolute",
