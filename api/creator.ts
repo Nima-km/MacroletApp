@@ -88,6 +88,9 @@ export type CreatorStatus = {
 		username: string;
 		display_name: string;
 		about: string | null;
+		/** Storage path, or null while the avatar is a monogram. */
+		avatar_path: string | null;
+		avatar_url: string | null;
 		is_active: boolean;
 		payout_state: PayoutState;
 		pending_balance_cents: number;
@@ -103,6 +106,11 @@ export type CreatorProfileInput = {
 	username: string;
 	display_name: string;
 	about?: string;
+	/**
+	 * Path returned by `POST /uploads/sign`. Omit to leave the avatar alone; pass
+	 * `null` to clear it. The API rejects a path this user does not own.
+	 */
+	avatar_path?: string | null;
 };
 
 const authed = (token: string) => ({
@@ -137,6 +145,7 @@ export const saveCreatorProfile = async (
 			display_name: profile.display_name,
 			// Omit rather than send "": the API treats absence as "no bio".
 			about: profile.about?.trim() ? profile.about.trim() : undefined,
+			avatar_path: profile.avatar_path,
 		}),
 	});
 	if (!res.ok) throw await toApiError(res);

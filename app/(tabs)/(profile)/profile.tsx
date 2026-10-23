@@ -1,5 +1,8 @@
 import { useFollowerCount } from "@/api/hooks/useFollowCreator";
 import { useCreatorStatus } from "@/api/hooks/useCreatorOnboarding";
+import { saveCreatorProfile as saveCreatorProfileApi } from "@/api/creator";
+import { pickAndUploadAvatar } from "@/lib/avatarUpload";
+import Toast from "react-native-toast-message";
 import ChevronRight from "@/assets/svg/chevron-right.svg";
 import DollarIcon from "@/assets/svg/dollar-frame.svg";
 import RecipeIcon from "@/assets/svg/recipe-book.svg";
@@ -109,7 +112,7 @@ function Card({
 }
 
 const profile = () => {
-	const { isSignedIn } = useAuth();
+	const { isSignedIn, getToken } = useAuth();
 	const { user } = useUser();
 	const router = useRouter();
 
@@ -122,6 +125,38 @@ const profile = () => {
 
 	const creator = status?.creator ?? null;
 	const username = creator?.username ?? null;
+
+	// Changing the picture is two steps: upload, then record the path. Only creators
+	// have an avatar at all - everyone else keeps the monogram.
+	const [savingAvatar, setSavingAvatar] = useState(false);
+	const changeAvatar = useCallback(async () => {
+		if (!creator) return;
+		try {
+			setSavingAvatar(true);
+			const token = await getToken();
+			if (!token) throw new Error("Sign in again to change your picture.");
+			const path = await pickAndUploadAvatar(token);
+			// Cancelled the picker: nothing changed.
+			if (!path) return;
+			await saveCreatorProfileApi(token, {
+				username: creator.username,
+				display_name: creator.display_name,
+				about: creator.about ?? undefined,
+				avatar_path: path,
+			});
+			await refetch();
+			Toast.show({ type: "success", text1: "Profile picture updated" });
+		} catch (error) {
+			Toast.show({
+				type: "error",
+				text1: "Couldn't update your picture",
+				text2:
+					error instanceof Error ? error.message : undefined,
+			});
+		} finally {
+			setSavingAvatar(false);
+		}
+	}, [creator, getToken, refetch]);
 	const followers = useFollowerCount(username);
 
 	// Shared with Discover's premium gate, so the two screens cannot disagree
@@ -192,7 +227,23 @@ const profile = () => {
 			>
 				<Card>
 					<View style={styles.identity}>
-						<Monogram name={displayName} size={56} />
+						<Pressable
+							onPress={creator ? changeAvatar : undefined}
+							disabled={!creator || savingAvatar}
+							accessibilityRole={creator ? "button" : undefined}
+							accessibilityLabel={
+								creator
+									? "Change profile picture"
+									: undefined
+							}
+							style={{ opacity: savingAvatar ? 0.6 : 1 }}
+						>
+							<Monogram
+								name={displayName}
+								size={56}
+								uri={creator?.avatar_url}
+							/>
+						</Pressable>
 						<View style={styles.identityText}>
 							<H2 numberOfLines={1}>{displayName}</H2>
 							{username ? (

@@ -1,23 +1,39 @@
 import { colors } from "@/theme";
+import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { H3, H5_SemiBold } from "../Typography";
 
 /**
- * Initials in a `primary_bg` circle - the stand-in for a profile picture.
+ * A profile picture, falling back to initials.
  *
- * There is no image pipeline yet (no storage, no picker, no upload endpoint), and
- * a grey circle reads as broken. A monogram reads as deliberate and costs
- * nothing. Replace with `ImageView` once uploads exist - see
- * `Macrolet-Express/docs/IMAGE_PIPELINE.md`.
+ * Pass `uri` when the creator has an uploaded avatar; leave it out and this is the
+ * `primary_bg` monogram it has always been. The fallback is deliberately complete -
+ * an image is never a prerequisite for a working screen.
  */
 export default function Monogram({
 	name,
 	size = 60,
+	uri,
 }: {
 	name: string;
 	size?: number;
+	uri?: string | null;
 }) {
+	if (uri) {
+		return (
+			<Image
+				source={{ uri }}
+				style={{ width: size, height: size, borderRadius: size / 2 }}
+				contentFit="cover"
+				transition={150}
+				// A picture is decorative next to the name it belongs to.
+				accessibilityElementsHidden
+				importantForAccessibility="no"
+			/>
+		);
+	}
+
 	const initials =
 		name
 			.split(/\s+/)
