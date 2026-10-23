@@ -18,6 +18,16 @@ const FoodCardSmall = ({ food, foodItem }: FoodFullData) => {
 			<View style={styles.rowContainer}>
 				<View style={{ width: 240 }}>
 					<H4 numberOfLines={1}>{food.name}</H4>
+					{/* Without this, three imported foods all called "Apple" are
+					    indistinguishable rows. */}
+					{food.brand ? (
+						<H6
+							numberOfLines={1}
+							style={{ color: colors.inactive }}
+						>
+							{food.brand}
+						</H6>
+					) : null}
 				</View>
 				<H4>
 					{foodItem.servings} {foodItem.serving_type}

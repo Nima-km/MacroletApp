@@ -4,7 +4,12 @@ import { FoodInsert, FoodItemData } from "@/types/food";
 import { IngredientFullData, RecipeInsert } from "@/types/recipe";
 import { ServingSizeType } from "@/types/servingSize";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import {
+	StyleSheet,
+	View,
+	Keyboard,
+	TouchableWithoutFeedback,
+} from "react-native";
 import FoodInfoCore from "./FoodInfoCore";
 
 interface Props {
@@ -78,8 +83,16 @@ const FoodView = ({
 					onLogRecipe={() => setEdit(false)}
 				/>
 			) : (
-				<View style={{ padding: 20, flex: 1 }}>
-					<FoodInfoCore
+				// Tapping outside the inputs dismisses the keyboard. The screens that
+				// already do this (goals, preferences) get it from KeyboardAware's
+				// ScrollView with keyboardShouldPersistTaps="handled"; this body has no
+				// scroll container, so it needs the tap caught explicitly.
+				<TouchableWithoutFeedback
+					onPress={Keyboard.dismiss}
+					accessible={false}
+				>
+					<View style={{ padding: 20, flex: 1 }}>
+						<FoodInfoCore
 						foodData={food}
 						foodItemData={foodItem}
 						servingsData={servingData}
@@ -89,9 +102,10 @@ const FoodView = ({
 						secondaryText={secondaryText}
 						secondaryButton={secondaryButton}
 						edit={recipeData ? false : edit}
-						setEdit={setEdit}
-					/>
-				</View>
+							setEdit={setEdit}
+						/>
+					</View>
+				</TouchableWithoutFeedback>
 			)}
 		</View>
 	);

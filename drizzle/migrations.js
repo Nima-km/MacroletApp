@@ -21,6 +21,7 @@ import m0016 from './0016_lumpy_silver_sable.sql';
 import m0017 from './0017_sudden_nightshade.sql';
 import m0018 from './0018_salty_snowbird.sql';
 import m0019 from './0019_crazy_goliath.sql';
+import m0020 from './0020_freezing_mad_thinker.sql';
 
   export default {
     journal,
@@ -44,7 +45,8 @@ m0015,
 m0016,
 m0017,
 m0018,
-m0019
+m0019,
+m0020
     }
   }
   

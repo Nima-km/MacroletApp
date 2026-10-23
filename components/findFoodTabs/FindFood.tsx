@@ -1,7 +1,9 @@
 import { useSearchFood } from "@/api/hooks/useSearchFood";
 import BarcodeComponent from "@/components/findFoodTabs/BarcodeComponent";
 import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
-import RecentComponent from "@/components/findFoodTabs/RecentComponent";
+import RecentComponent, {
+	FoodListRow,
+} from "@/components/findFoodTabs/RecentComponent";
 import RecipeComponent from "@/components/findFoodTabs/RecipeComponent";
 import { useGetFoodItemRecent } from "@/db/hooks/history/foodItemhistory";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
@@ -47,6 +49,10 @@ const FindFood = ({
 		(s) => s.setSelectedPage,
 	);
 	const [search, setSearch] = useState("");
+	// Typing filters what is already on the device; after a short pause the server is
+	// asked the same question. Enter used to be the trigger, and the committed term
+	// was never cleared - so editing the field left the previous results on screen.
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [visitedPages, setVisitedPages] = useState<Set<number>>(
 		new Set([selectedPage]),
 	);
@@ -55,8 +61,19 @@ const FindFood = ({
 		setVisitedPages((prev) => new Set(prev).add(selectedPage));
 		//console.warn("visted", visitedPages, selectedPage);
 	}, [selectedPage]);
-	const [committedQuery, setCommittedQuery] = useState("");
-	const { data, isLoading, error, refetch } = useSearchFood(committedQuery);
+
+	useEffect(() => {
+		const timeout = setTimeout(
+			() => setDebouncedSearch(search.trim()),
+			250,
+		);
+		return () => clearTimeout(timeout);
+	}, [search]);
+	const {
+		data: serverResults,
+		isLoading: isSearching,
+		error: searchError,
+	} = useSearchFood(debouncedSearch);
 	const {
 		data: recentPages,
 		isLoading: loadingSectionList,
@@ -96,23 +113,76 @@ const FindFood = ({
 		},
 		[isNotRecipe, addFood, addIngredient],
 	);
-	const handleSearch = useCallback(() => {
-		setCommittedQuery(search.trim());
-		refetch();
-	}, [search, refetch]);
 
-	const filteredData = useMemo(() => {
-		// Once an online search has been committed and returned data, prioritize it
-		if (committedQuery && data) {
-			return data.map((item) => ({
-				food: { ...item },
-				foodItem: null,
-			}));
+	// One list, but each row says where it came from: what is already on the
+	// device, and what the server returned for the same term.
+	const rows = useMemo(() => {
+		const local = recentPages?.pages.flat() ?? [];
+		const server = (serverResults ?? []).map((item) => ({
+			food: { ...item },
+			foodItem: null,
+		}));
+
+		const built: FoodListRow[] = [];
+
+		if (local.length > 0) {
+			built.push({
+				kind: "header",
+				id: "h-local",
+				title: debouncedSearch ? "Your foods" : "Recent",
+			});
+			local.forEach((entry, index) =>
+				built.push({
+					kind: "food",
+					id: `local-${entry.food.id}-${index}`,
+					item: entry,
+				}),
+			);
 		}
 
-		// Otherwise the recent list: filtering and the row limit happen in SQL.
-		return recentPages?.pages.flat();
-	}, [search, recentPages, data, committedQuery]);
+		if (debouncedSearch) {
+			if (isSearching) {
+				built.push({
+					kind: "status",
+					id: "s-searching",
+					text: "Searching all foods…",
+				});
+			} else if (searchError) {
+				built.push({
+					kind: "status",
+					id: "s-error",
+					text: "Couldn't search all foods. Check your connection.",
+				});
+			} else if (server.length > 0) {
+				built.push({
+					kind: "header",
+					id: "h-server",
+					title: "All foods",
+				});
+				server.forEach((entry, index) =>
+					built.push({
+						kind: "food",
+						id: `server-${entry.food.id}-${index}`,
+						item: entry,
+					}),
+				);
+			} else {
+				built.push({
+					kind: "status",
+					id: "s-empty",
+					text: `No foods found for “${debouncedSearch}”.`,
+				});
+			}
+		}
+
+		return built;
+	}, [
+		recentPages,
+		serverResults,
+		isSearching,
+		searchError,
+		debouncedSearch,
+	]);
 
 	// Only a typed search pages; the default recent list is deliberately short.
 	const loadMore = useMemo(
@@ -144,7 +214,6 @@ const FindFood = ({
 						style={{ paddingHorizontal: 20 }}
 						value={search}
 						placeholder="Search foods"
-						onSubmitEditing={handleSearch}
 						onChangeText={setSearch}
 					/>
 				</View>
@@ -165,7 +234,8 @@ const FindFood = ({
 						>
 							<View key="0" style={{ flex: 1 }}>
 								<RecentComponent
-									filteredData={filteredData}
+									rows={rows}
+									title={debouncedSearch ? "Search" : "Recent"}
 									onFoodCardID={onFoodCardID}
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
@@ -194,7 +264,8 @@ const FindFood = ({
 						>
 							<View key="0" style={{ flex: 1 }}>
 								<RecentComponent
-									filteredData={filteredData}
+									rows={rows}
+									title={debouncedSearch ? "Search" : "Recent"}
 									onFoodCardID={onFoodCardID}
 									onAddFood={onAddFood}
 									onEndReached={loadMore}

@@ -14,6 +14,10 @@ export const food = sqliteTable(
 		id: integer("id").primaryKey({ autoIncrement: true }),
 		name: text("name", { length: 250 }).notNull(),
 		nickname: text("nickname"),
+		// Brand owner for imported packaged foods; null for generic and local entries.
+		// The server returns it on search results and it is the only thing that
+		// distinguishes three foods that are all named "Apple".
+		brand: text("brand"),
 		// Macronutrients per 100g (or standard unit)
 		protein: integer("protein").default(0).notNull(),
 		fat: integer("fat").default(0).notNull(),

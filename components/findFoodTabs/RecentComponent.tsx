@@ -10,15 +10,30 @@ import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import FoodCardSmall from "../chartComponents/Cards/FoodCardSmall";
 import SwipeableAdd from "../UIComponents/Swipeable/SwipeableAdd";
 import { colors } from "@/theme";
-import { H1, H6 } from "../UIComponents/Typography";
+import { H1, H5, H6 } from "../UIComponents/Typography";
 
-interface FoodData {
+export interface FoodData {
 	food: FoodInsert & { id: number };
 	foodItem: FoodItemInsert;
 }
 
+/**
+ * A row in the search/recent list.
+ *
+ * The list mixes things that aren't foods - a section label, a status line - so it
+ * can show where each result came from. Before this, local and server results were
+ * rendered by one list with no distinction, which is what made the search feel like
+ * it was guessing.
+ */
+export type FoodListRow =
+	| { kind: "header"; id: string; title: string }
+	| { kind: "status"; id: string; text: string }
+	| { kind: "food"; id: string; item: RecentFoodFullData };
+
 interface RecentComponentProps {
-	filteredData?: RecentFoodFullData[];
+	rows: FoodListRow[];
+	/** Heading above the list: "Recent" when idle, "Search" when typing. */
+	title: string;
 	onFoodCardID: (id: number) => void;
 	onAddFood: (foodObject: FoodFullData) => void;
 	/** Infinite scroll: only meaningful for a typed search. */
@@ -27,40 +42,56 @@ interface RecentComponentProps {
 }
 
 const RecentComponent = ({
-	filteredData,
+	rows,
+	title,
 	onFoodCardID,
 	onAddFood,
 	onEndReached,
 	isFetchingNextPage = false,
 }: RecentComponentProps) => {
 	return (
-		<View style={styles.container} /*showsVerticalScrollIndicator={false}*/>
-			<H1 style={{ marginHorizontal: 20 }}>Recent </H1>
+		<View style={styles.container}>
+			<H1 style={{ marginHorizontal: 20 }}>{title}</H1>
 			<FlatList
-				data={filteredData}
-				renderItem={({ item }) => (
-					<SwipeableAdd
-						onSwipe={() =>
-							onAddFood({
-								food: item.food,
-								foodItem: item.foodItem ?? FoodItemDefault,
-							})
-						}
-					>
-						<Pressable onPress={() => onFoodCardID(item.food.id)}>
-							<FoodCardSmall
-								food={item.food}
-								foodItem={item.foodItem ?? FoodItemDefault}
-							/>
-						</Pressable>
-					</SwipeableAdd>
-				)}
-				keyExtractor={(item) => item.food.id.toString()}
+				data={rows}
+				renderItem={({ item }) => {
+					if (item.kind === "header") {
+						return (
+							<H6 style={styles.sectionHeader}>{item.title}</H6>
+						);
+					}
+					if (item.kind === "status") {
+						return <H5 style={styles.status}>{item.text}</H5>;
+					}
+					return (
+						<SwipeableAdd
+							onSwipe={() =>
+								onAddFood({
+									food: item.item.food,
+									foodItem: item.item.foodItem ?? FoodItemDefault,
+								})
+							}
+						>
+							<Pressable
+								onPress={() => onFoodCardID(item.item.food.id)}
+							>
+								<FoodCardSmall
+									food={item.item.food}
+									foodItem={
+										item.item.foodItem ?? FoodItemDefault
+									}
+								/>
+							</Pressable>
+						</SwipeableAdd>
+					);
+				}}
+				keyExtractor={(row) => row.id}
 				// This list is the scroller now. It has to be for paging to mean
 				// anything - scrollEnabled was false from when it sat inside a parent
 				// ScrollView.
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.4}
+				keyboardShouldPersistTaps="handled"
 				ListFooterComponent={
 					isFetchingNextPage ? (
 						<View style={{ paddingVertical: 16 }}>
@@ -86,7 +117,17 @@ export default RecentComponent;
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		//marginHorizontal: 20,
 		gap: 8,
+	},
+	sectionHeader: {
+		color: colors.inactive,
+		marginHorizontal: 20,
+		marginTop: 12,
+		textTransform: "uppercase",
+	},
+	status: {
+		color: colors.inactive,
+		marginHorizontal: 20,
+		marginVertical: 12,
 	},
 });

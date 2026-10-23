@@ -77,12 +77,6 @@ const FoodInfoCore = ({
 			fiber: foodData?.fiber ?? 0,
 		}));
 	}
-	function uploadFood() {
-		insertFood(food, {
-			onSuccess: (data) => console.log("Food inserted:", data),
-			onError: (error) => console.warn("Failed:", error.message),
-		});
-	}
 	function multiplyServing(inp?: number) {
 		return (inp ?? 0) * foodItem.serving_mult * foodItem.servings;
 	}
@@ -154,7 +148,6 @@ const FoodInfoCore = ({
 					}
 				/>
 			</View>
-			<InlineButton onPress={uploadFood}>Upload this food</InlineButton>
 			<View style={{ flexDirection: "column-reverse", gap: 20 }}>
 				{edit ? (
 					<View style={{ flexDirection: "row", gap: 8 }}>
