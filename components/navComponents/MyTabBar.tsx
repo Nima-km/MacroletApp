@@ -16,11 +16,11 @@ import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	interpolate,
-	runOnJS,
 	useAnimatedStyle,
 	useSharedValue,
 	withSpring,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { H4, H5, H5_SemiBold } from "../UIComponents/Typography";
 
 // Derived from expo-router's own Tabs (SDK 56+ deprecates importing React
@@ -133,7 +133,7 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 	const swipeUp = Gesture.Pan()
 		.activeOffsetY(-12)
 		.onStart(() => {
-			runOnJS(markOpened)();
+			scheduleOnRN(markOpened, );
 		})
 		.onUpdate((event) => {
 			const travel = -event.translationY;
@@ -144,10 +144,10 @@ const MyNavBar = ({ state, descriptors, navigation }: TabBarProps) => {
 		})
 		.onEnd((event) => {
 			if (-event.translationY >= DRAG_COMMIT_DISTANCE) {
-				runOnJS(commitDrag)(event.translationX, event.translationY);
+				scheduleOnRN(commitDrag, event.translationX, event.translationY);
 			} else {
 				// A short, wobbly press still means "open", like a tap does.
-				runOnJS(openMenu)();
+				scheduleOnRN(openMenu, );
 			}
 		});
 	/**

@@ -4,7 +4,8 @@ import React, { forwardRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { PrimaryButton } from "../Buttons/Button";
 import DropDownFilterCore from "../DropDown/DropDownFilterCore";
-import { H2 } from "../Typography";
+import { H2, H5 } from "../Typography";
+import { Pressable } from "react-native";
 import { BottomSheetCore } from "./BottomSheetCore";
 
 interface SearchFilterBottomSheet {
@@ -32,6 +33,25 @@ const SearchFilterBottomSheet = forwardRef<
 		min: "0",
 		max: "0",
 	});
+
+	/** How many of the five ranges are actually set. */
+	const activeCount = [
+		calorieRange,
+		proteinRange,
+		carbRange,
+		fatRange,
+		servingsYieldRange,
+	].filter((range) => range.min !== "0" || range.max !== "0").length;
+
+	const resetAll = () => {
+		const empty = { min: "0", max: "0" };
+		setCalorieRange(empty);
+		setProteinRange(empty);
+		setCarbRange(empty);
+		setFatRange(empty);
+		setServingsYieldRange(empty);
+	};
+
 	const handleApply = () => {
 		const filters: Record<string, string> = {};
 
@@ -63,7 +83,9 @@ const SearchFilterBottomSheet = forwardRef<
 			style={{ backgroundColor: colors.off_white }}
 			footer={
 				<PrimaryButton onPress={() => handleApply()}>
-					Apply
+					{activeCount > 0
+						? `Apply ${activeCount} ${activeCount === 1 ? "filter" : "filters"}`
+						: "Apply"}
 				</PrimaryButton>
 			}
 			header={<View></View>}
@@ -74,9 +96,27 @@ const SearchFilterBottomSheet = forwardRef<
 					justifyContent: "space-between",
 				}}
 			>
-				<H2>Filter</H2>
+				<View
+					style={{
+						flexDirection: "row",
+						alignItems: "center",
+						justifyContent: "space-between",
+					}}
+				>
+					<H2>Filter</H2>
+					{/* Reset only appears when there is something to reset - it used to
+					    look available with no filters applied. */}
+					{activeCount > 0 ? (
+						<Pressable onPress={resetAll} hitSlop={12}>
+							<H5 style={{ color: colors.inactive }}>Reset</H5>
+						</Pressable>
+					) : null}
+				</View>
 				<DropDownFilterCore
-					placeholder="Calorie Range"
+					sliderDomain={{ min: 0, max: 1000 }}
+					sliderStep={10}
+					placeholder={`Calorie Range`}
+					unit="cal"
 					minValue={calorieRange.min}
 					maxValue={calorieRange.max}
 					setMinValue={(newVal) =>
@@ -87,7 +127,8 @@ const SearchFilterBottomSheet = forwardRef<
 					}
 				/>
 				<DropDownFilterCore
-					placeholder="Protein Range"
+					sliderDomain={{ min: 0, max: 100 }}
+					placeholder={`Protein Range`}
 					unit="g"
 					minValue={proteinRange.min}
 					maxValue={proteinRange.max}
@@ -99,7 +140,8 @@ const SearchFilterBottomSheet = forwardRef<
 					}
 				/>
 				<DropDownFilterCore
-					placeholder="Carb Range"
+					sliderDomain={{ min: 0, max: 150 }}
+					placeholder={`Carb Range`}
 					unit="g"
 					minValue={carbRange.min}
 					maxValue={carbRange.max}
@@ -111,7 +153,8 @@ const SearchFilterBottomSheet = forwardRef<
 					}
 				/>
 				<DropDownFilterCore
-					placeholder="Fat Range"
+					sliderDomain={{ min: 0, max: 100 }}
+					placeholder={`Fat Range`}
 					unit="g"
 					minValue={fatRange.min}
 					maxValue={fatRange.max}
@@ -123,7 +166,8 @@ const SearchFilterBottomSheet = forwardRef<
 					}
 				/>
 				<DropDownFilterCore
-					placeholder="Servings Yield Range"
+					sliderDomain={{ min: 1, max: 20 }}
+					placeholder={`Servings Yield Range`}
 					unit="g"
 					minValue={servingsYieldRange.min}
 					maxValue={servingsYieldRange.max}

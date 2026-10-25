@@ -2,11 +2,11 @@ import React, { memo, ReactNode, useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-	runOnJS,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 
 type SwipeableCoreProps = {
 	children: ReactNode;
@@ -90,10 +90,10 @@ function SwipeableCore({
 				translateX.value = withTiming(-OPEN_DISTANCE, {
 					duration: ANIMATION_MS,
 				});
-				runOnJS(handleOpen)();
+				scheduleOnRN(handleOpen, );
 			} else {
 				translateX.value = withTiming(0, { duration: ANIMATION_MS });
-				runOnJS(handleClose)();
+				scheduleOnRN(handleClose, );
 			}
 		});
 
