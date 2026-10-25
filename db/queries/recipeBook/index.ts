@@ -1,12 +1,18 @@
 import { db } from "@/db/client";
-import { food, recipe, recipeBook, recipeBookItem } from "@/db/schema";
+import {
+	food,
+	foodItem,
+	recipe,
+	recipeBook,
+	recipeBookItem,
+} from "@/db/schema";
 import {
     RecipeBookInsert,
     RecipeBookItemInsert,
     RecipeBookItemType,
     RecipeBookType,
 } from "@/types/recipe";
-import { eq } from "drizzle-orm";
+import {eq, desc, sql} from "drizzle-orm";
 
 /*
 export const getRecipeBook = async (recipeBookID: number) => {
@@ -48,6 +54,29 @@ export const getAllRecipeList = async () => {
         .innerJoin(food, eq(food.recipe_id, recipe.id));
     return res;
 };
+/**
+ * Recipes ordered by their most recent log entry.
+ *
+ * `food` is the row that represents a recipe in the log; `foodItem` is each time it was
+ * eaten. Grouping by food and ordering by `max(timestamp)` gives "recently used"
+ * without adding a column to maintain.
+ */
+export const getRecentRecipeList = async (limit = 6) => {
+    const lastUsed = sql`max(${foodItem.timestamp})`;
+    return db
+        .select({
+            recipeData: recipe,
+            foodData: food,
+            lastUsed,
+        })
+        .from(recipe)
+        .innerJoin(food, eq(food.recipe_id, recipe.id))
+        .innerJoin(foodItem, eq(foodItem.food_id, food.id))
+        .groupBy(food.id, recipe.id)
+        .orderBy(desc(lastUsed))
+        .limit(limit);
+};
+
 export const insertRecipeBook = async (recipeBookObject: RecipeBookInsert) => {
     return db.insert(recipeBook).values(recipeBookObject).returning();
 };

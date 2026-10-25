@@ -260,7 +260,11 @@ const FindFood = ({
 					<FormInputSearch
 						style={{ paddingHorizontal: 20 }}
 						value={search}
-						placeholder="Search foods"
+						placeholder={
+							selectedPage === 1
+								? "Search your recipes"
+								: "Search foods"
+						}
 						onChangeText={setSearch}
 					/>
 				</View>
@@ -291,7 +295,7 @@ const FindFood = ({
 							</View>
 
 							<View key="1" style={{ flex: 1 }}>
-								{visitedPages.has(1) && <RecipeComponent />}
+								{visitedPages.has(1) && <RecipeComponent search={search} onAddFood={onAddFood} />}
 							</View>
 							<View key="2" style={{ flex: 1 }}>
 								{selectedPage === 2 && (

@@ -2,6 +2,7 @@ import CreateRecipe from "@/assets/svg/create-recipe.svg";
 import FindRecipe from "@/assets/svg/find-recipe.svg";
 import {
 	useGetAllRecipeList,
+	useGetRecentRecipeList,
 	useGetRecipeBookList,
 } from "@/db/hooks/recipeBook/getRecipeBookList";
 import { useInsertRecipeBook } from "@/db/hooks/recipeBook/useRecipeBook";
@@ -14,9 +15,20 @@ import RecipeCard from "../chartComponents/Cards/RecipeCard";
 import { SecondaryButton } from "../UIComponents/Buttons/Button";
 import KeyboardAware from "../UIComponents/KeyboardAware/KeyboardAware";
 import CreateRecipeBook from "../UIComponents/Modals/CreateRecipeBook";
-import { H2 } from "../UIComponents/Typography";
+import { H2, H3 } from "../UIComponents/Typography";
+import SwipeableAdd from "../UIComponents/Swipeable/SwipeableAdd";
+import { FoodItemDefault } from "@/tests/testData";
+import { FoodFullData } from "@/types/food";
 
-const RecipeComponent = () => {
+const RecipeComponent = ({
+	onAddFood,
+	search = "",
+}: {
+	/** Swiping a row adds it to the current log, as in the Recent tab. */
+	onAddFood?: (item: FoodFullData) => void;
+	/** FindFood's search bar, shared with the Recent tab. */
+	search?: string;
+}) => {
 	const router = useRouter();
 	const [testpics, setTestPics] = useState<string[]>([]);
 	const { addImageFromGallery } = useImageManager();
@@ -36,7 +48,21 @@ const RecipeComponent = () => {
 		isLoading: recipeListLoading,
 		error: recipeListError,
 	} = useGetAllRecipeList();
+	const { data: recentRecipes } = useGetRecentRecipeList();
 	const { mutate: insertRecipeBook } = useInsertRecipeBook();
+
+	const term = search.trim().toLowerCase();
+	const matches = (name?: string | null) =>
+		!term || (name ?? "").toLowerCase().includes(term);
+	const visibleBooks = (recipeBookList ?? []).filter((book) =>
+		matches(book.name),
+	);
+	const visibleRecipes = (recipeList ?? []).filter((item) =>
+		matches(item.foodData?.name),
+	);
+	const visibleRecent = (recentRecipes ?? []).filter((item) =>
+		matches(item.foodData?.name),
+	);
 
 	function createRecipeBook(newName: string) {
 		insertRecipeBook(
@@ -80,11 +106,32 @@ const RecipeComponent = () => {
 							Find Recipe
 						</SecondaryButton>
 					</View>
+					{!term && visibleRecent.length > 0 ? (
+						<>
+							<H3>Recently used</H3>
+							<View>
+								{visibleRecent.map((item) => (
+									<View key={`row-${item.foodData.id}`} style={{ paddingVertical: 10 }}>
+									<SwipeableAdd
+										onSwipe={() => onAddFood?.({ food: item.foodData, foodItem: FoodItemDefault })}
+									>
+										<Pressable
+											onPress={() => router.push({ pathname: "/food", params: { food_id: item.foodData.id } })}
+																					>
+											<RecipeCard recipe={item} />
+										</Pressable>
+									</SwipeableAdd>
+									</View>
+								))}
+							</View>
+						</>
+					) : null}
+
 					<H2>Saved</H2>
 
 					<View>
 						<FlatList
-							data={recipeBookList}
+							data={visibleBooks}
 							renderItem={({ item }) => (
 								<Pressable
 									onPress={() =>
@@ -105,7 +152,15 @@ const RecipeComponent = () => {
 						{/* Mapped, not virtualised: this is the local recipe list inside
 						    KeyboardAware's ScrollView, which is what triggers "VirtualizedLists should
 						    never be nested". A recipe collection is short enough not to need windowing. */}
-						{recipeList?.map((item) => (
+						{visibleRecipes.map((item) => (
+							<View
+								key={`row-${item.foodData.id}`}
+								style={{ paddingVertical: 10 }}
+							>
+							<SwipeableAdd
+								key={item.foodData.id}
+								onSwipe={() => onAddFood?.({ food: item.foodData, foodItem: FoodItemDefault })}
+							>
 							<Pressable
 								key={item.foodData.id}
 								onPress={() =>
@@ -114,10 +169,11 @@ const RecipeComponent = () => {
 									    params: { food_id: item.foodData.id },
 								})
 								}
-								style={{ paddingVertical: 10 }}
-							>
+															>
 								<RecipeCard recipe={item} />
 							</Pressable>
+							</SwipeableAdd>
+									</View>
 						))}
 					</View>
 				</View>
