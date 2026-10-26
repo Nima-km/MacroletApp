@@ -227,16 +227,18 @@ export function FormInputNumber({
 	lowerLimit,
 	viewStyle,
 	onChangeText,
-}: FormInputProps) {
+	placeholder = "0",
+	center = true,
+}: FormInputProps & { placeholder?: string; center?: boolean }) {
 	return (
 		<FormInput
 			value={value}
 			onChangeText={onChangeText}
 			numeric
-			center
+			center={center}
 			keyboardType="numeric"
 			unit={unit}
-			placeholder={"0"}
+			placeholder={placeholder}
 			style={style ?? typography.h3}
 			viewStyle={viewStyle}
 			upperLimit={upperLimit}

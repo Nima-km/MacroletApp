@@ -77,9 +77,7 @@ const RecentComponent = ({
 								})
 							}
 						>
-							<Pressable
-								onPress={() => onSelect(item.item)}
-							>
+							<Pressable onPress={() => onSelect(item.item)}>
 								<FoodCardSmall
 									food={item.item.food}
 									foodItem={

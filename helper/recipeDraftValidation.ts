@@ -42,6 +42,8 @@ type DraftLike = {
 				food?: {
 					nickname?: string | null;
 					macros_edited?: boolean | null;
+					/** Set when this food is a recipe — recipes can't be ingredients. */
+					recipe_id?: number | null;
 				} | null;
 		  }[]
 		| null;
@@ -107,6 +109,28 @@ function ingredientsRequirement(draft: DraftLike): Requirement {
 }
 
 /**
+ * A recipe may not be an ingredient of another recipe.
+ *
+ * Recipes are foods carrying a `recipe_id`, so nothing stops the drawer or the
+ * ingredients step handing one over. It is a hard rule at every tier: a recipe built
+ * out of other recipes is not reproducible, and logging it would credit the nested
+ * creator for a dish they did not make.
+ */
+export function recipeIngredients(draft: DraftLike) {
+	return (draft.ingredientItemsData ?? []).filter(
+		(item) => item?.food?.recipe_id != null,
+	);
+}
+
+function noRecipeIngredientRequirement(draft: DraftLike): Requirement {
+	return {
+		id: "no-recipe-ingredients",
+		label: "A recipe cannot be an ingredient of another recipe",
+		met: recipeIngredients(draft).length === 0,
+	};
+}
+
+/**
  * Step 1 — the overview fields.
  *
  * Scoped to this step on purpose: a private recipe must be able to leave the overview
@@ -146,6 +170,9 @@ export function ingredientsRequirements(
 		...overviewRequirements(draft, visibility),
 		servingsRequirement(draft),
 		ingredientsRequirement(draft),
+		// Hard rule at both tiers, so it cannot be worked around by keeping the
+		// recipe private.
+		noRecipeIngredientRequirement(draft),
 	];
 
 	// Published recipes must be reproducible from the catalogue, so this is checked

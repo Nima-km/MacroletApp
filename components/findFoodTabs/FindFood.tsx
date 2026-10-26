@@ -27,6 +27,7 @@ import PagerView, {
 import HeaderSimple from "../navComponents/HeaderSimple";
 import { isCatalogueIngredient } from "@/helper/recipeDraftValidation";
 import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
+import Toast from "react-native-toast-message";
 import NavSelector from "../navComponents/NavSelector";
 import { H5, H6 } from "../UIComponents/Typography";
 import { colors } from "@/theme";
@@ -126,6 +127,16 @@ const FindFood = ({
 		(item: FoodFullData) => {
 			if (isNotRecipe) {
 				addFood(item);
+				return;
+			}
+			// A recipe is a food with a recipe_id. It can be logged, but it cannot be
+			// an ingredient of another recipe.
+			if (item.food.recipe_id != null) {
+				Toast.show({
+					type: "warning",
+					text1: "A recipe can't be an ingredient",
+					text2: "Pick the individual foods instead.",
+				});
 				return;
 			}
 			addIngredient({ food: item.food, ingredientItem: item.foodItem });
