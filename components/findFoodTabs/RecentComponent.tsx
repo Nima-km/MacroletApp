@@ -40,6 +40,8 @@ interface RecentComponentProps {
 	/** Infinite scroll: only meaningful for a typed search. */
 	onEndReached?: () => void;
 	isFetchingNextPage?: boolean;
+	/** How many times each food is in the selection, keyed by food id. */
+	selectedCounts?: Map<number, number>;
 }
 
 const RecentComponent = ({
@@ -49,6 +51,7 @@ const RecentComponent = ({
 	onAddFood,
 	onEndReached,
 	isFetchingNextPage = false,
+	selectedCounts,
 }: RecentComponentProps) => {
 	return (
 		<View style={styles.container}>
@@ -82,12 +85,20 @@ const RecentComponent = ({
 									foodItem={
 										item.item.foodItem ?? FoodItemDefault
 									}
+									selectedCount={
+										selectedCounts?.get(
+											item.item.food.id,
+										) ?? 0
+									}
 								/>
 							</Pressable>
 						</SwipeableAdd>
 					);
 				}}
 				keyExtractor={(row) => row.id}
+				// Clear the bottom tab bar and the collapsed selection drawer, or the
+				// last row sits underneath them with nothing left to scroll.
+				contentContainerStyle={{ paddingBottom: 160 }}
 				// This list is the scroller now. It has to be for paging to mean
 				// anything - scrollEnabled was false from when it sat inside a parent
 				// ScrollView.

@@ -62,10 +62,19 @@ export const updateFoodAndItem = async (
 			.delete(food)
 			.where(eq(food.id, deletedFoodItem.food_id))
 			.returning();
+		// The original row is already deleted but still in hand: compare its macros
+		// before deciding whether this food still matches its catalogue entry.
+		const macrosChanged =
+			deletedFood.protein !== foodData.protein ||
+			deletedFood.carbs !== foodData.carbs ||
+			deletedFood.fat !== foodData.fat ||
+			deletedFood.fiber !== foodData.fiber;
+
 		const [newFood] = await tx
 			.insert(food)
 			.values({
 				...foodData,
+				macros_edited: deletedFood.macros_edited || macrosChanged,
 				id: undefined,
 			})
 			.returning();

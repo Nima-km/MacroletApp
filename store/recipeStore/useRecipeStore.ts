@@ -11,9 +11,23 @@ import { create } from "zustand";
 import { CalculateMacroSumIngredient } from "@/helper/recipeMacroSum";
 
 type VisibilityType = "public" | "private";
+
+/**
+ * Which flow the active draft belongs to.
+ *
+ * Creating and editing are separate pieces of work that must not share state: a create
+ * draft should still be there when the user comes back to it, and an edit must never
+ * overwrite it. One is active at a time; the create one is parked during an edit.
+ */
+export type DraftMode = "create" | "edit";
+
 export type RecipeDraftType = {
 	data: RecipeDraft;
 	visibility: VisibilityType;
+	mode: DraftMode;
+	parkedCreate: { data: RecipeDraft; visibility: VisibilityType } | null;
+	beginCreate: () => void;
+	beginEdit: (item: RecipeData) => void;
 	setVisibility: (newVisibility: VisibilityType) => void;
 	initializeRecipe: (item: RecipeData) => void;
 	updateRecipe: <K extends keyof RecipeInsert>(
@@ -46,7 +60,34 @@ export const emptyDraft: RecipeDraft = {
 export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
 	data: emptyDraft,
 	visibility: "private",
+	mode: "create",
+	parkedCreate: null,
 	setVisibility: (newVisibility) => set({ visibility: newVisibility }),
+	beginCreate: () =>
+		set((state) => {
+			// Already creating: keep the draft exactly as it was. Pressing "Create
+			// Recipe" from the recipe list must resume what the user had, not clear it.
+			if (state.mode === "create") return state;
+
+			// Coming back from an edit: restore the create draft that was parked, and
+			// drop the edit - entering an edit always re-loads its recipe.
+			return {
+				mode: "create" as const,
+				data: state.parkedCreate?.data ?? emptyDraft,
+				visibility: state.parkedCreate?.visibility ?? "private",
+				parkedCreate: null,
+			};
+		}),
+	beginEdit: (item) =>
+		set((state) => ({
+			mode: "edit",
+			// Park the create draft only when it is the one being replaced.
+			parkedCreate:
+				state.mode === "create"
+					? { data: state.data, visibility: state.visibility }
+					: state.parkedCreate,
+			data: item,
+		})),
 	initializeRecipe: (item) =>
 		set((state) => ({
 			data: item,
@@ -139,11 +180,29 @@ export const useRecipeDraftStore = create<RecipeDraftType>((set) => ({
 			},
 		})),
 
-	reset: () => set({ data: emptyDraft }),
+	/**
+	 * The active flow finished (saved, published, discarded). An edit hands control back
+	 * to the create draft; a create leaves an empty one.
+	 */
+	reset: () =>
+		set((state) => ({
+			mode: "create",
+			data: state.parkedCreate?.data ?? emptyDraft,
+			visibility: state.parkedCreate?.visibility ?? "private",
+			parkedCreate: null,
+		})),
 }));
 
 export const useRecipeStateStore = create<
-	Omit<RecipeDraftType, "visibility" | "setVisibility">
+	Omit<
+		RecipeDraftType,
+		| "visibility"
+		| "setVisibility"
+		| "mode"
+		| "parkedCreate"
+		| "beginCreate"
+		| "beginEdit"
+	>
 >((set) => ({
 	data: emptyDraft,
 

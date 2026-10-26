@@ -17,6 +17,11 @@ interface Props {
 	options: DropdownOption[];
 	onChangeText: (newText: string) => void;
 	onSelect?: (option: DropdownOption) => void;
+	/**
+	 * Values to highlight as selected. Use this when the caller owns the selection (a
+	 * multi-select, where the component's own `selected` only knows the last tap).
+	 */
+	selectedValues?: string[];
 	style?: any;
 }
 
@@ -25,10 +30,17 @@ const ControlledTextInput = ({
 	options,
 	onChangeText,
 	onSelect,
+	selectedValues,
 	style,
 }: Props) => {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<DropdownOption | null>(null);
+
+	/** Caller-owned selection wins; otherwise fall back to the last tap. */
+	const isSelected = (option: DropdownOption) =>
+		selectedValues
+			? selectedValues.includes(option.value)
+			: selected?.value === option.value;
 
 	const height = useRef(new Animated.Value(0)).current;
 
@@ -89,16 +101,14 @@ const ControlledTextInput = ({
 							<Pressable
 								style={[
 									styles.option,
-									selected?.value === item.value &&
-										styles.selectedOption,
+									isSelected(item) && styles.selectedOption,
 								]}
 								onPress={() => handleSelect(item)}
 							>
 								<H3
 									style={[
 										styles.optionText,
-										selected?.value === item.value &&
-											styles.selectedOptionText,
+										isSelected(item) && styles.selectedOptionText,
 									]}
 								>
 									{item.label}

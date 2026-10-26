@@ -17,6 +17,7 @@ const AddIngredient = () => {
 	const [servingsData, setServingsData] = useState([]);
 	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
 	const removeIngredient = useFoodSelectionStore((s) => s.removeIngredient);
+	const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
 	const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
 	const [ingredientIndex, setIngredientIndex] = useState<number>();
 	const setSelectedPage = useFindFoodSelectedPageStore(
@@ -41,6 +42,8 @@ const AddIngredient = () => {
 		setIngredientModalVisible(true);
 	}
 	const onLogFoodList = () => {
+		// Confirming hands the ingredients to the recipe, so the cart empties.
+		clearIngredient();
 		router.replace("/(tabs)/(logs)/CreateRecipe/ingredients");
 	};
 	useEffect(() => {

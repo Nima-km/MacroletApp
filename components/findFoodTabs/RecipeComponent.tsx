@@ -1,3 +1,4 @@
+import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
 import CreateRecipe from "@/assets/svg/create-recipe.svg";
 import FindRecipe from "@/assets/svg/find-recipe.svg";
 import {
@@ -30,6 +31,7 @@ const RecipeComponent = ({
 	search?: string;
 }) => {
 	const router = useRouter();
+	const beginCreate = useRecipeDraftStore((state) => state.beginCreate);
 	const [testpics, setTestPics] = useState<string[]>([]);
 	const { addImageFromGallery } = useImageManager();
 	const [showCreateRecipe, setShowCreateRecipe] = useState(false);
@@ -88,11 +90,14 @@ const RecipeComponent = ({
 						}}
 					>
 						<SecondaryButton
-							onPress={() =>
+							onPress={() => {
+								// Resumes an unfinished create draft; an edit left open is
+								// dropped rather than leaking into a new recipe.
+								beginCreate();
 								router.push(
 									"/(tabs)/(logs)/CreateRecipe/overview",
-								)
-							}
+								);
+							}}
 							style={{}}
 							icon={<CreateRecipe pointerEvents="none" />}
 						>

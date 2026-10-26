@@ -148,6 +148,13 @@
       "when": 1792778829054,
       "tag": "0020_freezing_mad_thinker",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1792994866295,
+      "tag": "0021_tough_shatterstar",
+      "breakpoints": true
     }
   ]
 }

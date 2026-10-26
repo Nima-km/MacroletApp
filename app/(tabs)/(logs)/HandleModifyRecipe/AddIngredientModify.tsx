@@ -13,6 +13,7 @@ const AddIngredientModify = () => {
     const [selectedFoodID, setSelectedFoodID] = useState<number | null>(null);
     const [servingsData, setServingsData] = useState([]);
     const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
+    const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
     const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
     const {
         data: foodData,
@@ -26,6 +27,8 @@ const AddIngredientModify = () => {
         setIngredientModalVisible(true);
     }
     const onLogFoodList = () => {
+        // Confirming hands the ingredients to the recipe, so the cart empties.
+        clearIngredient();
         router.back();
     };
     useEffect(() => {

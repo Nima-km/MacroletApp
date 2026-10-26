@@ -48,6 +48,7 @@ export default function FoodSelectionSheets({
 	const addFood = useFoodSelectionStore((s) => s.addFood);
 	const removeFood = useFoodSelectionStore((s) => s.removeFood);
 	const removeIngredient = useFoodSelectionStore((s) => s.removeIngredient);
+	const clearIngredient = useFoodSelectionStore((s) => s.clearIngredient);
 
 	const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
 	const [quickSelectedIndex, setQuickSelectedIndex] = useState<number>();
@@ -73,7 +74,12 @@ export default function FoodSelectionSheets({
 
 			{mode === "ingredient" && ingredientList.length > 0 ? (
 				<IngredientBottomSheet
-					onLogAll={onLogFoodList}
+					onLogAll={() => {
+						// The drawer is a cart: confirming it commits the ingredients and
+						// leaves nothing behind.
+						onLogFoodList();
+						clearIngredient();
+					}}
 					ref={sheetRef}
 					ingredientFullData={ingredientList}
 					isNewRecipe={isNewRecipe}

@@ -38,7 +38,12 @@ type DraftLike = {
 		bannerImage?: unknown[] | string | null;
 	} | null;
 	ingredientItemsData?:
-		| { food?: { nickname?: string | null } | null }[]
+		| {
+				food?: {
+					nickname?: string | null;
+					macros_edited?: boolean | null;
+				} | null;
+		  }[]
 		| null;
 };
 
@@ -61,9 +66,19 @@ export function nonEmptyDirections(draft: DraftLike) {
  * created on this device has none - and a recipe containing one cannot be published,
  * because the server computes the macros from the ingredients.
  */
+export function isCatalogueIngredient(food?: {
+	nickname?: string | null;
+	macros_edited?: boolean | null;
+} | null) {
+	// A nickname means the backend knows this food; untouched macros mean it still
+	// matches that entry. Editing macros is allowed, but the result can't stand in
+	// for the catalogue food in a published recipe.
+	return (food?.nickname ?? "").length > 0 && food?.macros_edited !== true;
+}
+
 export function verifiedIngredients(draft: DraftLike) {
-	return (draft.ingredientItemsData ?? []).filter(
-		(item) => (item?.food?.nickname ?? "").length > 0,
+	return (draft.ingredientItemsData ?? []).filter((item) =>
+		isCatalogueIngredient(item?.food),
 	);
 }
 
@@ -122,16 +137,31 @@ export function overviewRequirements(
 	return list;
 }
 
-/** Step 2 — what the ingredients step adds: a yield and at least one ingredient. */
+/** Step 2 — what the ingredients step adds: a yield, ingredients, and validity. */
 export function ingredientsRequirements(
 	draft: DraftLike,
 	visibility: Visibility,
 ): Requirement[] {
-	return [
+	const list = [
 		...overviewRequirements(draft, visibility),
 		servingsRequirement(draft),
 		ingredientsRequirement(draft),
 	];
+
+	// Published recipes must be reproducible from the catalogue, so this is checked
+	// where the ingredients are chosen - failing at the directions step would send the
+	// user somewhere they cannot fix it.
+	if (visibility === "public") {
+		const all = draft.ingredientItemsData?.length ?? 0;
+		const verified = verifiedIngredients(draft).length;
+		list.push({
+			id: "verified-ingredients",
+			label: "Swap ingredients that only exist on this device for catalogue foods",
+			met: all > 0 && verified === all,
+		});
+	}
+
+	return list;
 }
 
 /** The minimum for a recipe that stays on the device. */
@@ -168,11 +198,6 @@ export function publicRequirements(draft: DraftLike): Requirement[] {
 			met: tags >= MIN_TAGS,
 		},
 		{
-			id: "image",
-			label: "Add a recipe image",
-			met: hasImage,
-		},
-		{
 			id: "directions",
 			label: "Add at least one written direction",
 			met: steps > 0,
@@ -199,14 +224,9 @@ export function directionsRequirements(
 	visibility: Visibility,
 ): Requirement[] {
 	if (visibility === "public") return publicRequirements(draft);
-	return [
-		...ingredientsRequirements(draft, visibility),
-		{
-			id: "directions",
-			label: "Add at least one written direction",
-			met: nonEmptyDirections(draft).length > 0,
-		},
-	];
+	// Directions are a publishing requirement only: a private recipe is the author's
+	// own note and needs nothing beyond what the ingredients step collected.
+	return ingredientsRequirements(draft, visibility);
 }
 
 /** The requirements for the current draft, chosen by where it will live. */

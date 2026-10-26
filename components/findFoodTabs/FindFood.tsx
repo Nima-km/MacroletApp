@@ -20,12 +20,16 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Modal, StyleSheet, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 import PagerView, {
 	PagerViewOnPageSelectedEvent,
 } from "react-native-pager-view";
 import HeaderSimple from "../navComponents/HeaderSimple";
+import { isCatalogueIngredient } from "@/helper/recipeDraftValidation";
+import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
 import NavSelector from "../navComponents/NavSelector";
+import { H5, H6 } from "../UIComponents/Typography";
+import { colors } from "@/theme";
 import { useFoodSelectionStore } from "@/store/foodSelectionStore";
 import FoodSelectionSheets from "./FoodSelectionSheets";
 import { FormInputSearch } from "../UIComponents/TextInputs/FormInput";
@@ -49,6 +53,8 @@ const FindFood = ({
 }: FindFoodProps) => {
 	const addFood = useFoodSelectionStore((s) => s.addFood);
 	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
+	const foodCart = useFoodSelectionStore((s) => s.foodList);
+	const ingredientCart = useFoodSelectionStore((s) => s.ingredientList);
 	const selectedPage = useFindFoodSelectedPageStore((s) => s.selectedPage);
 	const setSelectedPage = useFindFoodSelectedPageStore(
 		(s) => s.setSelectedPage,
@@ -87,6 +93,14 @@ const FindFood = ({
 		hasNextPage,
 		isFetchingNextPage,
 	} = useGetFoodItemRecent(isNotRecipe, search);
+
+	// Only an ingredient being added to a public recipe has to be a catalogue food, so
+	// the filter is offered only there - and starts on, since an unusable ingredient is
+	// the thing they are trying to avoid.
+	const draftVisibility = useRecipeDraftStore((state) => state.visibility);
+	const offersCatalogueFilter =
+		!isNotRecipe && draftVisibility === "public";
+	const [catalogueOnly, setCatalogueOnly] = useState(true);
 	const pagerRef = useRef<PagerView>(null);
 	const currentPagerPage = useRef(selectedPage); // tracks the pager's actual current position
 
@@ -145,9 +159,28 @@ const FindFood = ({
 
 	// One list, but each row says where it came from: what is already on the
 	// device, and what the server returned for the same term.
+	// How many times each food sits in the cart, so the list can badge it. Keyed by
+	// food id, which is what the rows are keyed on.
+	const selectedCounts = useMemo(() => {
+		const counts = new Map<number, number>();
+		const items = isNotRecipe ? foodCart : ingredientCart;
+		items.forEach((item) => {
+			const id = item.food?.id;
+			if (typeof id === "number") {
+				counts.set(id, (counts.get(id) ?? 0) + 1);
+			}
+		});
+		return counts;
+	}, [foodCart, ingredientCart, isNotRecipe]);
+
 	const rows = useMemo(() => {
-		const local = recentPages?.pages.flat() ?? [];
-		const server: RecentFoodFullData[] = (serverResults ?? []).map(
+		const keep = (food?: { nickname?: string | null; macros_edited?: boolean | null } | null) =>
+			!offersCatalogueFilter || !catalogueOnly || isCatalogueIngredient(food);
+
+		const local = (recentPages?.pages.flat() ?? []).filter((entry) =>
+			keep(entry.food),
+		);
+		const server = (serverResults ?? []).map(
 			(item) => ({
 				// The API's nutrition fields are optional on the wire; a local food row
 				// needs them present, so they are normalised here rather than cast.
@@ -168,8 +201,9 @@ const FindFood = ({
 				},
 				foodItem: null,
 			}),
-		);
+		) as RecentFoodFullData[];
 
+		const filteredServer = server.filter((entry) => keep(entry.food));
 		const built: FoodListRow[] = [];
 
 		if (local.length > 0) {
@@ -200,13 +234,13 @@ const FindFood = ({
 					id: "s-error",
 					text: "Couldn't search all foods. Check your connection.",
 				});
-			} else if (server.length > 0) {
+			} else if (filteredServer.length > 0) {
 				built.push({
 					kind: "header",
 					id: "h-server",
 					title: "All foods",
 				});
-				server.forEach((entry, index) =>
+				filteredServer.forEach((entry, index) =>
 					built.push({
 						kind: "food",
 						id: `server-${entry.food.id}-${index}`,
@@ -229,6 +263,8 @@ const FindFood = ({
 		isSearching,
 		searchError,
 		debouncedSearch,
+		offersCatalogueFilter,
+		catalogueOnly,
 	]);
 
 	// Only a typed search pages; the default recent list is deliberately short.
@@ -268,6 +304,37 @@ const FindFood = ({
 						onChangeText={setSearch}
 					/>
 				</View>
+				{offersCatalogueFilter ? (
+					<View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
+						<Pressable
+							onPress={() => setCatalogueOnly((prev) => !prev)}
+							style={{
+								alignSelf: "flex-start",
+								flexDirection: "row",
+								alignItems: "center",
+								gap: 8,
+								paddingHorizontal: 12,
+								paddingVertical: 6,
+								borderRadius: 8,
+								backgroundColor: catalogueOnly
+									? colors.primary_bg
+									: colors.off_white,
+							}}
+							accessibilityRole="checkbox"
+							accessibilityState={{ checked: catalogueOnly }}
+						>
+							<H6
+								style={{
+									color: catalogueOnly
+										? colors.primary
+										: colors.inactive,
+								}}
+							>
+								{catalogueOnly ? "✓ " : ""}Catalogue ingredients only
+							</H6>
+						</Pressable>
+					</View>
+				) : null}
 				<View style={{ marginVertical: 12 }}>
 					<NavSelector
 						selectedValue={selectedPage}
@@ -291,6 +358,7 @@ const FindFood = ({
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}
+									selectedCounts={selectedCounts}
 								/>
 							</View>
 
@@ -321,6 +389,7 @@ const FindFood = ({
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}
+									selectedCounts={selectedCounts}
 								/>
 							</View>
 

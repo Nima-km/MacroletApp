@@ -18,6 +18,14 @@ export const food = sqliteTable(
 		// The server returns it on search results and it is the only thing that
 		// distinguishes three foods that are all named "Apple".
 		brand: text("brand"),
+		/**
+		 * Set when the user edits this food's macros by hand. Its nutrition no longer
+		 * matches the catalogue entry behind the `nickname`, so it stops counting as
+		 * valid for an online recipe. Editing macros is allowed and by design.
+		 */
+		macros_edited: integer("macros_edited", { mode: "boolean" })
+			.default(false)
+			.notNull(),
 		// Macronutrients per 100g (or standard unit)
 		protein: integer("protein").default(0).notNull(),
 		fat: integer("fat").default(0).notNull(),

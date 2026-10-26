@@ -14,6 +14,11 @@ import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware
 import { FormInput } from "@/components/UIComponents/TextInputs/FormInput";
 import { H1, H4, H5, H6 } from "@/components/UIComponents/Typography";
 import { calculateCalories } from "@/helper/calculateCalories";
+import Toast from "react-native-toast-message";
+import {
+	firstUnmet,
+	ingredientsRequirements,
+} from "@/helper/recipeDraftValidation";
 import { macroSum } from "@/helper/calculateMacro";
 import { CalculateMacroSumIngredient } from "@/helper/recipeMacroSum";
 import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
@@ -25,6 +30,7 @@ import { StyleSheet, View } from "react-native";
 const ingredients = () => {
 	const router = useRouter();
 	const recipeObject = useRecipeDraftStore((state) => state);
+	const visibility = useRecipeDraftStore((state) => state.visibility);
 	const [servingsYield, setServingsYield] = useState(
 		recipeObject.data.recipeData.servings_yield?.toString() ?? "",
 	);
@@ -45,15 +51,19 @@ const ingredients = () => {
 			recipeObject.updateRecipe("servings_yield", Number(text));
 	}
 	function goNext() {
-		if (
-			recipeObject.data.ingredientItemsData.length > 0 &&
-			recipeObject.data.recipeData.servings_yield &&
-			recipeObject.data.recipeData.servings_yield >= 1
-		) {
-			router.push("/(tabs)/(logs)/CreateRecipe/directions");
-		} else {
-			console.log("finish the steps");
+		const unmet = firstUnmet(
+			ingredientsRequirements(recipeObject.data, visibility),
+		);
+		if (unmet) {
+			// This used to log to the console, so the button looked dead.
+			Toast.show({
+				type: "warning",
+				text1: "Almost there",
+				text2: unmet.label,
+			});
+			return;
 		}
+		router.push("/(tabs)/(logs)/CreateRecipe/directions");
 	}
 	const calories = calculateCalories(foodData);
 	console.log("ingredientEdit foodData", foodData);

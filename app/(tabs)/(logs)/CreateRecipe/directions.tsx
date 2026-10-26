@@ -73,7 +73,10 @@ const directions = () => {
 				/>
 				<View style={{ flexDirection: "row", gap: 8 }}>
 					<H4>Directions</H4>
-					<H5 style={{ color: colors.inactive }}>{"required"}</H5>
+					{/* Only a published recipe needs written directions. */}
+					<H5 style={{ color: colors.inactive }}>
+						{visibility === "public" ? "required" : "optional"}
+					</H5>
 				</View>
 				{/* Mapped, not virtualised: a recipe has a handful of steps, and a
 				    FlatList here is nested in KeyboardAware's ScrollView. */}

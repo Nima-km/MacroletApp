@@ -1,0 +1,1 @@
+ALTER TABLE `food` ADD `macros_edited` integer DEFAULT false NOT NULL;

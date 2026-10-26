@@ -84,12 +84,13 @@ const food = () => {
 	 * has a `recipe_slug` is live and must not be editable this way - only its
 	 * ingredients and servings yield can change, which is the in-place edit below.
 	 */
-	const initializeRecipe = useRecipeDraftStore((state) => state.initializeRecipe);
+	const beginEdit = useRecipeDraftStore((state) => state.beginEdit);
 	const localRecipe = recipeData?.[0];
 	const isOnlineRecipe = Boolean(localRecipe?.recipe.recipe_slug);
 	function makeRecipePublic() {
 		if (!localRecipe || isOnlineRecipe) return;
-		initializeRecipe({
+		// Loads into the edit draft, leaving any create draft untouched.
+		beginEdit({
 			recipeData: localRecipe.recipe,
 			foodData: localRecipe.food,
 			ingredientItemsData: ingredients ?? [],

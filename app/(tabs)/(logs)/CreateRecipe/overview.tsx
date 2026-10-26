@@ -27,7 +27,7 @@ import { useFindFoodSelectedPageStore } from "@/store/useStore";
 import { colors } from "@/theme";
 import { RecipeTags } from "@/types/recipe";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 const overview = () => {
@@ -45,7 +45,15 @@ const overview = () => {
 	const setSelectedPage = useFindFoodSelectedPageStore(
 		(s) => s.setSelectedPage,
 	);
-	const [tagList, setTagList] = useState<RecipeTags[]>([]);
+	const [tagList, setTagList] = useState<RecipeTags[]>(
+		draft.recipeData.tags ?? [],
+	);
+
+	// The requirement reads `draft.recipeData.tags`, and the tag picker writes to local
+	// state - so without this mirror the checklist never saw a single tag.
+	useEffect(() => {
+		updateRecipe("tags", tagList);
+	}, [tagList]);
 	const requirements = overviewRequirements(draft, visibility);
 	const [attempted, setAttempted] = useState(false);
 
@@ -177,17 +185,24 @@ const overview = () => {
 						</View>
 						<ControlledTextInput
 							value={tagText}
-							options={filteredTags.map((item) => ({
+							// The dropdown highlights these using the same selected
+							// style the rest of the app uses.
+							selectedValues={tagList.map((tag) => tag.tag)}
+							options={filteredTags.slice(0, 8).map((item) => ({
 								label: item,
 								value: item,
 							}))}
 							onChangeText={setTagText}
-							onSelect={(selected) =>
-								setTagList((prev) => [
-									...prev,
-									{ tag: selected.label },
-								])
-							}
+							onSelect={(selected) => {
+								// Tap toggles, and a tag can only be in the list once.
+								setTagList((prev) =>
+									prev.some((t) => t.tag === selected.value)
+										? prev.filter(
+												(t) => t.tag !== selected.value,
+											)
+										: [...prev, { tag: selected.value }],
+								);
+							}}
 						/>
 						{/* A mapped row, not a FlatList: this is a short horizontal set,
 						    and a virtualised list inside KeyboardAware's ScrollView is

@@ -2,6 +2,7 @@ import RemoveIcon from "@/assets/svg/bin.svg";
 import { H4, H5, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { calculateMacro } from "@/helper/calculateMacro";
+import { isCatalogueIngredient } from "@/helper/recipeDraftValidation";
 import { SimpleRound } from "@/helper/simpleRound";
 import { colors } from "@/theme";
 import { IngredientFullData } from "@/types/recipe";
@@ -33,6 +34,11 @@ const FoodCardIngredient = ({
 							{ingredientItem.prep_notes ? "," : ""}{" "}
 							{ingredientItem.prep_notes}
 						</H4>
+						{/* Catalogue food with untouched macros: usable online. The badge
+						    disappears as soon as the macros are edited. */}
+						{isCatalogueIngredient(food) ? (
+							<H6 style={styles.catalogueBadge}>✓ catalogue</H6>
+						) : null}
 					</View>
 					<H4>
 						{ingredientItem.servings} {ingredientItem.serving_type}
@@ -104,6 +110,10 @@ const FoodCardIngredient = ({
 export default FoodCardIngredient;
 
 const styles = StyleSheet.create({
+	catalogueBadge: {
+		color: colors.primary,
+		marginTop: 2,
+	},
 	container: {
 		paddingVertical: 16,
 		flexDirection: "row",
