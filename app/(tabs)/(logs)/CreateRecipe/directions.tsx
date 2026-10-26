@@ -30,11 +30,12 @@ const directions = () => {
 	const router = useRouter();
 	const recipeObject = useRecipeDraftStore((state) => state);
 	const draft = useRecipeDraftStore((state) => state.data);
+	const visibility = useRecipeDraftStore((state) => state.visibility);
 	const [directions, setDirections] = useState<DirectionStep[]>(
 		recipeObject.data.recipeData.directions ?? [],
 	);
 	function goToPreview() {
-		const unmet = firstUnmet(directionsRequirements(draft));
+		const unmet = firstUnmet(directionsRequirements(draft, visibility));
 		if (unmet) {
 			// This used to log to the console, so pressing the button looked broken.
 			Toast.show({
@@ -104,15 +105,27 @@ const directions = () => {
 				</View>
 
 				<SecondaryAddButton
-					onPress={() =>
+					onPress={() => {
+						// A step is never added blank: there would be nothing to write
+						// into it, and an empty step is exactly what the publish check
+						// rejects later.
+						const last = directions[directions.length - 1];
+						if (last && (last.text ?? "").trim().length === 0) {
+							Toast.show({
+								type: "warning",
+								text1: "Finish this step first",
+								text2: "Write the instruction, then add the next one.",
+							});
+							return;
+						}
 						setDirections(
 							addStep(directions, {
 								id: generateId(),
 								text: "",
 								photo: "",
 							}),
-						)
-					}
+						);
+					}}
 				>
 					Add Step
 				</SecondaryAddButton>

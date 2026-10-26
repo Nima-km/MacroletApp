@@ -1,4 +1,10 @@
 import Check from "@/assets/svg/check.svg";
+import {
+	allMet,
+	directionsRequirements,
+	ingredientsRequirements,
+	overviewRequirements,
+} from "@/helper/recipeDraftValidation";
 import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
 import { colors } from "@/theme";
@@ -12,6 +18,7 @@ interface Props {
 const StepIndicator = ({ activeStep }: Props) => {
 	const router = useRouter();
 	const { data: draft } = useRecipeDraftStore();
+	const visibility = useRecipeDraftStore((state) => state.visibility);
 	const setSelectedPage = useFindFoodSelectedPageStore(
 		(s) => s.setSelectedPage,
 	);
@@ -29,20 +36,13 @@ const StepIndicator = ({ activeStep }: Props) => {
 				(router.push("/(tabs)/(logs)/CreateRecipe/ingredients"),
 					setSelectedPage(0));
 			},
-			active:
-				draft.foodData.name &&
-				draft.foodData.name.length > 3 &&
-				draft.recipeData.description &&
-				draft.recipeData.description?.length > 10,
+			active: allMet(overviewRequirements(draft, visibility)),
 		},
 		{
 			name: "Directions",
 
 			link: () => router.push("/(tabs)/(logs)/CreateRecipe/directions"),
-			active:
-				draft.ingredientItemsData.length > 0 &&
-				draft.recipeData.servings_yield &&
-				draft.recipeData.servings_yield >= 1,
+			active: allMet(ingredientsRequirements(draft, visibility)),
 		},
 		{
 			name: "Preview",
@@ -51,28 +51,23 @@ const StepIndicator = ({ activeStep }: Props) => {
 			active: false,
 		},
 	];
+	/**
+	 * Completion comes from the same rules the screens gate on, by tier - the tracker
+	 * used to keep its own copy, which demanded a description even for a private recipe
+	 * and marked Overview complete no matter what was typed.
+	 */
 	function isCompleted(step: string) {
-		if (step == "Overview") {
-			return (
-				draft.foodData.name &&
-				draft.foodData.name.length > 3 &&
-				draft.recipeData.description &&
-				draft.recipeData.description?.length > 10 /*&&
-				draft.recipeData.tags &&
-				draft.recipeData.tags.length > 0*/
-			);
-		} else if (step == "Ingredients") {
-			return (
-				draft.ingredientItemsData.length > 0 &&
-				draft.recipeData.servings_yield &&
-				draft.recipeData.servings_yield >= 1
-			);
-		} else if (step == "Directions") {
-			return (
-				draft.recipeData.directions &&
-				draft.recipeData.directions?.length > 0
-			);
+		if (step === "Overview") {
+			return allMet(overviewRequirements(draft, visibility));
 		}
+		if (step === "Ingredients") {
+			return allMet(ingredientsRequirements(draft, visibility));
+		}
+		if (step === "Directions") {
+			// Directions are done when the recipe is ready for preview.
+			return allMet(directionsRequirements(draft, visibility));
+		}
+		return false;
 	}
 	return (
 		<View>

@@ -1,4 +1,5 @@
 import FindFood from "@/components/findFoodTabs/FindFood";
+import KeyboardAvoider from "@/components/UIComponents/KeyboardAware/KeyboardAvoider";
 import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
 import QuickAddIngredientModal from "@/components/UIComponents/Modals/QuickAddIngredientModal";
 import { useGetFood } from "@/db/hooks/food/useFood";
@@ -48,7 +49,7 @@ const AddIngredient = () => {
 		}
 	}, [foodData]);
 	return (
-		<KeyboardAware>
+		<KeyboardAvoider>
 			<FindFood
 				onFoodCardID={onFoodCardID}
 				onLogFoodList={onLogFoodList}
@@ -83,7 +84,7 @@ const AddIngredient = () => {
 					</KeyboardAware>
 				</Modal>
 			)}
-		</KeyboardAware>
+		</KeyboardAvoider>
 	);
 };
 

@@ -46,7 +46,7 @@ const overview = () => {
 		(s) => s.setSelectedPage,
 	);
 	const [tagList, setTagList] = useState<RecipeTags[]>([]);
-	const requirements = overviewRequirements(draft);
+	const requirements = overviewRequirements(draft, visibility);
 	const [attempted, setAttempted] = useState(false);
 
 	function goNext() {
@@ -105,7 +105,9 @@ const overview = () => {
 					<View style={{ gap: 10 }}>
 						<View style={{ flexDirection: "row", gap: 8 }}>
 							<H4>Recipe Name</H4>
-							<H5 style={{ color: colors.inactive }}>required</H5>
+							<H5 style={{ color: colors.inactive }}>
+								required
+							</H5>
 						</View>
 						<FormInput
 							value={draft.foodData.name ?? ""}
@@ -136,7 +138,10 @@ const overview = () => {
 					<View style={{ gap: 10 }}>
 						<View style={{ flexDirection: "row", gap: 8 }}>
 							<H4>Description</H4>
-							<H5 style={{ color: colors.inactive }}>required</H5>
+							{/* Only a published recipe needs a description. */}
+							<H5 style={{ color: colors.inactive }}>
+								{visibility === "public" ? "required" : "optional"}
+							</H5>
 						</View>
 						<FormInputLong
 							value={draft.recipeData.description ?? ""}
@@ -165,7 +170,9 @@ const overview = () => {
 							>
 								{state("tags") === "error"
 									? `Add at least ${MIN_TAGS} tags`
-									: `required (min. ${MIN_TAGS})`}
+									: visibility === "public"
+										? `required (min. ${MIN_TAGS})`
+										: "optional"}
 							</H5>
 						</View>
 						<ControlledTextInput

@@ -1,5 +1,5 @@
 import FindFood from "@/components/findFoodTabs/FindFood";
-import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware";
+import KeyboardAvoider from "@/components/UIComponents/KeyboardAware/KeyboardAvoider";
 import { useInsertFoodItems } from "@/db/hooks/food/useFoodItem";
 import { useFoodSelectionStore } from "@/store/foodSelectionStore";
 import { useFindFoodSelectedPageStore } from "@/store/useStore";
@@ -56,7 +56,7 @@ const logFood = () => {
 	}, [logFoodItems, router]);
 
 	return (
-		<KeyboardAware>
+		<KeyboardAvoider>
 			<FindFood
 				onFoodCardID={onFoodCardID}
 				onLogFoodList={onLogFoodList}
@@ -64,7 +64,7 @@ const logFood = () => {
 
 			{/*BottomFoodList*/}
 			{/*OnFood*/}
-		</KeyboardAware>
+		</KeyboardAvoider>
 	);
 };
 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-MacroletApp is a comprehensive mobile nutrition application that enables users to track their diet while supporting a creator economy. Users can create and share recipes, filter by macros, calories, and tags, and track meals seamlessly. Creators earn money based on the portion of paid users who log their recipes, with Stripe handling all payment processing.
+MacroletApp is a comprehensive mobile nutrition application that enables users to track their diet while supporting a creator economy. Users can create and share recipes, filter by macros, calories, and tags, and track meals seamlessly. Creators earn money based on the portion of paid users who log their recipes, with in-app purchases through RevenueCat handling subscriptions, and Stripe handling creator payouts.
 
 ---
 
@@ -19,9 +19,19 @@ MacroletApp is a comprehensive mobile nutrition application that enables users t
 | **Custom Charts (Skia)**   | High-performance nutrition charts built with React Native Skia           |
 | **Creator Monetization**   | Recipe creators earn money based on paid user engagement                 |
 | **Secure Authentication**  | Clerk-powered auth with social login support                             |
-| **Stripe Payments**        | Automated subscriptions and creator earnings payouts                     |
+| **Subscriptions**          | RevenueCat in-app purchases (`macrolet_pro` entitlement), restore, manage  |
+| **Creator Payouts**        | Stripe Express accounts, monthly ShareCredit payout run                   |
 
 ---
+
+## Where to read next
+
+This README is the overview. The docs that stay current:
+
+- [`../Macrolet-Express/docs/ARCHITECTURE.md`](../Macrolet-Express/docs/ARCHITECTURE.md) — how the two apps fit together, data ownership, rendering rules
+- [`../Macrolet-Express/docs/STATUS.md`](../Macrolet-Express/docs/STATUS.md) — what works, what doesn't, what's next
+- [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) — governs any UI
+- [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) — how this app calls each endpoint
 
 ## Tech Stack
 
@@ -36,7 +46,8 @@ MacroletApp is a comprehensive mobile nutrition application that enables users t
 
 - [Express.js](https://expressjs.com/) _(reimplemented from Django for better scaling)_
 - [Clerk](https://clerk.com/) — authentication
-- [Stripe](https://stripe.com/) — payment processing & webhook handling
+- [RevenueCat](https://www.revenuecat.com/) — subscriptions, entitlements, revenue ledger
+- [Stripe](https://stripe.com/) — creator payouts only (Express accounts, `account.updated` webhook)
 
 ---
 
@@ -50,7 +61,7 @@ Building smooth, performant charts while handling large nutrition datasets.
 ### Creator Revenue Tracking
 
 Accurately tracking and calculating creator earnings from recipe usage across a large catalog.
-**Solution:** Implemented an event-driven tracking system with Stripe webhooks for reliable, real-time calculations.
+**Solution:** RevenueCat webhooks feed a revenue ledger; credits are stamped per log and paid out through Stripe by a monthly ShareCredit run.
 
 ### Local Database Optimization
 
@@ -67,7 +78,7 @@ Originally built on Django, the backend was fully reimplemented in Express.js to
 
 - Smooth **60fps** nutrition charts with Skia rendering
 - Accurate creator payment calculations across **1,000+ recipes**
-- **Zero transaction failures** with Stripe webhook system
+- **Zero transaction failures** with the RevenueCat webhook pipeline
 - App Store ready with full regulatory compliance
 
 ---

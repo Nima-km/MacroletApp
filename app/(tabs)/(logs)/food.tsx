@@ -1,3 +1,4 @@
+import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
 import HeaderFood from "@/components/navComponents/HeaderFood";
 import FoodView from "@/components/UIComponents/Modals/Food/FoodView";
 import { H1 } from "@/components/UIComponents/Typography";
@@ -8,6 +9,7 @@ import {
 	useGetIngredientsFromFoodID,
 	useGetRecipeFromFoodID,
 } from "@/db/hooks/recipe/useGetRecipe";
+import { useRecipeDraftStore } from "@/store/recipeStore/useRecipeStore";
 import {
 	useGetFoodServingSize,
 	useInsertServingSize,
@@ -75,6 +77,25 @@ const food = () => {
 		isSuccess: logServingSuccess,
 	} = useInsertServingSize();
 	const [edit, setEdit] = useState(false);
+
+	/**
+	 * Turning a private recipe into a published one reuses the create flow: load the
+	 * local recipe into the draft and walk the same four screens. A recipe that already
+	 * has a `recipe_slug` is live and must not be editable this way - only its
+	 * ingredients and servings yield can change, which is the in-place edit below.
+	 */
+	const initializeRecipe = useRecipeDraftStore((state) => state.initializeRecipe);
+	const localRecipe = recipeData?.[0];
+	const isOnlineRecipe = Boolean(localRecipe?.recipe.recipe_slug);
+	function makeRecipePublic() {
+		if (!localRecipe || isOnlineRecipe) return;
+		initializeRecipe({
+			recipeData: localRecipe.recipe,
+			foodData: localRecipe.food,
+			ingredientItemsData: ingredients ?? [],
+		});
+		router.push("/(tabs)/(logs)/CreateRecipe/overview");
+	}
 	const [foodItem, setFoodItem] = useState({
 		...FoodItemDefault,
 		timestamp: date,
@@ -146,6 +167,17 @@ const food = () => {
 					edit={edit}
 					setEdit={setEdit}
 				/>
+				{/* Editing reuses the create flow: the same four screens, starting from
+				    what this recipe already has. Choosing "Anyone on the Platform" inside
+				    is what makes it public. Once it has a slug it is live, and only its
+				    ingredients and servings can change (the in-place edit above). */}
+				{localRecipe && !isOnlineRecipe ? (
+					<View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+						<PrimaryButton onPress={makeRecipePublic}>
+							Edit recipe
+						</PrimaryButton>
+					</View>
+				) : null}
 			</View>
 		</View>
 	);

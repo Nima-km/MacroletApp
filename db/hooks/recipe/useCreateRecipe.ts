@@ -4,6 +4,7 @@ import {
 	createRecipeWithFoodAndIngredients,
 	updateRecipe,
 	updateRecipeSlug,
+	updateRecipeWithFoodAndIngredients,
 } from "@/db/queries/recipe";
 import { FoodItemInsert } from "@/types/food";
 import { RecipeData, RecipeInsert } from "@/types/recipe";
@@ -83,6 +84,38 @@ interface UpdateRecipeProps {
 	recipeData: RecipeInsert;
 	recipe_Id: number;
 }
+/**
+ * Saves changes over an existing local recipe: recipe row, its `food` row (which holds
+ * the name), and its ingredient list, in one transaction.
+ *
+ * This is what the edit path uses. `useCreateRecipeWithFoodAndIngredients` *inserts*,
+ * so saving an edited recipe with it silently produces a duplicate.
+ */
+export const useUpdateRecipeWithFoodAndIngredients = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (data: RecipeData) =>
+			updateRecipeWithFoodAndIngredients(
+				data.recipeData.id as number,
+				data.recipeData,
+				data.foodData as never,
+				// The draft stores the ingredient item alongside its food; the query
+				// wants the item alone, minus the recipe id it sets itself.
+				data.ingredientItemsData.map(
+					(item) => item.ingredientItem,
+				) as Parameters<
+					typeof updateRecipeWithFoodAndIngredients
+				>[3],
+			),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["food-history"] });
+			queryClient.invalidateQueries({ queryKey: ["recipeBook-list"] });
+			queryClient.invalidateQueries({ queryKey: ["recipe-list"] });
+		},
+	});
+};
+
 export const useUpdateRecipe = () => {
 	const queryClient = useQueryClient();
 

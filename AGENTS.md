@@ -1,5 +1,11 @@
 # MacroletApp — client instructions
 
+**Read first, in this order:** `../Macrolet-Express/docs/ARCHITECTURE.md` (how the two
+apps fit together, data ownership, the rendering rules that keep screens fast), then
+`../Macrolet-Express/docs/STATUS.md` (what works, what doesn't, what's next), then
+this file. Area docs: `docs/STYLE_GUIDE.md` before any UI,
+`docs/API_INTEGRATION.md` before touching an endpoint call.
+
 Expo SDK 57 / React Native client. Prebuilt native project: `ios/` and `android/`
 both exist, so new native modules require a rebuild, not just a JS reload.
 Product overview and feature list: `README.md`.
@@ -61,21 +67,22 @@ screens or components you were not asked to change.
 There is **no client test suite** — `tests/` holds test-data generators only
 (`generateTestData.ts`, `testData.ts`), and `package.json` has no `test` script.
 
-- `npx tsc --noEmit` — the baseline is **22 pre-existing errors**. Do not chase
+- `npx tsc --noEmit` — the baseline is **16 pre-existing errors**. Do not chase
   them during unrelated work, and never present a higher count as success; check
   that your own files add nothing. Current distribution:
 
   | File | Errors |
   | --- | --- |
   | `components/UIComponents/Modals/IngredientModal.tsx` | 6 |
-  | `app/(tabs)/(logs)/HandleCreateRecipe123/**` | 5 — the code navigates to
-    `/(tabs)/(logs)/HandleCreateRecipe/*`, but the directory is `...123`. Real
-    broken navigation, not a typing nuisance. |
   | `helper/recipeHelpers/stespUtil.ts` | 5 |
   | `components/testComponents/TestComponent.tsx` | 2 |
   | `components/chartComponents/MacroCharts/MyBarChart.tsx` | 2 |
-  | `components/UIComponents/Swipeable/SwipeableDelete.tsx` | 1 |
-  | `components/navComponents/MyTabBar.tsx` | 1 — points at `/(tabs)/discover`, which is absent from the generated route types. Check whether the screen exists before "fixing" this with a cast. |
+  | `components/UIComponents/Swipeable/SwipeableDelete.tsx` | 1 — `<Bin style={{ color }}>`
+    on an SVG component; pre-existing, cosmetic. |
+
+  Two entries have since been fixed rather than tolerated: `MyTabBar.tsx` (tab
+  switching goes through the navigator now) and `HandleCreateRecipe123/**`, which the
+  other session removed along with the broken navigation.
 - `npx expo export --platform android` — must exit 0. Delete the resulting
   `dist/` afterwards (it is gitignored).
 - `npx expo install --check` — should report "Dependencies are up to date";
