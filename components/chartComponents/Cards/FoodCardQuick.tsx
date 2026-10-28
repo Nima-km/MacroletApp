@@ -5,7 +5,7 @@ import { calculateMacro } from "@/helper/calculateMacro";
 import { SimpleRound } from "@/helper/simpleRound";
 import { colors } from "@/theme";
 import { FoodFullData } from "@/types/food";
-import React from "react";
+import React, { memo } from "react";
 import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
 interface FoodCardQuickProps {
 	onRemove?: () => void;
@@ -83,7 +83,7 @@ const FoodCardQuick = ({
 	);
 };
 
-export default FoodCardQuick;
+export default memo(FoodCardQuick);
 
 const styles = StyleSheet.create({
 	container: {

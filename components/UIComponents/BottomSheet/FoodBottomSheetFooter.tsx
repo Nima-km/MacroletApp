@@ -10,12 +10,11 @@ import {
 	CalculateMacroSumIngredient,
 } from "@/helper/recipeMacroSum";
 import { useFoodSelectionStore } from "@/store/foodSelectionStore";
-import { useFoodBottomSheetStore } from "@/store/useStore";
 import { colors, typography } from "@/theme";
 import { FoodFullData } from "@/types/food";
 import ArrowLeft from "@/assets/svg/chevron-left.svg";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { PrimaryButton, SecondaryButton } from "../Buttons/Button";
@@ -23,6 +22,8 @@ import { FormInput, FormInputNumber } from "../TextInputs/FormInput";
 import { H1, H3, H4, H5, H5_SemiBold } from "../Typography";
 
 type Props = {
+	/** The current selection. Passed in rather than mirrored through a store. */
+	foodFullData: FoodFullData[];
 	onLogAll: (foodObject: FoodFullData[]) => void;
 };
 
@@ -35,9 +36,8 @@ const MIN_NAME_LENGTH = 4;
  * recipe. The second replaces the nutrition summary with the two things a recipe
  * needs - a name and a yield - and otherwise reuses what the drawer already holds.
  */
-const FoodBottomSheetFooter = ({ onLogAll }: Props) => {
+const FoodBottomSheetFooter = ({ foodFullData, onLogAll }: Props) => {
 	const router = useRouter();
-	const { foodFullData } = useFoodBottomSheetStore();
 	const clearFood = useFoodSelectionStore((state) => state.clearFood);
 	const { mutate: createRecipe, isPending } =
 		useCreateRecipeWithFoodAndIngredients();
@@ -46,7 +46,12 @@ const FoodBottomSheetFooter = ({ onLogAll }: Props) => {
 	const [name, setName] = useState("");
 	const [servings, setServings] = useState("");
 
-	const foodData = CalculateMacroSum(foodFullData);
+	// The sum only changes when the selection does, not on every keystroke in the
+	// quick-recipe form.
+	const foodData = useMemo(
+		() => CalculateMacroSum(foodFullData),
+		[foodFullData],
+	);
 	const calories = calculateCalories(foodData);
 	const total_macro = foodData.carbs + foodData.fat + foodData.protein;
 

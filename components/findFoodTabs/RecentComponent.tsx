@@ -5,7 +5,8 @@ import {
 	FoodItemInsert,
 	RecentFoodFullData,
 } from "@/types/food";
-import React from "react";
+import { useFoodSelectionStore } from "@/store/foodSelectionStore";
+import React, { memo, useCallback, useMemo } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import FoodCardSmall from "../chartComponents/Cards/FoodCardSmall";
 import SwipeableAdd from "../UIComponents/Swipeable/SwipeableAdd";
@@ -28,20 +29,74 @@ export interface FoodData {
 export type FoodListRow =
 	| { kind: "header"; id: string; title: string }
 	| { kind: "status"; id: string; text: string }
-	| { kind: "food"; id: string; item: RecentFoodFullData };
+	| {
+			kind: "food";
+			id: string;
+			item: RecentFoodFullData;
+			/** Came from the local database, not the server. */
+			isLocal: boolean;
+	  };
+
+/**
+ * One food row.
+ *
+ * Memoised, and given primitives plus stable handlers, so adding an item re-renders
+ * only the row whose count changed - not every visible row. The swipe handler here is
+ * built from props, not from a closure over the list, which is what let the old
+ * inline `onSwipe` defeat `SwipeableAdd`'s memo on every render.
+ */
+const FoodRow = memo(function FoodRow({
+	item,
+	selectedCount,
+	onAdd,
+	onSelect,
+	isLocal,
+}: {
+	item: RecentFoodFullData;
+	selectedCount: number;
+	onAdd: (food: FoodFullData) => void;
+	onSelect: (food: RecentFoodFullData, isLocal: boolean) => void;
+	/** Server rows look positive-id'd too, so provenance has to travel with the row. */
+	isLocal: boolean;
+}) {
+	const handleSwipe = useCallback(
+		() =>
+			onAdd({
+				food: item.food,
+				foodItem: item.foodItem ?? FoodItemDefault,
+			}),
+		[onAdd, item],
+	);
+	const handlePress = useCallback(
+		() => onSelect(item, isLocal),
+		[onSelect, item, isLocal],
+	);
+
+	return (
+		<SwipeableAdd onSwipe={handleSwipe}>
+			<Pressable onPress={handlePress}>
+				<FoodCardSmall
+					food={item.food}
+					foodItem={item.foodItem ?? FoodItemDefault}
+					selectedCount={selectedCount}
+				/>
+			</Pressable>
+		</SwipeableAdd>
+	);
+});
 
 interface RecentComponentProps {
 	rows: FoodListRow[];
 	/** Heading above the list: "Recent" when idle, "Search" when typing. */
 	title: string;
 	/** The whole row, because a server result needs saving before it has an id. */
-	onSelect: (item: RecentFoodFullData) => void;
+	onSelect: (item: RecentFoodFullData, isLocal: boolean) => void;
 	onAddFood: (foodObject: FoodFullData) => void;
 	/** Infinite scroll: only meaningful for a typed search. */
 	onEndReached?: () => void;
 	isFetchingNextPage?: boolean;
-	/** How many times each food is in the selection, keyed by food id. */
-	selectedCounts?: Map<number, number>;
+	/** True when this list fills a recipe's ingredients rather than a meal. */
+	ingredientMode?: boolean;
 }
 
 const RecentComponent = ({
@@ -51,13 +106,32 @@ const RecentComponent = ({
 	onAddFood,
 	onEndReached,
 	isFetchingNextPage = false,
-	selectedCounts,
+	ingredientMode = false,
 }: RecentComponentProps) => {
+	// Subscribed here rather than in the parent: the counts only affect this list, and
+	// a parent subscription made the whole screen (pager and tabs included) re-render
+	// on every swipe.
+	const foodCart = useFoodSelectionStore((state) => state.foodList);
+	const ingredientCart = useFoodSelectionStore((state) => state.ingredientList);
+	const selectedCounts = useMemo(() => {
+		const counts = new Map<number, number>();
+		const items = ingredientMode ? ingredientCart : foodCart;
+		items.forEach((item) => {
+			const id = item.food?.id;
+			if (typeof id === "number") {
+				counts.set(id, (counts.get(id) ?? 0) + 1);
+			}
+		});
+		return counts;
+	}, [foodCart, ingredientCart, ingredientMode]);
 	return (
 		<View style={styles.container}>
 			<H1 style={{ marginHorizontal: 20 }}>{title}</H1>
 			<FlatList
 				data={rows}
+				// A stable renderer plus extraData: a count change reaches the cells
+				// without the list rebuilding every row's handler.
+				extraData={selectedCounts}
 				renderItem={({ item }) => {
 					if (item.kind === "header") {
 						return (
@@ -68,29 +142,15 @@ const RecentComponent = ({
 						return <H5 style={styles.status}>{item.text}</H5>;
 					}
 					return (
-						<SwipeableAdd
-							onSwipe={() =>
-								onAddFood({
-									food: item.item.food,
-									foodItem:
-										item.item.foodItem ?? FoodItemDefault,
-								})
+						<FoodRow
+							item={item.item}
+							isLocal={item.isLocal}
+							selectedCount={
+								selectedCounts?.get(item.item.food.id) ?? 0
 							}
-						>
-							<Pressable onPress={() => onSelect(item.item)}>
-								<FoodCardSmall
-									food={item.item.food}
-									foodItem={
-										item.item.foodItem ?? FoodItemDefault
-									}
-									selectedCount={
-										selectedCounts?.get(
-											item.item.food.id,
-										) ?? 0
-									}
-								/>
-							</Pressable>
-						</SwipeableAdd>
+							onAdd={onAddFood}
+							onSelect={onSelect}
+						/>
 					);
 				}}
 				keyExtractor={(row) => row.id}

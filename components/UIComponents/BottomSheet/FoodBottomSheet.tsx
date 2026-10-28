@@ -1,10 +1,9 @@
 import FoodCardQuick from "@/components/chartComponents/Cards/FoodCardQuick";
 
-import { useFoodBottomSheetStore } from "@/store/useStore";
 import { colors } from "@/theme";
 import { FoodFullData, FoodItemData } from "@/types/food";
 import BottomSheet from "@gorhom/bottom-sheet";
-import React, { forwardRef, useEffect } from "react";
+import React, { forwardRef, useCallback } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { H5_SemiBold } from "../Typography";
@@ -24,14 +23,12 @@ interface FoodBottomSheetProps {
 
 const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(
 	({ foodFullData, onRemove, onModify, onLogAll }, ref) => {
-		const setFoodFullData = useFoodBottomSheetStore(
-			(s) => s.setFoodFullData,
+		// Stable per-row handler, so the memoised card isn't invalidated by a new
+		// closure every time the selection changes.
+		const removeAt = useCallback(
+			(index: number) => () => onRemove(index),
+			[onRemove],
 		);
-		useEffect(() => {
-			if (setFoodFullData) {
-				setFoodFullData(foodFullData ?? []);
-			}
-		}, [foodFullData]);
 
 		if (foodFullData.length == 0) {
 			return <View></View>;
@@ -39,7 +36,10 @@ const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(
 		return (
 			<BottomSheetCore
 				ref={ref}
-				footer={<FoodBottomSheetFooter onLogAll={onLogAll} />}
+				footer={<FoodBottomSheetFooter
+					foodFullData={foodFullData}
+					onLogAll={onLogAll}
+				/>}
 				header={
 					foodFullData?.length > 0 ? (
 						<H5_SemiBold style={{ color: colors.primary }}>
@@ -67,7 +67,7 @@ const FoodBottomSheet = forwardRef<BottomSheet, FoodBottomSheetProps>(
 								<FoodCardQuick
 									food={item.food}
 									foodItem={item.foodItem}
-									onRemove={() => onRemove(index)}
+									onRemove={removeAt(index)}
 								/>
 							</Pressable>
 						)}

@@ -22,17 +22,7 @@ import { colors } from "@/theme";
 import { RecipeData } from "@/types/recipe";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-	ActivityIndicator,
-	Keyboard,
-	KeyboardAvoidingView,
-	KeyboardAvoidingViewProps,
-	Platform,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	View,
-} from "react-native";
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, KeyboardAvoidingViewProps, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import PagerView, {
 	PagerViewOnPageSelectedEvent,
@@ -231,50 +221,50 @@ const creatorProfile = () => {
 					<View
 						style={{ flexDirection: "row", gap: 8, marginTop: 8 }}
 					>
-						<Pressable
-							style={{
-								gap: 4,
-								flexDirection: "row",
-								paddingHorizontal: 12,
-								borderRadius: 25,
-								alignItems: "center",
-								paddingVertical: 7,
-								backgroundColor: colors.light_blue,
-							}}
-						>
-							<InstagramIcon />
-							<H6 style={{ color: colors.dark_blue }}>
-								Instagram
-							</H6>
-						</Pressable>
-						<Pressable
-							style={{
-								gap: 4,
-								flexDirection: "row",
-								paddingHorizontal: 12,
-								paddingVertical: 7,
-								borderRadius: 25,
-								alignItems: "center",
-								backgroundColor: colors.light_blue,
-							}}
-						>
-							<YoutubeIcon />
-							<H6 style={{ color: colors.dark_blue }}>Youtube</H6>
-						</Pressable>
-						<Pressable
-							style={{
-								gap: 4,
-								flexDirection: "row",
-								paddingHorizontal: 12,
-								paddingVertical: 7,
-								borderRadius: 25,
-								alignItems: "center",
-								backgroundColor: colors.light_blue,
-							}}
-						>
-							<TiktokIcon />
-							<H6 style={{ color: colors.dark_blue }}>Tiktok</H6>
-						</Pressable>
+						{[
+							{
+								key: "instagram",
+								label: "Instagram",
+								url: profile.author.instagram,
+								Icon: InstagramIcon,
+							},
+							{
+								key: "youtube",
+								label: "Youtube",
+								url: profile.author.youtube,
+								Icon: YoutubeIcon,
+							},
+							{
+								key: "tiktok",
+								label: "Tiktok",
+								url: profile.author.tiktok,
+								Icon: TiktokIcon,
+							},
+						]
+							// Only the platforms this creator actually linked.
+							.filter((social) => Boolean(social.url))
+							.map(({ key, label, url, Icon }) => (
+								<Pressable
+									key={key}
+									onPress={() => Linking.openURL(url as string)}
+									accessibilityRole="link"
+									accessibilityLabel={`Open ${label}`}
+									style={{
+										gap: 4,
+										flexDirection: "row",
+										paddingHorizontal: 12,
+										paddingVertical: 7,
+										borderRadius: 25,
+										alignItems: "center",
+										backgroundColor: colors.light_blue,
+									}}
+								>
+									<Icon />
+									<H6 style={{ color: colors.dark_blue }}>
+										{label}
+									</H6>
+								</Pressable>
+							))}
 					</View>
 				</View>
 

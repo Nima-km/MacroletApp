@@ -7,6 +7,9 @@ type AuthorType = {
 	username: string;
 	display_name: string;
 	about: string;
+	instagram: string | null;
+	youtube: string | null;
+	tiktok: string | null;
 };
 type RecipeBookType = {
 	name: string;
@@ -88,6 +91,10 @@ export type CreatorStatus = {
 		username: string;
 		display_name: string;
 		about: string | null;
+		/** Social links, null when the creator has not linked that platform. */
+		instagram: string | null;
+		youtube: string | null;
+		tiktok: string | null;
 		/** Storage path, or null while the avatar is a monogram. */
 		avatar_path: string | null;
 		avatar_url: string | null;
@@ -106,6 +113,13 @@ export type CreatorProfileInput = {
 	username: string;
 	display_name: string;
 	about?: string;
+	/**
+	 * Social links. Omit to leave them alone, `""` to clear one, or a full http(s)
+	 * URL. The API rejects anything that isn't a URL.
+	 */
+	instagram?: string;
+	youtube?: string;
+	tiktok?: string;
 	/**
 	 * Path returned by `POST /uploads/sign`. Omit to leave the avatar alone; pass
 	 * `null` to clear it. The API rejects a path this user does not own.
@@ -143,6 +157,9 @@ export const saveCreatorProfile = async (
 		body: JSON.stringify({
 			username: profile.username,
 			display_name: profile.display_name,
+			instagram: profile.instagram,
+			youtube: profile.youtube,
+			tiktok: profile.tiktok,
 			// Omit rather than send "": the API treats absence as "no bio".
 			about: profile.about?.trim() ? profile.about.trim() : undefined,
 			avatar_path: profile.avatar_path,

@@ -2,6 +2,7 @@ import { insertFoodList } from "@/db/queries/food";
 import { useSearchFood } from "@/api/hooks/useSearchFood";
 import BarcodeComponent from "@/components/findFoodTabs/BarcodeComponent";
 import QuickAddComponent from "@/components/findFoodTabs/QuickAddComponent";
+import VoiceLogTab from "@/components/findFoodTabs/VoiceLogTab";
 import RecentComponent, {
 	FoodListRow,
 } from "@/components/findFoodTabs/RecentComponent";
@@ -54,8 +55,6 @@ const FindFood = ({
 }: FindFoodProps) => {
 	const addFood = useFoodSelectionStore((s) => s.addFood);
 	const addIngredient = useFoodSelectionStore((s) => s.addIngredient);
-	const foodCart = useFoodSelectionStore((s) => s.foodList);
-	const ingredientCart = useFoodSelectionStore((s) => s.ingredientList);
 	const selectedPage = useFindFoodSelectedPageStore((s) => s.selectedPage);
 	const setSelectedPage = useFindFoodSelectedPageStore(
 		(s) => s.setSelectedPage,
@@ -152,8 +151,10 @@ const FindFood = ({
 	 * takes the local id, and opens it.
 	 */
 	const onSelectResult = useCallback(
-		async (item: RecentFoodFullData) => {
-			if (item.foodItem) {
+		async (item: RecentFoodFullData, isLocal = false) => {
+			// Provenance, not the id: the server's foods carry real positive ids too,
+			// so `id > 0` opened a local row that did not exist and showed a blank page.
+			if (isLocal) {
 				onFoodCardID(item.food.id);
 				return;
 			}
@@ -162,7 +163,13 @@ const FindFood = ({
 				const localId = saved?.[0]?.id;
 				if (localId) onFoodCardID(localId);
 			} catch (error) {
+				// Was silent: a failed save left the tap doing nothing at all.
 				console.warn("saving the chosen food failed", error);
+				Toast.show({
+					type: "error",
+					text1: "Couldn't open that food",
+					text2: "Try again in a moment.",
+				});
 			}
 		},
 		[onFoodCardID],
@@ -170,20 +177,6 @@ const FindFood = ({
 
 	// One list, but each row says where it came from: what is already on the
 	// device, and what the server returned for the same term.
-	// How many times each food sits in the cart, so the list can badge it. Keyed by
-	// food id, which is what the rows are keyed on.
-	const selectedCounts = useMemo(() => {
-		const counts = new Map<number, number>();
-		const items = isNotRecipe ? foodCart : ingredientCart;
-		items.forEach((item) => {
-			const id = item.food?.id;
-			if (typeof id === "number") {
-				counts.set(id, (counts.get(id) ?? 0) + 1);
-			}
-		});
-		return counts;
-	}, [foodCart, ingredientCart, isNotRecipe]);
-
 	const rows = useMemo(() => {
 		const keep = (food?: { nickname?: string | null; macros_edited?: boolean | null } | null) =>
 			!offersCatalogueFilter || !catalogueOnly || isCatalogueIngredient(food);
@@ -228,6 +221,7 @@ const FindFood = ({
 					kind: "food",
 					id: `local-${entry.food.id}-${index}`,
 					item: entry,
+					isLocal: true,
 				}),
 			);
 		}
@@ -256,6 +250,7 @@ const FindFood = ({
 						kind: "food",
 						id: `server-${entry.food.id}-${index}`,
 						item: entry,
+						isLocal: false,
 					}),
 				);
 			} else {
@@ -369,7 +364,7 @@ const FindFood = ({
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}
-									selectedCounts={selectedCounts}
+									ingredientMode={!isNotRecipe}
 								/>
 							</View>
 
@@ -382,7 +377,10 @@ const FindFood = ({
 								)}
 							</View>
 							<View key="3" style={{ flex: 1 }}>
-								{visitedPages.has(3) && <QuickAddComponent />}
+								{visitedPages.has(3) && <VoiceLogTab />}
+							</View>
+							<View key="4" style={{ flex: 1 }}>
+								{visitedPages.has(4) && <QuickAddComponent />}
 							</View>
 						</PagerView>
 					) : (
@@ -400,7 +398,7 @@ const FindFood = ({
 									onAddFood={onAddFood}
 									onEndReached={loadMore}
 									isFetchingNextPage={isFetchingNextPage}
-									selectedCounts={selectedCounts}
+									ingredientMode={!isNotRecipe}
 								/>
 							</View>
 

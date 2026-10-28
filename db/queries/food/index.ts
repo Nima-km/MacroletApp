@@ -127,7 +127,9 @@ export const insertFood = async (foodObject: FoodInsert) => {
 export const insertFoodList = async (foodObjects: FoodInsert[]) => {
 	return db
 		.insert(food)
-		.values(foodObjects)
+		// Drop any id the caller carried: the row is keyed by nickname, and inserting
+		// an explicit id collides with the local row it came from.
+		.values(foodObjects.map(({ id, ...rest }) => rest))
 		.onConflictDoUpdate({
 			target: food.nickname,
 			set: {

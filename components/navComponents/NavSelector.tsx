@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Barcode from "@/assets/svg/barcode.svg";
 import Recent from "@/assets/svg/clock.svg";
 import Quick from "@/assets/svg/quick.svg";
+import Mic from "@/assets/svg/mic.svg";
 import Recipes from "@/assets/svg/recipe-book.svg";
 import { colors } from "@/theme";
 import { H6 } from "../UIComponents/Typography";
@@ -71,8 +72,20 @@ const NavSelector = ({
 		...(isNotRecipe
 			? [
 					{
-						label: "Quick Add",
+						label: "Voice",
 						value: 3,
+						icon: (style?: object) => (
+							<Mic
+								width={width}
+								height={height}
+								style={style}
+								pointerEvents="none"
+							/>
+						),
+					},
+					{
+						label: "Quick Add",
+						value: 4,
 						icon: (style?: object) => (
 							<Quick
 								width={width}

@@ -1,6 +1,8 @@
 import { useFollowerCount } from "@/api/hooks/useFollowCreator";
 import { useCreatorStatus } from "@/api/hooks/useCreatorOnboarding";
+import { useQueryClient } from "@tanstack/react-query";
 import { saveCreatorProfile as saveCreatorProfileApi } from "@/api/creator";
+import { resetLocalCatalogue } from "@/db/queries/dev/reset";
 import { pickAndUploadAvatar } from "@/lib/avatarUpload";
 import Toast from "react-native-toast-message";
 import ChevronRight from "@/assets/svg/chevron-right.svg";
@@ -25,16 +27,7 @@ import { useAuth, useUser } from "@clerk/expo";
 import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	RefreshControl,
-	ScrollView,
-	StyleProp,
-	StyleSheet,
-	View,
-	ViewStyle,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 /**
  * Profile: identity, creator status and account destinations.
@@ -158,7 +151,43 @@ const profile = () => {
 			setSavingAvatar(false);
 		}
 	}, [creator, getToken, refetch]);
+	const queryClient = useQueryClient();
 	const followers = useFollowerCount(username);
+
+	// Development helper. Confirmed, because it deletes logs and recipes too.
+	const resetCatalogue = useCallback(() => {
+		Alert.alert(
+			"Delete all local food data?",
+			"This empties foods, log entries, recipes and recipe books on this device. Goals, weigh-ins and preferences are kept.",
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Reset",
+					style: "destructive",
+					onPress: async () => {
+						try {
+							const result = await resetLocalCatalogue();
+							await queryClient.invalidateQueries();
+							Toast.show({
+								type: "success",
+								text1: "Local food data cleared",
+								text2: `${result.foods} foods, ${result.foodItems} logs, ${result.recipes} recipes removed`,
+							});
+						} catch (error) {
+							Toast.show({
+								type: "error",
+								text1: "Couldn't reset",
+								text2:
+									error instanceof Error
+										? error.message
+										: undefined,
+							});
+						}
+					},
+				},
+			],
+		);
+	}, [queryClient]);
 
 	// Shared with Discover's premium gate, so the two screens cannot disagree
 	// about whether the user is subscribed.
@@ -288,6 +317,15 @@ const profile = () => {
 								router.push("/(tabs)/(profile)/CreatorStudio")
 							}
 						/>
+						<Row
+							icon={<ProfileIcon2 color={colors.primary} />}
+							label="Edit Profile"
+							onPress={() =>
+								router.push(
+									"/(tabs)/(profile)/CreatorStudio/CreatorProfileEdit",
+								)
+							}
+						/>
 						{status?.payouts_ready ? null : (
 							<Row
 								icon={<DollarIcon color={colors.primary} />}
@@ -375,6 +413,22 @@ const profile = () => {
 				<Card style={styles.rowCard}>
 					<SignOutButton />
 				</Card>
+
+				{/*
+				 * Development only: the catalogue's serving weights changed, and local
+				 * rows hold the old values until they are fetched again. This clears
+				 * them so a search repopulates from the API.
+				 */}
+				{__DEV__ ? (
+					<Card style={styles.rowCard}>
+						<Row
+							icon={<RecipeIcon color={colors.primary} />}
+							label="Delete all local food data"
+							onPress={resetCatalogue}
+							last
+						/>
+					</Card>
+				) : null}
 
 				{version ? (
 					<H6 style={[styles.muted, styles.version]}>

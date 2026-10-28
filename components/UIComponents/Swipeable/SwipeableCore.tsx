@@ -2,6 +2,7 @@ import React, { memo, ReactNode, useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+	runOnJS,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
@@ -21,7 +22,7 @@ type SwipeableCoreProps = {
 const OPEN_DISTANCE = 60;
 /** Drag past this, or fling, and the row opens on release. */
 const OPEN_THRESHOLD = 30;
-const ANIMATION_MS = 160;
+const ANIMATION_MS = 140;
 
 const CONTAINER_STYLE = { paddingHorizontal: 0 };
 
@@ -57,13 +58,27 @@ function SwipeableCore({
 
 	// Fires once, when the row reaches open - the swipe itself is the action.
 	const handleOpen = useCallback(() => {
-		onSwipe();
 		if (autoClose) {
-			translateX.value = withTiming(0, { duration: ANIMATION_MS });
+			// Close first, and run the action from the animation's completion callback.
+			//
+			// `onSwipe` writes to the store and everything downstream re-renders -
+			// including the selection drawer with its charts. Starting that on the next
+			// frame put the render inside the 160ms animation and made it hitch, so the
+			// work waits until the animation is finished. The row still responds the
+			// instant it is released; only the badge and the drawer follow.
 			setIsOpen(false);
+			translateX.value = withTiming(
+				0,
+				{ duration: ANIMATION_MS },
+				(finished) => {
+					"worklet";
+					if (finished) runOnJS(onSwipe)();
+				},
+			);
 			return;
 		}
 		setIsOpen(true);
+		onSwipe();
 	}, [onSwipe, autoClose, translateX]);
 
 	const handleClose = useCallback(() => {
@@ -90,10 +105,10 @@ function SwipeableCore({
 				translateX.value = withTiming(-OPEN_DISTANCE, {
 					duration: ANIMATION_MS,
 				});
-				scheduleOnRN(handleOpen, );
+				scheduleOnRN(handleOpen);
 			} else {
 				translateX.value = withTiming(0, { duration: ANIMATION_MS });
-				scheduleOnRN(handleClose, );
+				scheduleOnRN(handleClose);
 			}
 		});
 
