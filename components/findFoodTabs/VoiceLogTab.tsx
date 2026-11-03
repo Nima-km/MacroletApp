@@ -2,6 +2,8 @@ import FoodCardQuick from "@/components/chartComponents/Cards/FoodCardQuick";
 import DropDownServings from "@/components/UIComponents/DropDown/DropDownServings";
 import { H3, H4, H5, H6 } from "@/components/UIComponents/Typography";
 import { insertFoodItem, insertFoodList } from "@/db/queries/food";
+import { getRecentFoodNicknames } from "@/db/queries/voice";
+import VoiceMicButton from "@/components/findFoodTabs/VoiceMicButton";
 import { servingSizeProvider } from "@/helper/ServingSizeProvider";
 import { useFoodSelectionStore } from "@/store/foodSelectionStore";
 import { colors } from "@/theme";
@@ -14,6 +16,74 @@ import Toast from "react-native-toast-message";
 import { PrimaryButton, SecondaryButton } from "../UIComponents/Buttons/Button";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+/** A failure with copy the user can act on, instead of a status code. */
+class VoiceRequestError extends Error {
+	constructor(
+		readonly title: string,
+		readonly detail: string,
+	) {
+		super(detail);
+		this.name = "VoiceRequestError";
+	}
+}
+
+/**
+ * What to tell the user when a stage fails.
+ *
+ * "Couldn't read that" covered a 401, a 429, a dead model and a missing route, so the
+ * only thing it communicated was that something happened. Each case now names a
+ * different cause and, where it exists, a way out.
+ *
+ * The server's own `error` string is deliberately not shown: it is written for logs
+ * ("Validation failed", a stack trace) and reads as noise in a toast.
+ */
+function voiceFailure(stage: "parse" | "resolve", status: number): VoiceRequestError {
+	if (status === 401) {
+		return new VoiceRequestError(
+			"Session expired",
+			"Sign in again to keep logging.",
+		);
+	}
+	if (status === 404) {
+		return new VoiceRequestError(
+			"Voice log isn't available",
+			"Type what you ate instead, or update the app.",
+		);
+	}
+	if (status === 429) {
+		return new VoiceRequestError(
+			"One moment",
+			"Too many requests just now. Try again in a few seconds.",
+		);
+	}
+	if (status === 400) {
+		return new VoiceRequestError(
+			"Nothing to read there",
+			'Say what you ate, like "two eggs and a slice of toast".',
+		);
+	}
+	if (status >= 500) {
+		return stage === "parse"
+			? new VoiceRequestError(
+					"Couldn't understand that",
+					"The speech reader is having trouble. Try again, or type what you ate.",
+				)
+			: new VoiceRequestError(
+					"Couldn't look those foods up",
+					"Our food search is having trouble. Try again in a moment.",
+				);
+	}
+	return stage === "parse"
+		? new VoiceRequestError(
+				"Couldn't understand that",
+				"Try rewording it, or type what you ate.",
+			)
+		: new VoiceRequestError(
+				"Couldn't look those foods up",
+				"Try again, or log it by hand.",
+			);
+}
 
 /**
  * Split a spoken sentence into the foods in it.
@@ -89,7 +159,12 @@ const VoiceLogTab = () => {
 		setPending(true);
 		try {
 			const token = await getToken();
-			if (!token) throw new Error("Sign in again to log this.");
+			if (!token) {
+				throw new VoiceRequestError(
+					"Session expired",
+					"Sign in again to keep logging.",
+				);
+			}
 
 			// 1. Parse: sentence -> items, with quantity and restaurant per item.
 			const parseRes = await fetch(`${API_URL}/voice/parse`, {
@@ -106,8 +181,12 @@ const VoiceLogTab = () => {
 			}
 			if (!parseRes.ok) {
 				const body = await parseRes.json().catch(() => ({}));
-				console.log("voice/parse failed", parseRes.status, JSON.stringify(body).slice(0, 200));
-				throw new Error(body?.error ?? `Couldn't read that (${parseRes.status})`);
+				console.log(
+					"voice/parse failed",
+					parseRes.status,
+					JSON.stringify(body).slice(0, 200),
+				);
+				throw voiceFailure("parse", parseRes.status);
 			}
 			const parsedItems = ((await parseRes.json()).items ?? []) as Array<{
 				text: string;
@@ -143,16 +222,57 @@ const VoiceLogTab = () => {
 					setNeedsPro(true);
 					return;
 				}
-				throw new Error(body?.error ?? `Couldn't resolve that (${res.status})`);
+				throw voiceFailure("resolve", res.status);
 			}
 			const body = await res.json();
-			setItems(body.items ?? []);
+
+			// Re-rank with this device's history. The resolver scores "Denny's, french
+			// fries" and "Mcdonald's, french fries" identically; if the user always logs
+			// the latter, it should be first. Matching is by nickname because the
+			// candidates carry the server's ids, not ours.
+			const recent = await getRecentFoodNicknames();
+			const rank = new Map(recent.map((nickname, index) => [nickname, index]));
+			const ordered = (body.items ?? []).map(
+				(item: VoiceResolvedItem): VoiceResolvedItem => {
+					const candidates = [...item.candidates].sort((a, b) => {
+						const ra = rank.get(a.food?.nickname ?? "") ?? Number.MAX_SAFE_INTEGER;
+						const rb = rank.get(b.food?.nickname ?? "") ?? Number.MAX_SAFE_INTEGER;
+						return ra - rb;
+					});
+					return {
+						...item,
+						candidates,
+						// The server's selection was an index into the old order.
+						selected: candidates.length > 0 ? 0 : null,
+					};
+				},
+			);
+			setItems(ordered);
 		} catch (error) {
-			Toast.show({
-				type: "error",
-				text1: "Couldn't read that",
-				text2: error instanceof Error ? error.message : undefined,
-			});
+			// A request that never reached the server throws TypeError from fetch; that is
+			// a connection problem, not a reading problem.
+			const offline =
+				error instanceof TypeError ||
+				/failed to fetch|network request failed/i.test(
+					error instanceof Error ? error.message : "",
+				);
+
+			if (error instanceof VoiceRequestError) {
+				Toast.show({ type: "error", text1: error.title, text2: error.detail });
+			} else if (offline) {
+				Toast.show({
+					type: "error",
+					text1: "No connection",
+					text2: "Can't reach the server. Check your connection and try again.",
+				});
+			} else {
+				console.log("voice log failed", error);
+				Toast.show({
+					type: "error",
+					text1: "Couldn't log that",
+					text2: "Try again, or type what you ate.",
+				});
+			}
 		} finally {
 			setPending(false);
 		}
@@ -194,10 +314,15 @@ const VoiceLogTab = () => {
 			keyboardShouldPersistTaps="handled"
 		>
 			<H3>Say what you ate</H3>
-			<H5 style={{ color: colors.inactive }}>
-				Type it for now — the microphone arrives with speech-to-text. Include how much,
-				and the restaurant if it came from one.
-			</H5>
+			<H6 style={{ color: colors.inactive }}>
+				Hold the mic and speak, or type below. Include how much, and the restaurant if
+				it came from one.
+			</H6>
+
+			<VoiceMicButton
+				onTranscript={(transcript) => setText(transcript)}
+				disabled={pending}
+			/>
 
 			<View style={styles.inputWrap}>
 				<TextInput
@@ -206,6 +331,10 @@ const VoiceLogTab = () => {
 					placeholder="two eggs and a big mac from mcdonalds"
 					placeholderTextColor={colors.inactive}
 					multiline
+					// Not auto-focused: focusing opens the keyboard over the mic button.
+					returnKeyType="search"
+					onSubmitEditing={() => resolve()}
+					blurOnSubmit
 					style={styles.input}
 				/>
 			</View>
@@ -425,6 +554,10 @@ const styles = StyleSheet.create({
 		minHeight: 72,
 		fontSize: 16,
 		color: colors.black,
+	},
+	micHint: {
+		gap: 4,
+		paddingVertical: 4,
 	},
 	card: {
 		backgroundColor: colors.off_white,

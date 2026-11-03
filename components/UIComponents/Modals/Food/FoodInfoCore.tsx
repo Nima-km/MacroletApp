@@ -20,7 +20,7 @@ import {
 	PrimaryButton,
 	SecondaryButton,
 } from "../../Buttons/Button";
-import TimeDateSelector from "../../Calendar/TimeDateSelector";
+import DatePickerSheet from "../../Calendar/DatePickerSheet";
 import DropDownServings from "../../DropDown/DropDownServings";
 import KeyboardAware from "../../KeyboardAware/KeyboardAware";
 import { FormInput } from "../../TextInputs/FormInput";
@@ -203,44 +203,14 @@ const FoodInfoCore = ({
 					}
 				/>
 			</View>
-			<Modal
-				visible={calendarVisible}
-				transparent
-				// animationType='fade'
-				onRequestClose={() => {
-					setCalendarVisible(false);
-				}}
-			>
-				<KeyboardAware scrollEnabled={false}>
-					<Pressable
-						style={{
-							flex: 1,
-							backgroundColor: "rgba(0,0,0,0.5)",
-							justifyContent: "center",
-							alignItems: "center",
-						}}
-						onPress={() => setCalendarVisible(false)}
-					>
-						<Pressable
-							style={{
-								backgroundColor: "red",
-								width: "80%",
-							}}
-						>
-							<TimeDateSelector
-								value={foodItem.timestamp}
-								onChange={(newDate) =>
-									setFoodItem((prev) => ({
-										...prev,
-										timestamp: newDate,
-									}))
-								}
-								isTime={false}
-							/>
-						</Pressable>
-					</Pressable>
-				</KeyboardAware>
-			</Modal>
+			<DatePickerSheet
+					visible={calendarVisible}
+					value={foodItem.timestamp}
+					onChange={(newDate) =>
+						setFoodItem((prev) => ({ ...prev, timestamp: newDate }))
+					}
+					onClose={() => setCalendarVisible(false)}
+				/>
 		</View>
 	);
 };

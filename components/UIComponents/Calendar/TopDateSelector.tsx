@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import KeyboardAware from "../KeyboardAware/KeyboardAware";
 import { H4 } from "../Typography";
-import TimeDateSelector from "./TimeDateSelector";
+import DatePickerSheet from "./DatePickerSheet";
 
 interface CalendarDatePickerProps {
 	date: Date;
@@ -27,15 +27,13 @@ const TopDateSelector = ({ date, setDate }: CalendarDatePickerProps) => {
 				style={{
 					flexDirection: "row",
 					justifyContent: "space-between",
-					//backgroundColor: "red",
-					alignItems: "center",
+						alignItems: "center",
 				}}
 			>
 				<Pressable
 					style={{
 						height: 50,
 						width: 50,
-						// backgroundColor: "red",
 						justifyContent: "center",
 						alignItems: "center",
 					}}
@@ -58,7 +56,6 @@ const TopDateSelector = ({ date, setDate }: CalendarDatePickerProps) => {
 					style={{
 						height: 50,
 						width: 50,
-						// backgroundColor: "red",
 						justifyContent: "center",
 						alignItems: "center",
 					}}
@@ -67,39 +64,12 @@ const TopDateSelector = ({ date, setDate }: CalendarDatePickerProps) => {
 					<ArrowRight color={colors.black} />
 				</Pressable>
 			</View>
-			<Modal
+			<DatePickerSheet
 				visible={calendarVisible}
-				// animationType='fade'
-				transparent
-				onRequestClose={() => {
-					setCalendarVisible(false);
-				}}
-			>
-				<KeyboardAware scrollEnabled={false}>
-					<Pressable
-						style={{
-							flex: 1,
-							backgroundColor: "rgba(0,0,0,0.5)",
-							justifyContent: "center",
-							alignItems: "center",
-						}}
-						onPress={() => setCalendarVisible(false)}
-					>
-						<Pressable
-							style={{
-								backgroundColor: "red",
-								width: "80%",
-							}}
-						>
-							<TimeDateSelector
-								value={date}
-								onChange={setDate}
-								isTime={false}
-							/>
-						</Pressable>
-					</Pressable>
-				</KeyboardAware>
-			</Modal>
+				value={date}
+				onChange={setDate}
+				onClose={() => setCalendarVisible(false)}
+			/>
 		</View>
 	);
 };

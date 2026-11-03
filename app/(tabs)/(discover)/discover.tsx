@@ -257,52 +257,58 @@ const discover = () => {
 
 							{/* What the feed is currently filtered by, and the way in to change
 					    it. Tappable as a whole row rather than just the icon. */}
-							<Pressable
-								onPress={() =>
-									router.push(
-										"/(tabs)/(discover)/discoveryPreferences",
-									)
-								}
-								accessibilityRole="button"
-								accessibilityLabel="Edit discovery preferences"
-								style={styles.summary}
-							>
-								<View style={{ flex: 1 }}>
-									{hasPreferences ? (
-										<>
-											<H6
-												style={styles.summaryLine}
-												numberOfLines={1}
-											>
-												<H6 style={styles.summaryLabel}>
-													Required:{" "}
+							{/* The onboarding nudge is here to explain what the feed is, so it has no
+							    place on top of search results. Once someone searches, the feed is not
+							    what they are looking at, and the prompt competes with what they asked for.
+							    Returning from search brings it back. */}
+							{showSearch && !hasPreferences ? null : (
+								<Pressable
+									onPress={() =>
+										router.push(
+											"/(tabs)/(discover)/discoveryPreferences",
+										)
+									}
+									accessibilityRole="button"
+									accessibilityLabel="Edit discovery preferences"
+									style={styles.summary}
+								>
+									<View style={{ flex: 1 }}>
+										{hasPreferences ? (
+											<>
+												<H6
+													style={styles.summaryLine}
+													numberOfLines={1}
+												>
+													<H6 style={styles.summaryLabel}>
+														Required:{" "}
+													</H6>
+													{summarise(required)}
 												</H6>
-												{summarise(required)}
-											</H6>
-											<H6
-												style={styles.summaryLine}
-												numberOfLines={1}
-											>
-												<H6 style={styles.summaryLabel}>
-													Preferred:{" "}
+												<H6
+													style={styles.summaryLine}
+													numberOfLines={1}
+												>
+													<H6 style={styles.summaryLabel}>
+														Preferred:{" "}
+													</H6>
+													{summarise(preferred)}
 												</H6>
-												{summarise(preferred)}
-											</H6>
-										</>
-									) : (
-										<>
-											<H6 style={styles.summaryLabel}>
-												Personalise your feed
-											</H6>
-											<H6 style={styles.summaryLine}>
-												Pick the tags you want recipes
-												from
-											</H6>
-										</>
-									)}
-								</View>
-								<SlidersIcon color={colors.primary} />
-							</Pressable>
+											</>
+										) : (
+											<>
+												<H6 style={styles.summaryLabel}>
+													Personalise your feed
+												</H6>
+												<H6 style={styles.summaryLine}>
+													Pick the tags you want recipes
+													from
+												</H6>
+											</>
+										)}
+									</View>
+									<SlidersIcon color={colors.primary} />
+								</Pressable>
+							)}
 						</View>
 						{!showSearch ? (
 							// This area used to render nothing at all while the feed loaded,

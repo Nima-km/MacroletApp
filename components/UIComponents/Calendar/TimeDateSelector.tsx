@@ -1,8 +1,7 @@
-import { colors, typography } from "@/theme";
+import { colors } from "@/theme";
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import StyledRadioButton from "../Buttons/RadioButton";
-import { FormInputNumber } from "../TextInputs/FormInput";
+import TimeWheel from "./TimeWheel";
 import { H2, H4, H5, H5_SemiBold } from "../Typography";
 
 interface CalendarDatePickerProps {
@@ -12,6 +11,11 @@ interface CalendarDatePickerProps {
 }
 
 const WEEK_DAYS = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+
+/** Wheel columns. Hours 1-12 with AM/PM separate; minutes padded to two digits. */
+const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+const PERIODS = ["AM", "PM"];
 const MONTHS = [
     "JAN",
     "FEB",
@@ -36,14 +40,9 @@ export default function TimeDateSelector({
         const d = value ?? new Date();
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
-    const [isPM, setIsPM] = useState(value.getHours() > 12 ? 1 : 0);
-    const [hour, setHour] = useState(
-        (value.getHours() > 12
-            ? value.getHours() - 12
-            : value.getHours()
-        ).toString(),
-    );
-    const [minute, setMinute] = useState(value.getMinutes().toString());
+    const [isPM, setIsPMState] = useState(value.getHours() >= 12 ? 1 : 0);
+    const hourIndex = (value.getHours() % 12 || 12) - 1;
+    const minuteIndex = value.getMinutes();
     const selectedDate = value;
     const RadioOptions = [
         { label: "AM", value: 0 },
@@ -121,50 +120,29 @@ export default function TimeDateSelector({
     function setMonth(newMonth: number) {
         setCurrentMonthYear((d) => new Date(d.getFullYear(), newMonth, 1));
     }
-    function onChangeHour(newHour: string) {
-        setHour(newHour);
-        console.log("testing time", Number(newHour) + isPM * 12);
-        onChange(
-            new Date(
-                value.getFullYear(),
-                value.getMonth(),
-                value.getDate(),
-                Number(newHour) + isPM * 12,
-                value.getMinutes(),
-            ),
-        );
-    }
-    function onChangeMinute(newMinute: string) {
-        try {
-            setMinute(newMinute);
-            onChange(
-                new Date(
-                    value.getFullYear(),
-                    value.getMonth(),
-                    value.getDate(),
-                    value.getHours(),
-                    Number(newMinute),
-                ),
-            );
-        } catch {
-            console.log("something went wrong with the clock");
-        }
-    }
-    function ToggleAMPM(newIsPM: number) {
-        if (newIsPM != isPM) {
-            setIsPM(newIsPM);
-            console.log("testing time", Number(hour) + (newIsPM ?? -1) * 12);
-            onChange(
-                new Date(
-                    value.getFullYear(),
-                    value.getMonth(),
-                    value.getDate(),
-                    Number(hour) + (newIsPM ?? -1) * 12,
-                    value.getMinutes(),
-                ),
-            );
-        }
-    }
+      /** Rebuild the timestamp from the three wheel positions. 12 AM is hour 0. */
+      function setTime(nextHourIndex: number, nextMinuteIndex: number, nextPM: number) {
+          const hour24 = ((nextHourIndex + 1) % 12) + (nextPM === 1 ? 12 : 0);
+          onChange(
+              new Date(
+                  value.getFullYear(),
+                  value.getMonth(),
+                  value.getDate(),
+                  hour24,
+                  nextMinuteIndex,
+              ),
+          );
+      }
+      function setHourIndex(next: number) {
+          setTime(next, minuteIndex, isPM);
+      }
+      function setMinuteIndex(next: number) {
+          setTime(hourIndex, next, isPM);
+      }
+      function setIsPM(next: number) {
+          setIsPMState(next);
+          setTime(hourIndex, minuteIndex, next);
+      }
     return (
         <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -356,61 +334,31 @@ export default function TimeDateSelector({
                     </View>
                 )}
 
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
-                >
-                    <H4>Time</H4>
-                    <View style={{ flexDirection: "row", flex: 1, gap: 8 }}>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                flex: 1,
-                                justifyContent: "flex-end",
-                                alignItems: "center",
-                                gap: 8,
-                            }}
-                        >
-                            <FormInputNumber
-                                value={hour}
-                                onChangeText={(text) => onChangeHour(text)}
-                                style={[
-                                    typography.h5_SemiBold,
-                                    { color: colors.primary },
-                                ]}
-                                viewStyle={{
-                                    backgroundColor: colors.primary_bg,
-                                }}
-                                upperLimit={12}
-                            />
-                            <H4>:</H4>
-                            <FormInputNumber
-                                value={minute}
-                                onChangeText={(text) => onChangeMinute(text)}
-                                style={[
-                                    typography.h5_SemiBold,
-                                    { color: colors.primary },
-                                ]}
-                                viewStyle={{
-                                    backgroundColor: colors.primary_bg,
-                                }}
-                                upperLimit={60}
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <StyledRadioButton
-                                options={RadioOptions}
-                                defaultOption={isPM}
-                                onSelect={(value) => {
-                                    ToggleAMPM(value);
-                                }}
-                            />
-                        </View>
-                    </View>
-                </View>
+                  {/* A wheel, not two number fields: minutes are impossible to
+                      type quickly, and the wheel is the gesture people know. */}
+                  <View style={styles.timeSection}>
+                      <H4>Time</H4>
+                      <View style={styles.wheels}>
+                          <TimeWheel
+                              values={HOURS}
+                              index={hourIndex}
+                              onIndexChange={setHourIndex}
+                              width={72}
+                          />
+                          <TimeWheel
+                              values={MINUTES}
+                              index={minuteIndex}
+                              onIndexChange={setMinuteIndex}
+                              width={72}
+                          />
+                          <TimeWheel
+                              values={PERIODS}
+                              index={isPM}
+                              onIndexChange={setIsPM}
+                              width={72}
+                          />
+                      </View>
+                  </View>
             </View>
             <View style={{ flex: 0.5 }} />
         </View>
@@ -418,13 +366,21 @@ export default function TimeDateSelector({
 }
 
 const styles = StyleSheet.create({
-    container: {
-        width: 360,
-        height: 460,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 12,
-    },
+      container: {
+          width: 340,
+          backgroundColor: colors.white,
+          borderRadius: 8,
+          padding: 20,
+          gap: 12,
+      },
+      timeSection: {
+          gap: 8,
+      },
+      wheels: {
+          flexDirection: "row",
+          justifyContent: "center",
+          gap: 4,
+      },
     header: {
         flexDirection: "row",
         alignItems: "center",
