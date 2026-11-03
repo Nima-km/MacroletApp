@@ -1,15 +1,11 @@
 import { WeightHistoryRecord } from "@/types/weight";
 
 /**
- * The data model stores a bare number: there is no unit on a weight record, so this
- * label is fixed. Changing it needs a unit on the record or in settings - see the
- * Home weight card notes.
+ * Every number in this module is **grams**, which is how weights are stored.
+ *
+ * Formatting, bounds and unit labels live in `helper/units.ts` — nothing here knows
+ * whether the reader thinks in pounds or kilograms.
  */
-export const WEIGHT_UNIT = "lbs";
-
-/** Sensible bounds for a logged weight, used to guard the input. */
-export const MIN_WEIGHT = 20;
-export const MAX_WEIGHT = 500;
 
 export type WeightSummary = {
 	/** The most recent reading in the window. */
@@ -23,11 +19,6 @@ export type WeightSummary = {
 	samples: number;
 };
 
-/** One decimal place, which is the precision a scale reports. */
-export function formatWeight(value: number) {
-	return value.toFixed(1);
-}
-
 /**
  * Summarise a window of weigh-ins.
  *
@@ -36,7 +27,7 @@ export function formatWeight(value: number) {
  * buckets carry a `count`, so the average weights by samples rather than by bucket.
  */
 export function summarizeWeight(
-	data?: WeightHistoryRecord[],
+	data?: (WeightHistoryRecord | { timestamp: Date; weight: number })[],
 ): WeightSummary | null {
 	const entries = (data ?? [])
 		.filter((entry) => Number.isFinite(entry.weight) && entry.weight > 0)
@@ -46,12 +37,14 @@ export function summarizeWeight(
 
 	const latest = entries[entries.length - 1];
 	const earliest = entries[0];
+	// Raw rows have no `count`; a bucket has one. Both mean "how many readings".
 	const samples = entries.reduce(
-		(total, entry) => total + (entry.count || 1),
+		(total, entry) => total + (("count" in entry && entry.count) || 1),
 		0,
 	);
 	const weighted = entries.reduce(
-		(total, entry) => total + entry.weight * (entry.count || 1),
+		(total, entry) =>
+			total + entry.weight * (("count" in entry && entry.count) || 1),
 		0,
 	);
 

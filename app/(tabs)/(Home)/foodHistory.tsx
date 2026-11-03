@@ -14,11 +14,9 @@ import { useGetDailyFoodSums } from "@/db/hooks/history/foodItemhistory";
 import { useGetWeightList } from "@/db/hooks/weight/useWeightLog";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { SimpleRound } from "@/helper/simpleRound";
-import {
-	formatWeight,
-	summarizeWeight,
-	WEIGHT_UNIT,
-} from "@/helper/weightSummary";
+import { summarizeWeight } from "@/helper/weightSummary";
+import { formatWeight, unitLabel } from "@/helper/units";
+import { useUnitStore } from "@/store/unitStore";
 import { useDateStore } from "@/store/dateStore";
 import { colors } from "@/theme";
 import { MacroDateType } from "@/types/food";
@@ -172,6 +170,8 @@ export default function FoodHistory() {
 	}, [loggedDays, summary]);
 
 	// Bodyweight over the same window, stated against intake.
+	const unit = useUnitStore((state) => state.unit);
+	const WEIGHT_UNIT = unitLabel(unit);
 	const weightSummary = summarizeWeight(weightData);
 
 	const highlights = useMemo(() => {
@@ -373,14 +373,14 @@ export default function FoodHistory() {
 								<H3>Weight</H3>
 								<View style={styles.heroRow}>
 									<H1>
-										{formatWeight(weightSummary.current)}
+										{formatWeight(weightSummary.current, unit)}
 									</H1>
 									<H5 style={styles.muted}>
 										{WEIGHT_UNIT}
 									</H5>
 								</View>
 								<H5 style={styles.muted}>
-									{Math.abs(weightSummary.delta) < 0.05
+									{Math.abs(weightSummary.delta) < (unit === "lb" ? 22 : 50)
 										? `Held steady over ${days} days`
 										: `${
 												weightSummary.delta > 0
@@ -388,6 +388,7 @@ export default function FoodHistory() {
 													: "Down"
 											} ${formatWeight(
 												Math.abs(weightSummary.delta),
+												unit,
 											)} ${WEIGHT_UNIT} over ${days} days while averaging ${SimpleRound(
 												summary.calories,
 											)} cal / day`}

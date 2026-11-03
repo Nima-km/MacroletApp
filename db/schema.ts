@@ -179,3 +179,52 @@ export const tagPreference = sqliteTable("tagPreference", {
 	tag_name: text("tag_name", { length: 50 }).primaryKey(),
 	role: text("role", { enum: ["required", "preferred"] }).notNull(),
 });
+
+/**
+ * App preferences, one row per key.
+ *
+ * Deliberately not a fixed-shape table: preferences arrive one at a time (weight unit
+ * today, more later) and a column per preference means a migration per preference.
+ * Values are strings; each key owns its own encoding.
+ */
+export const setting = sqliteTable("setting", {
+	key: text("key").primaryKey(),
+	value: text("value").notNull(),
+});
+
+/**
+ * The user's current weight goal.
+ *
+ * Insert-only, like `nutritionGoal`: the newest row is the active goal and older rows are
+ * history. Editing a goal therefore appends rather than mutates, which keeps "what was I
+ * aiming for in March" answerable without a separate audit table.
+ *
+ * `started_at` is not the same as `created_at`. It records when this *episode* began and
+ * is carried forward across edits to the same goal, because the estimator excludes the
+ * first two weeks after a goal starts (the water/glycogen drop). Re-inserting on a target
+ * change must not restart that window.
+ *
+ * Weights are grams (see helper/units.ts). `tolerance` is the band half-width for a
+ * `maintain` goal and null for the others; `target_date` is null whenever the user has
+ * not set one.
+ */
+export const weightGoal = sqliteTable(
+	"weightGoal",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		kind: text("kind", { enum: ["lose", "gain", "maintain"] }).notNull(),
+		target_weight: integer("target_weight").notNull(),
+		tolerance: integer("tolerance"),
+		target_date: integer("target_date", { mode: "timestamp" }),
+		started_at: integer("started_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		created_at: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+	},
+	(table) => [
+		// Every read is "the newest row".
+		index("weight_goal_created_at_idx").on(table.created_at),
+	],
+);

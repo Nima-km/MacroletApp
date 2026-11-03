@@ -15,6 +15,8 @@ import {
 	QueryClientProvider,
 } from "@tanstack/react-query";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { countWeightItems } from "@/db/queries/weight";
+import { useUnitStore } from "@/store/unitStore";
 //import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -47,11 +49,25 @@ export default function RootLayout() {
 		"GS-Medium": require("@/assets/fonts/general-sans/GeneralSans-Medium.otf"),
 	});
 
+	const hydrateUnit = useUnitStore((state) => state.hydrate);
+
 	useEffect(() => {
-		if (success) {
-			console.log("database loaded");
-		} else console.log(error);
-	}, [success, error]);
+		if (!success) {
+			if (error) console.log(error);
+			return;
+		}
+		console.log("database loaded");
+
+		// The weight unit is stored in the database, so it can only be read once the
+		// migrations have run. An install that already has weigh-ins predates units and
+		// keeps pounds rather than switching under the user.
+		countWeightItems()
+			.then((existing) => hydrateUnit(existing > 0))
+			.catch((reason) => {
+				console.log("could not count weigh-ins", reason);
+				hydrateUnit(false);
+			});
+	}, [success, error, hydrateUnit]);
 	if (!loaded && !error) {
 		return null;
 	}

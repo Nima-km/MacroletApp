@@ -2,15 +2,20 @@ import MacroBar from "@/components/chartComponents/MacroCharts/MacroBar";
 import TimeWheel from "@/components/UIComponents/Calendar/TimeWheel";
 import HeaderSimple from "@/components/navComponents/HeaderSimple";
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
-import { H1, H4, H4_Bold, H6 } from "@/components/UIComponents/Typography";
+import { H1, H4, H4_Bold, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
 import {
 	useGetNutriGoals,
 	useInsertNutritionGoal,
 } from "@/db/hooks/goals/nutritionGoal";
 import { calculateCalories } from "@/helper/calculateCalories";
+import { useGetWeightGoal } from "@/db/hooks/weightGoal/useWeightGoal";
+import { formatBand, formatWeight } from "@/helper/units";
+import { useUnitStore } from "@/store/unitStore";
 import { colors } from "@/theme";
+import type { WeightUnit } from "@/helper/units";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 /**
  * Macro goals.
@@ -44,6 +49,25 @@ const goals = () => {
 	const { mutate: addNewGoal } = useInsertNutritionGoal();
 	const { data: nutriGoals, isLoading: nutriGoalsLoading } =
 		useGetNutriGoals();
+
+	const unit = useUnitStore((state) => state.unit);
+	const setUnit = useUnitStore((state) => state.setUnit);
+	const router = useRouter();
+	const { data: weightGoal } = useGetWeightGoal();
+
+	// One line that answers "what am I aiming at" without opening the editor.
+	const weightGoalSummary = weightGoal
+		? weightGoal.kind === "maintain"
+			? `Maintain around ${formatWeight(weightGoal.target_weight, unit)} ${unit}${
+					weightGoal.tolerance
+						? ` ±${formatBand(weightGoal.tolerance, unit)}`
+						: ""
+				}`
+			: `${weightGoal.kind === "lose" ? "Lose to" : "Gain to"} ${formatWeight(
+					weightGoal.target_weight,
+					unit,
+				)} ${unit}`
+		: "Not set";
 
 	const [protein, setProtein] = useState(0);
 	const [carbs, setCarbs] = useState(0);
@@ -133,6 +157,62 @@ const goals = () => {
 					</View>
 				</View>
 
+				{/* Weight goal lives on its own screen: its target picker is a wheel, and a
+				    wheel is a FlatList, which cannot be nested in a scrolling page. */}
+				<Pressable
+					onPress={() => router.push("/(tabs)/(profile)/weightGoal")}
+					accessibilityRole="button"
+					accessibilityLabel="Edit weight goal"
+					style={styles.unitCard}
+				>
+					<View style={{ flex: 1 }}>
+						<H4>Weight goal</H4>
+						<H6 style={{ color: colors.inactive }}>
+							{weightGoalSummary}
+						</H6>
+					</View>
+					<H6 style={{ color: colors.primary }}>
+						{weightGoal ? "Change" : "Set"}
+					</H6>
+				</Pressable>
+
+				{/* Display preference, saved on tap — it is not a goal, so it does not
+				    wait for Apply. Storage is always grams; this only changes what is
+				    shown, everywhere at once. */}
+				<View style={styles.unitCard}>
+					<View style={{ flex: 1 }}>
+						<H4>Units</H4>
+						<H6 style={{ color: colors.inactive }}>
+							Body weight is shown in this unit.
+						</H6>
+					</View>
+					<View style={styles.segmented}>
+						{(["lb", "kg"] as WeightUnit[]).map((option) => (
+							<Pressable
+								key={option}
+								onPress={() => setUnit(option)}
+								accessibilityRole="button"
+								accessibilityState={{ selected: unit === option }}
+								style={[
+									styles.segment,
+									unit === option && styles.segmentActive,
+								]}
+							>
+								<H5_SemiBold
+									style={{
+										color:
+											unit === option
+												? colors.white
+												: colors.inactive,
+									}}
+								>
+									{option}
+								</H5_SemiBold>
+							</Pressable>
+						))}
+					</View>
+				</View>
+
 				<View style={{ flex: 1 }} />
 
 				<PrimaryButton onPress={addGoal}>Apply</PrimaryButton>
@@ -203,6 +283,29 @@ const styles = StyleSheet.create({
 	hint: {
 		color: colors.inactive,
 		textAlign: "center",
+	},
+	unitCard: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 12,
+		backgroundColor: colors.white,
+		borderRadius: 8,
+		padding: 16,
+	},
+	segmented: {
+		flexDirection: "row",
+		backgroundColor: colors.off_white,
+		borderRadius: 8,
+		padding: 3,
+		gap: 3,
+	},
+	segment: {
+		paddingHorizontal: 16,
+		paddingVertical: 7,
+		borderRadius: 6,
+	},
+	segmentActive: {
+		backgroundColor: colors.primary,
 	},
 	dot: {
 		width: 8,

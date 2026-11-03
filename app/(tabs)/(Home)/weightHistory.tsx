@@ -6,17 +6,20 @@ import KeyboardAware from "@/components/UIComponents/KeyboardAware/KeyboardAware
 import { FormInputNumber } from "@/components/UIComponents/TextInputs/FormInput";
 import { H1, H3, H5, H6 } from "@/components/UIComponents/Typography";
 import {
-	useGetWeightList,
+	useGetAllWeightItems,
+	useGetWeightItems,
 	useInsertWeight,
 } from "@/db/hooks/weight/useWeightLog";
+import { formatWindow, summarizeWeight } from "@/helper/weightSummary";
 import {
 	formatWeight,
-	formatWindow,
-	MAX_WEIGHT,
-	MIN_WEIGHT,
-	summarizeWeight,
-	WEIGHT_UNIT,
-} from "@/helper/weightSummary";
+	toDisplay,
+	toGrams,
+	unitLabel,
+	weightBounds,
+} from "@/helper/units";
+import { emaTrend } from "@/helper/weightTrend";
+import { useUnitStore } from "@/store/unitStore";
 import { colors } from "@/theme";
 import React, { useMemo, useState } from "react";
 import { Keyboard, StyleSheet, View } from "react-native";
@@ -25,9 +28,16 @@ import Toast from "react-native-toast-message";
 /** The screen shows the eight days before the selected end date. */
 const WINDOW_DAYS = 8;
 
-function startOfTomorrow() {
-	const date = new Date();
-	date.setHours(24, 0, 0, 0);
+/**
+ * The day the screen is looking at, at local midnight.
+ *
+ * The date control used to sit on the window's *exclusive* end — tomorrow — so it read
+ * a day ahead of every weigh-in and could not change the date a log was stamped with.
+ * It is now the selected day itself: it moves the window and it dates the next log.
+ */
+function startOfDay(value: Date = new Date()) {
+	const date = new Date(value);
+	date.setHours(0, 0, 0, 0);
 	return date;
 }
 
@@ -40,49 +50,74 @@ function dayLabel(date: Date) {
 }
 
 export default function WeightHistory() {
-	const [endDate, setEndDate] = useState(startOfTomorrow);
+	const [selectedDay, setSelectedDay] = useState(() => startOfDay());
 	const [draft, setDraft] = useState("");
 
 	const startDate = useMemo(() => {
-		const from = new Date(endDate);
-		from.setDate(from.getDate() - WINDOW_DAYS);
+		const from = new Date(selectedDay);
+		from.setDate(from.getDate() - (WINDOW_DAYS - 1));
 		return from;
-	}, [endDate]);
+	}, [selectedDay]);
 
-	const { data, isLoading, error } = useGetWeightList(startDate, endDate);
+	const endDate = useMemo(() => {
+		const to = new Date(selectedDay);
+		to.setDate(to.getDate() + 1);
+		return to;
+	}, [selectedDay]);
+
+	const unit = useUnitStore((state) => state.unit);
+	const bounds = weightBounds(unit);
+	const WEIGHT_UNIT = unitLabel(unit);
+
+	// Raw readings, not daily averages: a morning and an evening weigh-in are two points.
+	const { data, isLoading, error } = useGetWeightItems(startDate, endDate);
+	// History is every log ever, not just the visible window.
+	const { data: allEntries } = useGetAllWeightItems();
 	const { mutate: logWeight, isPending } = useInsertWeight();
 
 	const summary = summarizeWeight(data);
 
-	// Newest first for the list; the chart wants the ascending order it gets.
-	const entries = useMemo(
-		() =>
-			[...(data ?? [])].sort(
-				(a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
-			),
-		[data],
-	);
+	// The same trend the chart draws, so the number and the line can never disagree.
+	const trend = useMemo(() => {
+		const points = emaTrend(
+			(data ?? []).map((entry) => ({
+				timestamp: entry.timestamp,
+				weight: entry.weight,
+			})),
+		);
+		return points.length ? points[points.length - 1].trend : null;
+	}, [data]);
 
+	// Newest first; the query already returns them that way.
+	const entries = allEntries ?? [];
+
+	// Typed in the display unit; validated in it and stored in grams.
 	const parsed = Number(draft);
 	const canLog =
 		draft.trim().length > 0 &&
 		Number.isFinite(parsed) &&
-		parsed >= MIN_WEIGHT &&
-		parsed <= MAX_WEIGHT;
+		parsed >= bounds.min &&
+		parsed <= bounds.max;
 
 	function submit() {
 		if (!canLog) {
 			Toast.show({
 				type: "error",
 				text1: "Enter a weight",
-				text2: `Between ${MIN_WEIGHT} and ${MAX_WEIGHT} ${WEIGHT_UNIT}.`,
+				text2: `Between ${bounds.min} and ${bounds.max} ${WEIGHT_UNIT}.`,
 			});
 			return;
 		}
 
 		Keyboard.dismiss();
+		// Stamped with the selected day, keeping the clock time: picking a date is how a
+		// missed weigh-in gets filled in.
+		const stamp = new Date(selectedDay);
+		const now = new Date();
+		stamp.setHours(now.getHours(), now.getMinutes(), 0, 0);
+
 		logWeight(
-			{ weight: parsed },
+			{ weight: toGrams(parsed, unit), timestamp: stamp },
 			{
 				onSuccess: () => {
 					setDraft("");
@@ -98,12 +133,14 @@ export default function WeightHistory() {
 		);
 	}
 
+	// "Unchanged" is judged in the display unit: 0.05 lb is below a scale's precision, but
+	// the same threshold in grams would call half a pound a change.
+	const unchangedBelow = unit === "lb" ? 22 : 50;
+
 	const deltaText = summary
-		? Math.abs(summary.delta) < 0.05
+		? Math.abs(summary.delta) < unchangedBelow
 			? "No change over the week"
-			: `${summary.delta > 0 ? "Up" : "Down"} ${formatWeight(
-					Math.abs(summary.delta),
-				)} ${WEIGHT_UNIT} over the week`
+			: `${summary.delta > 0 ? "Up" : "Down"} ${formatWeight(Math.abs(summary.delta), unit)} ${WEIGHT_UNIT} over the week`
 		: null;
 
 	return (
@@ -129,15 +166,23 @@ export default function WeightHistory() {
 					) : summary ? (
 						<>
 							<View style={styles.valueRow}>
-								<H1>{formatWeight(summary.current)}</H1>
+								<H1>{formatWeight(summary.current, unit)}</H1>
 								<H5 style={styles.muted}>{WEIGHT_UNIT}</H5>
 							</View>
 							<H5 style={styles.muted}>{deltaText}</H5>
 							<View style={styles.divider} />
 							<View style={styles.rowBetween}>
+								<H6 style={styles.muted}>Trend</H6>
+								<H6>
+									{trend === null
+										? "—"
+										: `${formatWeight(trend, unit)} ${WEIGHT_UNIT}`}
+								</H6>
+							</View>
+							<View style={styles.rowBetween}>
 								<H6 style={styles.muted}>7-day average</H6>
 								<H6>
-									{formatWeight(summary.average)} {WEIGHT_UNIT}
+									{formatWeight(summary.average, unit)} {WEIGHT_UNIT}
 								</H6>
 							</View>
 						</>
@@ -150,16 +195,29 @@ export default function WeightHistory() {
 
 				{/* Trend, with the date control that moves the window. */}
 				<View style={styles.card}>
-					<TopDateSelector date={endDate} setDate={setEndDate} />
+					<TopDateSelector date={selectedDay} setDate={setSelectedDay} />
 					<WeightChartFull
 						weightData={data?.length ? data : undefined}
 						onSelect={() => {}}
 					/>
+					{/* Says out loud what the line is for, so a bad morning is not read
+					    as a bad week. */}
+					<H6 style={[styles.muted, styles.chartNote]}>
+						Readings move with water, salt and food in transit. The dashed
+						line is the trend.
+					</H6>
 				</View>
 
 				{/* Logging. Guarded, with feedback, and it clears on success. */}
 				<View style={styles.card}>
 					<H3>Log a weight</H3>
+					<H6 style={styles.muted}>
+						{selectedDay.toLocaleDateString(undefined, {
+							weekday: "long",
+							day: "numeric",
+							month: "short",
+						})}
+					</H6>
 					<View style={styles.logRow}>
 						<View style={styles.inputWidth}>
 							<FormInputNumber
@@ -201,15 +259,13 @@ export default function WeightHistory() {
 										<H5>{dayLabel(entry.timestamp)}</H5>
 										<View style={styles.valueInline}>
 											<H5>
-												{formatWeight(entry.weight)}{" "}
+												{formatWeight(entry.weight, unit)}{" "}
 												{WEIGHT_UNIT}
 											</H5>
-											{Math.abs(change) < 0.05 ? null : (
+											{Math.abs(change) < unchangedBelow ? null : (
 												<H6 style={styles.muted}>
 													{change > 0 ? "+" : "−"}
-													{formatWeight(
-														Math.abs(change),
-													)}
+													{formatWeight(Math.abs(change), unit)}
 												</H6>
 											)}
 										</View>
@@ -225,6 +281,9 @@ export default function WeightHistory() {
 }
 
 const styles = StyleSheet.create({
+	chartNote: {
+		marginTop: 4,
+	},
 	page: {
 		// Style guide: 20 gutter between cards, 16 padding inside them.
 		paddingHorizontal: 20,

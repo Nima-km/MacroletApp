@@ -1,16 +1,25 @@
 import { bigRound } from "@/helper/bigRound";
+import {
+	axisMinSpan,
+	axisPadding,
+	axisStep,
+	toDisplay,
+} from "@/helper/units";
+import { emaTrend } from "@/helper/weightTrend";
+import { useUnitStore } from "@/store/unitStore";
 import { colors, typography } from "@/theme";
-import { WeightHistoryRecord, WeightType } from "@/types/weight";
+import { WeightType } from "@/types/weight";
+import type { WeightPoint } from "@/helper/weightTrend";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { CurveType, LineChart } from "react-native-gifted-charts";
 
 interface Props {
-	weightData?: WeightHistoryRecord[];
-	onSelect?: (item: WeightHistoryRecord) => void;
+	weightData?: WeightPoint[];
+	onSelect?: (item: WeightPoint) => void;
 }
 const formatWeightForChart = (
-	weightData: WeightType[],
+	weightData: WeightPoint[],
 	//  onSelect: (item: WeightType) => void,
 ) => {
 	return weightData.map((item) => ({
@@ -23,19 +32,30 @@ const formatWeightForChart = (
 	}));
 };
 const calculateStepValue = (
-	a?: WeightHistoryRecord,
-	b?: WeightHistoryRecord,
+	a: WeightPoint | undefined,
+	b: WeightPoint | undefined,
+	step: number,
 ) => {
 	if (a && b) {
-		const res = Math.ceil(Math.max(a.weight - b.weight, 5) / 3 / 5) * 5;
-		return res;
+		return Math.ceil(Math.max(a.weight - b.weight, step) / 3 / step) * step;
 	}
-	return 5;
+	return step;
 };
 const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
-	const lineData = weightData
+	const unit = useUnitStore((state) => state.unit);
+	const step = axisStep(unit);
+	const pad = axisPadding(unit);
+	const minSpan = axisMinSpan(unit);
+
+	// Stored grams -> display unit once; the sparkline's constants are unit-dependent.
+	const display = weightData?.map((record) => ({
+		...record,
+		weight: toDisplay(record.weight, unit),
+	}));
+
+	const lineData = display
 		// The newest seven, not the oldest: the query returns ascending order.
-		? formatWeightForChart(weightData).slice(-7)
+		? formatWeightForChart(display).slice(-7)
 		: [];
 	const customDataPoint = () => {
 		return (
@@ -52,12 +72,18 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 		);
 	};
 
-	const minWeight = weightData?.reduce((a, b) =>
+	const minWeight = display?.reduce((a, b) =>
 		a.weight < b.weight || b.weight == 0 ? a : b,
 	);
-	const maxWeight = weightData?.reduce((a, b) =>
+	const maxWeight = display?.reduce((a, b) =>
 		a.weight > b.weight ? a : b,
 	);
+	const trendData = display
+		? emaTrend(display)
+				.slice(-7)
+				.map((point) => ({ value: point.trend }))
+		: undefined;
+
 	return (
 		<View style={{}}>
 			<LineChart
@@ -65,12 +91,18 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				curved
 				mostNegativeValue={0}
 				curveType={CurveType.CUBIC}
-				stepValue={calculateStepValue(maxWeight, minWeight)}
+				stepValue={calculateStepValue(maxWeight, minWeight, step)}
 				dashGap={0}
 				showFractionalValues={false}
 				width={275}
 				height={120}
+				// The readings are the data; the trend is an annotation on top of them.
 				color={colors.primary}
+				data2={trendData}
+				color2={colors.inactive}
+				thickness2={2}
+				strokeDashArray2={[5, 4]}
+				hideDataPoints2
 				customDataPoint={customDataPoint}
 				yAxisTextStyle={[typography.h6, { color: colors.black }]}
 				yAxisLabelContainerStyle={{
@@ -87,12 +119,12 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				disableScroll
 				yAxisThickness={0}
 				xAxisColor={colors.light_gray}
-				yAxisOffset={Math.max(bigRound(minWeight?.weight, 5) - 10, 0)}
+				yAxisOffset={Math.max(bigRound(minWeight?.weight, step) - pad, 0)}
 				maxValue={Math.max(
-					20,
-					bigRound(maxWeight?.weight, 5) -
-						bigRound(minWeight?.weight, 5) +
-						20,
+					minSpan,
+					bigRound(maxWeight?.weight, step) -
+						bigRound(minWeight?.weight, step) +
+						minSpan,
 				)}
 			/>
 		</View>

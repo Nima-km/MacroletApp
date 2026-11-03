@@ -2,17 +2,15 @@ import WeightLogChartSmall from "@/components/chartComponents/LogHistoryCharts/W
 import { PrimaryButton } from "@/components/UIComponents/Buttons/Button";
 import { H1, H3, H5, H6 } from "@/components/UIComponents/Typography";
 import { colors } from "@/theme";
-import {
-	formatWeight,
-	summarizeWeight,
-	WEIGHT_UNIT as UNIT,
-} from "@/helper/weightSummary";
-import { WeightHistoryRecord } from "@/types/weight";
+import { summarizeWeight } from "@/helper/weightSummary";
+import { formatWeight, toDisplay, unitLabel } from "@/helper/units";
+import { useUnitStore } from "@/store/unitStore";
+import type { WeightPoint } from "@/helper/weightTrend";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 type Props = {
-	data?: WeightHistoryRecord[];
+	data?: WeightPoint[];
 	/** Tap anywhere on the card: opens weight history. */
 	onOpenHistory: () => void;
 	/** The explicit "Log" affordance: goes straight to logging. */
@@ -32,6 +30,11 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
  * success - that depends on the user's goal, which the app does not know.
  */
 export default function WeightCard({ data, onOpenHistory, onLogWeight }: Props) {
+	const unit = useUnitStore((state) => state.unit);
+	const UNIT = unitLabel(unit);
+	// Deltas are compared in grams but shown in the chosen unit, so the threshold for
+	// "unchanged" has to be the display unit's noise floor.
+	const unchangedBelow = unit === "lb" ? 22 : 50;
 	// Shared with the history screen, so the two cannot disagree about what
 	// "current weight" or "7-day average" mean.
 	const summary = summarizeWeight(data);
@@ -57,19 +60,17 @@ export default function WeightCard({ data, onOpenHistory, onLogWeight }: Props) 
 	}
 
 	const gained = summary.delta > 0;
-	const equal = Math.abs(summary.delta) < 0.05;
+	const equal = Math.abs(summary.delta) < unchangedBelow;
 
 	return (
 		<Pressable
 			onPress={onOpenHistory}
 			style={({ pressed }) => [styles.card, pressed && styles.pressed]}
 			accessibilityRole="button"
-			accessibilityLabel={`Weight, ${formatWeight(summary.current)} ${UNIT}, ${
+			accessibilityLabel={`Weight, ${formatWeight(summary.current, unit)} ${UNIT}, ${
 				equal
 					? "unchanged"
-					: `${gained ? "up" : "down"} ${formatWeight(
-							Math.abs(summary.delta),
-						)} ${UNIT}`
+					: `${gained ? "up" : "down"} ${formatWeight(Math.abs(summary.delta), unit)} ${UNIT}`
 			} over the last 7 days. Opens weight history.`}
 		>
 			<View style={styles.headerRow}>
@@ -89,16 +90,14 @@ export default function WeightCard({ data, onOpenHistory, onLogWeight }: Props) 
 			</View>
 
 			<View style={styles.valueRow}>
-				<H1>{formatWeight(summary.current)}</H1>
+				<H1>{formatWeight(summary.current, unit)}</H1>
 				<H5 style={styles.unit}>{UNIT}</H5>
 			</View>
 
 			<H5 style={styles.meta}>
 				{equal
 					? "No change over the week"
-					: `${gained ? "Up" : "Down"} ${formatWeight(
-							Math.abs(summary.delta),
-						)} ${UNIT} over the week`}
+					: `${gained ? "Up" : "Down"} ${formatWeight(Math.abs(summary.delta), unit)} ${UNIT} over the week`}
 				{"  ·  "}
 				<H5 style={styles.metaMuted}>
 					last logged {lastLogged}
@@ -110,7 +109,7 @@ export default function WeightCard({ data, onOpenHistory, onLogWeight }: Props) 
 			<View style={styles.averageRow}>
 				<H6 style={styles.metaMuted}>7-day average</H6>
 				<H6>
-					{formatWeight(summary.average)} {UNIT}
+					{formatWeight(summary.average, unit)} {UNIT}
 				</H6>
 			</View>
 

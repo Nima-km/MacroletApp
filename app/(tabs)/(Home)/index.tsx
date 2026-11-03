@@ -14,7 +14,7 @@ import { useInsertFoodAndItem } from "@/db/hooks/food/useFood";
 import { useInsertFoodItems } from "@/db/hooks/food/useFoodItem";
 import { useGetNutriGoals } from "@/db/hooks/goals/nutritionGoal";
 import { useGetFoodItemSum } from "@/db/hooks/history/foodItemhistory";
-import { useGetWeightList } from "@/db/hooks/weight/useWeightLog";
+import { useGetWeightItems } from "@/db/hooks/weight/useWeightLog";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { useDateStore } from "@/store/dateStore";
 import { generateMacroTestData } from "@/tests/generateTestData";
@@ -57,7 +57,7 @@ export default function Index() {
 		data: WeightData,
 		isLoading,
 		error,
-	} = useGetWeightList(sevenDaysAgo, now);
+	} = useGetWeightItems(sevenDaysAgo, now);
 	const {
 		data: LiveFood,
 		isLoading: liveFoodLoading,
