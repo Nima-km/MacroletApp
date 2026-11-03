@@ -1,5 +1,6 @@
 import RemoveIcon from "@/assets/svg/bin.svg";
 import { H4, H5_SemiBold, H6 } from "@/components/UIComponents/Typography";
+import MacroBar from "@/components/chartComponents/MacroCharts/MacroBar";
 import { calculateCalories } from "@/helper/calculateCalories";
 import { calculateMacro } from "@/helper/calculateMacro";
 import { SimpleRound } from "@/helper/simpleRound";
@@ -10,6 +11,14 @@ import { Pressable, StyleSheet, View, ViewStyle } from "react-native";
 interface FoodCardQuickProps {
 	onRemove?: () => void;
 	style?: ViewStyle;
+	/**
+	 * Show the macro-spread bar under the P/C/F row.
+	 *
+	 * Off by default: this card is also the quick-add drawer row, where a bar per recipe
+	 * would crowd a list the user scrolls quickly. The voice confirm asks for it because
+	 * the whole screen is about judging one food at a time.
+	 */
+	showMacroBar?: boolean;
 }
 
 const FoodCardQuick = ({
@@ -17,6 +26,7 @@ const FoodCardQuick = ({
 	style,
 	foodItem,
 	onRemove,
+	showMacroBar = false,
 }: FoodFullData & FoodCardQuickProps) => {
 	const foodData = calculateMacro(
 		food,
@@ -71,6 +81,13 @@ const FoodCardQuick = ({
 						<H6>{SimpleRound(foodData.fat)} g</H6>
 					</View>
 				</View>
+				{showMacroBar && (
+					<MacroBar
+						protein={foodData.protein}
+						carbs={foodData.carbs}
+						fat={foodData.fat}
+					/>
+				)}
 			</View>
 			{onRemove && (
 				<Pressable onPress={onRemove}>

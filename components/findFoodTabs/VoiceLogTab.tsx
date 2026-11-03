@@ -138,6 +138,58 @@ export type VoiceResolvedItem = {
  * Nothing is logged until the user presses Log, and the amount is editable, because no
  * model tested got every quantity right.
  */
+/**
+ * The opening serving for an item.
+ *
+ * The parser reports units in speech ("piece", "slice", "300 grams"), and those are not
+ * serving sizes — the picker only knows the food's own options, which always start with
+ * "Serving" plus Gram/Lb/Oz when the weight is known. Putting the spoken word straight
+ * into `serving_type` left the picker showing a value it could not offer, and worse,
+ * "300 grams" was logged as **300 servings**.
+ *
+ * So the quantity is read as a count of whatever serving is chosen — except grams, which
+ * map onto the Gram option whose multiplier already divides by the serving weight.
+ */
+function defaultDraft(
+	food: { serving_100g: number } | null | undefined,
+	quantity: number | undefined,
+	unit: string | null | undefined,
+) {
+	const options = servingSizeProvider({
+		servingData: [],
+		serving_100g: food?.serving_100g ?? 0,
+	});
+	const spoken = (unit ?? "").trim().toLowerCase();
+	const isWeight = ["gram", "grams", "g", "gr", "gm"].includes(spoken);
+	const gramOption = isWeight
+		? options.find((option) => option.serving_type.toLowerCase() === "gram")
+		: undefined;
+	// Fall back to the first option, which is always "Serving".
+	const option = gramOption ?? options[0];
+
+	// A weight with no serving weight to divide by cannot be converted, and treating
+	// "300 grams" as 300 servings is wildly wrong. With nothing to go on, log one.
+	const servings =
+		isWeight && !gramOption ? 1 : Math.max(1, Math.round(quantity || 1));
+
+	return {
+		servings,
+		serving_mult: option.serving_mult,
+		serving_type: option.serving_type,
+	};
+}
+
+/**
+ * Whether a food can carry an adjustable amount at all.
+ *
+ * `serving_100g` is the serving's weight. At zero there is nothing to convert grams
+ * against and no serving size to offer beyond "Serving", so the picker would be a
+ * control that changes nothing meaningful.
+ */
+function hasPortionData(food: { serving_100g: number } | null | undefined) {
+	return (food?.serving_100g ?? 0) > 0;
+}
+
 const VoiceLogTab = () => {
 	const router = useRouter();
 	const { getToken } = useAuth();
@@ -372,11 +424,13 @@ function VoiceConfirm({
 		items.map((item) => item.selected ?? -1),
 	);
 	const [drafts, setDrafts] = useState(() =>
-		items.map((item) => ({
-			servings: Math.max(1, Math.round(item.quantity || 1)),
-			serving_mult: 1,
-			serving_type: item.unit || "Serving",
-		})),
+		items.map((item) =>
+			defaultDraft(
+				item.candidates[item.selected ?? 0]?.food ?? null,
+				item.quantity,
+				item.unit,
+			),
+		),
 	);
 
 	const updateDraft = (index: number, patch: Partial<(typeof drafts)[number]>) =>
@@ -472,6 +526,7 @@ function VoiceConfirm({
 							<>
 								{/* The app's own card, not a bespoke layout. */}
 								<FoodCardQuick
+									showMacroBar
 									food={food as never}
 									foodItem={{
 										// `FoodItemData` is the shape without `food_id`; the card
@@ -481,23 +536,36 @@ function VoiceConfirm({
 									}}
 								/>
 
-								{/* And the app's serving picker, in place of free text. */}
-								<DropDownServings
-									options={optionsFor(food)}
-									servings={draft.servings}
-									placeholder={{
-										serving_type: draft.serving_type,
-										serving_mult: draft.serving_mult,
-									}}
-									setServings={(servings) => updateDraft(index, { servings })}
-									onSelect={(value) =>
-										updateDraft(index, {
-											serving_type: value.serving_type,
-											serving_mult: value.serving_mult,
-										})
-									}
-									setNewServing={() => {}}
-								/>
+								{/* And the app's serving picker, in place of free text.
+								    Hidden when the food has no serving weight: the only option
+								    left is "Serving", so the control would only offer to
+								    change something the data cannot describe. */}
+								{hasPortionData(food) ? (
+									<DropDownServings
+										options={optionsFor(food)}
+										servings={draft.servings}
+										placeholder={{
+											serving_type: draft.serving_type,
+											serving_mult: draft.serving_mult,
+										}}
+										setServings={(servings) =>
+											updateDraft(index, { servings })
+										}
+										onSelect={(value) =>
+											updateDraft(index, {
+												serving_type: value.serving_type,
+												serving_mult: value.serving_mult,
+											})
+										}
+										setNewServing={() => {}}
+									/>
+								) : (
+									<H6 style={{ color: colors.inactive }}>
+										No portion data for this food, so the amount can't be
+										adjusted. Logs as {draft.servings}{" "}
+										{draft.serving_type.toLowerCase()}.
+									</H6>
+								)}
 
 								{item.candidates.length > 1 ? (
 									<View style={styles.alternatives}>
@@ -506,11 +574,22 @@ function VoiceConfirm({
 											altIndex === choice[index] || !alt.food ? null : (
 												<Pressable
 													key={altIndex}
-													onPress={() =>
+													onPress={() => {
 														setChoice((prev) =>
 															prev.map((v, i) => (i === index ? altIndex : v)),
-														)
-													}
+														);
+														// Keep the amount, but re-derive the serving: the food just chosen may
+														// not offer the one the previous row had.
+														const next = defaultDraft(
+															alt.food ?? undefined,
+															items[index].quantity,
+															items[index].unit,
+														);
+														updateDraft(index, {
+															serving_type: next.serving_type,
+															serving_mult: next.serving_mult,
+														});
+													}}
 													accessibilityRole="button"
 												>
 													<H6 style={{ color: colors.primary }}>
