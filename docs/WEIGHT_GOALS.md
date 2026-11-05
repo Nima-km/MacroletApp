@@ -289,22 +289,27 @@ small drag corrects it.
 The chart also regains x-axis dates, every other point, counting back from the newest so
 the latest date stays on the axis.
 
-### One row per reading, not per day
+### The chart plots one point per day; History lists every log
 
-The weight query bucketed by day (`AVG` per day), so two weigh-ins on the same day became
-a single averaged point and the History list showed days rather than logs. Three problems
-followed from that one aggregation:
+These are deliberately different, because they answer different questions.
 
-- `getWeightItems(from, to)` returns **raw rows**, which the chart and summary now use.
-- `getAllWeightItems()` returns every log ever, which the History list uses — it is not
-  limited to the visible window any more.
-- The date control sits on the **selected day** rather than the window's exclusive end
-  (it used to read tomorrow), and logging stamps that day with the current clock time, so
-  a missed weigh-in can be filled in.
+**The chart** uses the daily bucket (`useGetWeightList` → `getWeightHistory`, one row per
+day with `AVG(weight)`). Two weigh-ins on the same day differ by water and food timing,
+which is noise at the scale of a trend; the day's average is the honest single number for
+that day. Plotting both made the line jitter for no information.
 
-Verified on device: two logs on the same day drew as two points, an out-of-window log
-appeared in History, and logging with the selector on 1 Nov wrote a row stamped
-`2026-11-01`.
+**History** uses `getAllWeightItems()` — every log ever, newest first, not limited to the
+visible window. That is where you go to check what you actually typed on a given morning.
+
+Two consequences that had to be fixed:
+
+- The date control sits on the **selected day** rather than the window's exclusive end (it
+  used to read tomorrow), and logging stamps that day with the current clock time, so a
+  missed weigh-in can be filled in. Verified: logging with the selector on 1 Nov wrote a
+  row stamped `2026-11-01`.
+- Day buckets arrive as `"2026-10-27"` and `new Date()` reads that as UTC midnight, which
+  is the previous day everywhere west of Greenwich — every chart label was a day early.
+  `parseDayBucket` builds the date in local time instead.
 
 ### Two defects this exposed
 
@@ -373,7 +378,11 @@ which is why the app keeps re-estimating from actual data rather than trusting i
 
 - Drop a week whose median deviates more than ~3× MAD from the fitted line (travel,
   illness) — count it as **missing**, not as evidence.
-- **Skip the first 14 days** of the goal episode (`started_at`).
+- **Damp, don't skip, the first 14 days** of the goal episode. Excluding them would miss
+  the case that matters most — starting a diet and gaining — so they are included at
+  `0.4 → 1.0` weight over the fortnight. In the first two weeks that mostly reads as a
+  smaller effective sample; once the episode is a month old it stops the opening water
+  swing from dragging on the regression.
 - Require ≥2 weeks with data to show anything, ≥3 for medium, ≥4 for high.
 
 ### Confidence
@@ -391,6 +400,53 @@ residual scatter.
 data ending 12 Oct — 3 weigh-ins since missed."
 
 ---
+
+**The profile is a table, not a store.** It was first written as a zustand store over the
+`setting` key/value table — no migration, synchronous reads. That was wrong for data an
+algorithm depends on: a store needs hydrating, and hydration was only wired into the two
+profile screens, so the estimator would have read an empty profile and silently dropped
+its prior. It is now a `profile` table (singleton row) read through a TanStack query, which
+fetches on mount for every consumer. Migration `0026` creates the table and carries any
+values already stored as settings into it.
+
+### As built (`helper/maintenance.ts`)
+
+**The headline blends the three windows ½ : ⅓ : ⅕** rather than taking the widest fit. A
+single 56-day regression cannot turn quickly — six weeks of losing outweighs two weeks of
+gaining inside one straight line, and a fixture of exactly that case lagged a real
+reversal by ~900 kcal.
+
+**Outlier removal is iterative and floored.** Drop the worst week, refit, look again (twice
+at most). The threshold is `max(0.4 kg, min(3 × MAD, 1.5 kg))`: 3 × MAD is the right shape
+but the wrong scale on four or five buckets, where one wild week inflates the MAD enough to
+hide itself, and on a straight line the MAD collapses to zero and a pure ratio discards a
+legitimate week.
+
+**The prior blends in below 0.5 confidence**, proportionally, so nothing jumps:
+`t = c / 0.5`, `estimate = t·data + (1−t)·prior`. Above 0.5 the prior contributes nothing.
+
+**The target moves at most ±150 / ±250 / ±350** depending on episode age and tier, with a
+75 kcal deadband (`nextCalorieGoal`). The estimate may swing; what a person eats from
+should not.
+
+Fixtures in `scripts/maintenance-fixtures.ts` (`node_modules/.bin/tsx scripts/maintenance-fixtures.ts`) cover: steady loss (recovers 2,760 from −0.6 kg/week at 2,100
+kcal), **the early gain** (2,300 kcal, +0.35 kg/week over a fortnight → 1,916), a reversal
+after six weeks of losing (recent data leads: 2,259), sparse data, a travel week (dropped,
+back to 2,758), and no data at all. The same code run against the device's real 44-reading
+series produced a flat slope, 0.118 kg residual scatter, and high confidence.
+
+### The surface (step 5 complete)
+
+A **Maintenance** row on Goals — `2,438 ± 250 kcal · prior` — opening a detail screen with
+the number, the range, what the tier means in words, the four things that went into it
+(average intake, weight change per week, days logged, weigh-ins), and the estimator's own
+notes. The prior share is shown, so a profile-derived figure can never look like a
+measurement.
+
+**Gated as Pro.** The Goals row says `Pro · how many calories you actually burn`, the
+detail screen replaces the numbers with an explanation, the Adaptive option is disabled, and
+the weekly job refuses to run for a lapsed subscription — so a lapsed user keeps their last
+adaptive number but it stops moving.
 
 ## 8. Adaptive calorie goal and guardrails
 
@@ -445,46 +501,113 @@ bypassable — but visibly:
 
 ---
 
+### Adaptive goal — as built (step 6)
+
+`nutritionGoal` gained `source` (`manual | adaptive`) and `maintenance`. The table is
+insert-only, so an adaptive update is simply a new row and the changelog *is* the history —
+no separate audit table.
+
+- `helper/calorieTarget.ts` — safe band → rate → target, with the deficit capped at whichever
+  of 25 % of maintenance or 1 % of bodyweight per week binds first, a floor at
+  `max(1200, BMR)`, and `projectedDate` reporting where the safe rate lands instead of
+  honouring an impossible date.
+- `helper/adaptiveGoal.ts` — the weekly cadence (7 days from the row's timestamp), macro
+  scaling that preserves the split, and the changelog line.
+- `db/hooks/goals/useAdaptiveGoal.ts` — runs from the Goals screen, because a local-first app
+  has no scheduler that survives being closed. Guarded by the row timestamp, so opening the
+  screen repeatedly is free.
+- The card shows `Manual | Adaptive` and, when adaptive, the last change:
+  `target 2600 → 2450 (-150) · maintenance 3956 → 2438`.
+
+**Two defects this step exposed.** The `calories` column was never written — the app derived
+it from macros and left the column at 0, which every new consumer read as "target 0". And
+the estimator happily produced a maintenance from **two logged days** (3,956 kcal). It now
+withholds the data estimate below seven logged days in 28 and lets the profile prior answer,
+and coverage caps the confidence score so plentiful weigh-ins cannot outvote a thin food
+log.
+
 ## 9. Macro profiles (Pro)
 
 The curve exists to answer "what macros does this calorie target correspond to?" It has
 no consumer without the adaptive goal, which is why it is Pro.
 
-### Shape
+### As built (curve; storage and editor still to come)
 
-A profile holds **checkpoints** of `(calories, protein g, fat g)`; **carbs are derived**:
-`carbs = (cal − 4p − 9f) / 4`.
+**The profile is a pure mapping: calories in, macros out.** It has no opinion about whether
+the target is sensible — the clamp belongs to the maintenance algorithm, not the curve. A
+900 kcal target gets a 900 kcal answer.
 
-Three typed numbers instead of four, and the checkpoint is consistent by construction —
-no recomputing calories from all three and hoping they agree (which is what the original
-editor did, despite `assignNutrition` already deriving carbs elsewhere).
+- Below the lowest checkpoint it **interpolates**, which is why a profile can be anchored at
+  `(0, 0, 0, 0)`: the curve is then defined at every calorie level with no special case.
+- Above the highest checkpoint it **holds**, like a fan at full speed.
+- Validation allows the origin checkpoint (only with zero macros) and rejects the rest as
+  before: negative carbs, protein and fat floors, duplicate calorie levels.
 
-### Validation, not correction
+Worked example, entered as three checkpoints and verified against the engine:
 
-- calories strictly ascending; ≥1 checkpoint (flat curve); 2+ to interpolate
-- derived carbs ≥ 0, else the checkpoint is impossible — reject at entry
-- **protein and fat floors**, so a 1,200 kcal checkpoint cannot yield 10 g fat
-- optional "fill sensible defaults" (protein ~1.8 g/kg, fat ~28% of calories, carbs
-  remainder) so nobody starts from an empty form
+| Target | Output |
+| --- | --- |
+| 900 | 91 p / 34 f / 57 c |
+| 1,580 | 160 p / 60 f / 100 c |
+| 1,900 | 160 p / 69 f / 160 c |
+| 2,650 | 160 p / 90 f / 300 c |
+| 3,000 | held at 160 p / 90 f / 300 c |
 
-### Interpolation
+Deriving carbs from the interpolated calorie target is algebraically identical to
+interpolating carbs directly, whenever the endpoints are self-consistent — so the
+three-argument mental model and the stored `(calories, protein, fat)` agree by construction.
 
-Linear in grams between neighbouring checkpoints — exactly `findMiddleMacro`. The only
-change: **clamp outside the range**. Extrapolating a 1,200–2,000 curve up to 3,500
-produces macros nobody intended, and the old `"OUT OF BOUNDS"` string is not a return
-type.
+**Defaults are generated, not hard-coded.** Each preset is derived from the user's weight and
+height and **regenerated weekly** when the adaptive job runs, so the fat and protein slopes
+track the body they belong to. Custom profiles are hand-built and never regenerated.
 
-### Consumption path
+**Arbitrary checkpoints per profile, and multiple profiles per user** (muscle gain, fat
+loss…), one active at a time.
 
-```
-maintenance → calorie target → interpolate the profile → macro targets
-```
+**Adding a checkpoint:** the user picks a target calorie for it, adjusts protein / fat /
+carbs until they hit that calorie (or close enough — close is shown, not enforced), and
+confirms. It is appended to the profile.
 
-One path, which is also why the profile cannot exist as a standalone free feature.
+**Snapshots, not regeneration.** A preset is written once, when it is added, from the
+user's weight and height. Editing it therefore cannot be silently overwritten a week later;
+a stored formula would have made that guaranteed. Regenerating is an explicit action.
 
----
+**The height-aware cap.** Above a BMI of 35 the extra mass is not treated as requiring more
+protein or fat, so a 250 lb person at 5'2" gets a lower figure than 250 lb at 6'4". Rails at
+150–320 lb keep an extreme frame from producing an absurd cap, and a missing height falls
+back to the old flat 220 lb.
 
-## 10. Day exclusions (Pro)
+**The chart is a scrubber, not a picture.** Tapping or dragging draws a vertical line that
+follows the finger, with a dot on each macro line in that macro's colour and a tooltip
+naming the calories and grams at that level; releasing snaps the line back to the right
+edge. The x axis starts at zero so the fan visibly converges on the point all three lines
+share — the origin checkpoint earning its place a second time.
+
+
+
+## 10. Day exclusions (Pro) — **core built**
+
+`helper/intakeDays.ts` decides which logged days count. Two rules, in this order:
+
+1. **What the user said wins.** A day they include or exclude is never re-decided.
+2. **Half-logged days drop automatically** — below 40 % of the median day's calories, or
+   below 40 % of its item count. A partial Tuesday is not a 700 kcal Tuesday, and left in it
+   pulls maintenance down with it.
+
+A day with nothing logged is "not logged", not a day of zero intake. The baseline is built
+only from days the user has not excluded, so dropping one unusual day does not shift the
+"usual" and start excluding ordinary ones.
+
+Overrides live in `intakeDayOverride` (migration `0028`), keyed by local `YYYY-MM-DD`. The
+Maintenance screen lists the last fortnight with a tap to cycle a day: counted → dropped →
+back to automatic. Excluded days are marked, never silently removed.
+
+**Gated as Pro**, with the rest of the algorithm. "Looks half-logged" is decided by calories
+and item count only — meal timing varies too much between people to be a signal.
+
+## 10a. Original spec
+
+
 
 Incomplete logging looks like a deficit that never happened, so excluded days must not
 reach the estimator.
@@ -545,12 +668,81 @@ Inverts its current neutrality. With a goal it can say "down 3.2 of 8.0 lb" or
 
 ### Weight history (`weightHistory.tsx`)
 
-Goal line on `WeightChartFull`, goal in the summary strip. The chart already accepts a
-`goal` prop that is currently ignored — that is the seam.
+**The chart is now custom, drawn with Skia** (`WeightChart.tsx`), replacing the
+`react-native-gifted-charts` version. Two reasons:
 
-**The domain must include the goal.** `yAxisOffset` and `maxValue` are derived purely
-from `minWeight`/`maxWeight` today; a goal above the heaviest weigh-in would be drawn
-off-canvas.
+1. **That library's x-axis is an index, not a time scale.** Points sit at uniform
+   `spacing`, so an 18-day gap rendered the same width as a one-day gap — in a feature
+   built around weighing in irregularly. `helper/weightChartScale.ts` now maps time to x,
+   so gaps are visible.
+2. **The goal line, the maintain band and a projection are shapes here**, not a fight
+   with a fork whose `pointerLabelComponent` is missing from its own types and whose
+   pointer API never activated.
+
+Geometry lives in `helper/weightChartScale.ts` and is pure: `timeDomain`, `timeToX`,
+`valueDomain` (with a minimum span so a 2 lb change is not stretched across the plot),
+`niceTicks`, `tickDecimals`, `labelIndices`, `nearestPointIndex`. Tested in Node.
+
+`WeightChart` takes `weightData` (grams) and an optional `goal` of
+`{ targetWeight, tolerance }` in grams — the band is drawn when a tolerance is present,
+which is what a maintain goal needs. **The goal is not wired yet**; the screen does not
+pass it, and that is step 5's job.
+
+**The axis is padded at both ends.** `valueDomain` takes `{ minSpan, pad }` and snaps
+*outward* to whole tick steps, so the lowest reading never sits on the floor. Measured:
+
+| Data | Axis | Air below / above |
+| --- | --- | --- |
+| 396.1–398.5 lb | 385–410 | 11.1 / 11.5 lb |
+| 380–410 lb | 370–420 | 10.0 / 10.0 lb |
+| 179.6–180.8 kg | 172.5–187.5 | 7.1 / 6.7 kg |
+
+`axisMinSpan` is deliberately small (4 lb / 2 kg): an earlier version combined a 20 lb
+floor with the padding and stretched a 2.5 lb change across 50 lb of axis. The headroom
+comes from `axisPadding` (10 lb / 5 kg), which is the same number the library chart used.
+
+**The line is straight, not smoothed.** A Catmull-Rom curve overshoots between points:
+two readings either side of a low can produce a curve that dips below both of them,
+drawing a weight nobody weighed. On a chart whose job is fidelity to measurements that is
+a lie told for elegance, so segments are linear.
+
+**The trend is the bold line and the readings are the faint one.** The v1 chart had this
+inverted — a heavy 3 pt reading line with a grey dashed trend — so the eye landed on the
+noise instead of the direction. Readings are now 1.5 pt `primary_inactive`; the trend is
+3 pt `primary` with a soft gradient fill beneath it. Rings appear only while there are ≤ 7
+marks.
+
+**A sparse value axis: three labels over hairlines.** Removing the axis entirely left the
+plot with no visible scale, which is fine for a sparkline and wrong for a chart someone is
+supposed to read. Three labels (bottom, middle, top) at `rgba(46,34,28,0.06)` rules anchor
+the scale without turning the plot back into graph paper. The goal is excluded from the
+percentile clipping, or the target line falls off the bottom of the chart.
+
+**The value box is drawn *inside* the canvas, and points at its reading.** On Android a
+Skia canvas is a `SurfaceView`: it occupies its own layer and covers any React view placed
+over it, so a normal `<View>` tooltip rendered perfectly and was completely invisible.
+
+It is now a `RoundedRect` + notch + two `SkText`s, **always above the held dot** and centred
+on it. It does not flip below near the top of the plot — below the point is where the axis
+and the fill are, so a flipped box covered the thing it was describing. The
+plot reserves `CHART_LAYOUT.top = 76` so a 48 pt box plus its 24 pt gap fits above the
+highest point — without that headroom the box was pinned to the canvas edge and the gap
+had nowhere to go. The notch is dropped when there is no room, and the held marker is
+drawn last so it can never be hidden by the box. Styling follows the app: white card, 10 pt radius, `colors.light_gray`
+border, black value in Metropolis SemiBold **17**, grey date in Metropolis Regular 12.
+
+**The chart band is full-bleed**, matching the calorie card on Home: no side margin, no
+radius, `paddingVertical` only. The controls inside keep their 20 pt inset; the canvas does
+not, so the plot gains roughly 28 % more width than it had inside an inset card. Axis and
+date labels clamp 2 pt inside the canvas edges so nothing touches the screen border.
+
+**The readout always carries a tenth**, whatever the unit, while the axis ticks and the
+goal label stay coarse. It is the one place the extra area earns its keep: the axis is for
+orienting, the readout is for the number.
+
+The chart still shows dates for every other point and reads a point on touch, but the
+touch mapping is now exact rather than one point off, because it goes through the same
+time scale the dots were placed with.
 
 ### `WeightLogChartSmall`
 
@@ -608,18 +800,53 @@ Steps 1–3 are useful on their own and ship without any algorithm.
 
 ---
 
-## 15. Open decisions
+## 15. Decisions (settled)
 
-1. **Target date gate** — free or Pro. Deferred until it is built.
-2. **Free maintain band status** — see §11; the free version is otherwise inert.
-3. **Recomp as a distinct kind** — currently merged; revisit if a second progress signal
-   (waist measurement) is ever built.
-4. **Trend weight as the primary displayed number** — decide after step 4.
-5. **`WeightChartFull`'s unused `goal` prop** — it types as `nutritionGoalGet` (a calorie
-   goal) but is only used by the weight chart, which needs a weight goal. The type should
-   change when it is first used.
+1. **Target date / pace is Pro** — it exists to feed the algorithm, and the algorithm is the
+   paid part. The `target_date` column stays available to the estimator regardless; what is
+   gated is the ability to set one.
+2. **Free maintain-goal status** — see §15a. Still the one open question.
+3. **Recomp stays merged into maintain.** They ask the same question of the data — "is my
+   weight stable" — and nothing in this app measures body composition. Revisit only if a
+   second progress signal (waist circumference) is ever added.
+4. **Trend weight is the primary number** on the weight card. The latest weigh-in becomes a
+   secondary line ("last weighed 184.2, yesterday"), because the trend is the number that
+   answers "how am I doing" and the raw reading answers "what did the scale say".
+5. **The home sparkline may curve.** It is a rough shape, not a measurement; the history
+   chart is linear because it is read precisely.
+6. **Goal history on the chart stays current-goal-only**, with an **achievement marker** —
+   see §15b.
 
----
+## 15a. The free maintain-goal question
+
+The problem: a maintain goal's entire value is "am I inside my band?" — but on-track status
+is a Pro line in §11. So a free user configures a band and gets no feedback on it, which
+risks reading as broken rather than as paid.
+
+| Option | Free gets | Risk |
+| --- | --- | --- |
+| **A. Keep the gate** | the goal and the band, drawn; no status | consistent, but the free maintain goal is inert — the reason this was flagged |
+| **B. Free the status** | "In band" / "3 lb above your band" | consistent with "data is free, algorithm is paid" — the status is a comparison, the projection is the algorithm |
+| **C. Coarse free, precise Pro** | "outside your band" | free gets something, Pro gets "2.1 lb above for 6 days, back in band by 12 Nov" |
+
+**Recommendation: B, with C as the shape.** Where you are against your own target is data,
+not algorithm; the projection, the ETA and the on-track judgement stay Pro. B also has a
+safety argument: maintenance is where rebound gets caught, and hiding the one signal that
+shows it is the wrong thing to charge for.
+
+## 15b. Achievement markers
+
+When a goal is reached, the chart should show it: a goal set for 11 Nov, hit on 8 Nov, gets
+a marker on 8 Nov.
+
+**Derive, don't store.** For each goal episode `[started_at, next goal's started_at)`, scan
+the weigh-ins (or the trend, for stability) and take the **first** crossing into the target —
+for a lose goal, the first day at or below target; for a gain goal, at or above; for a
+maintain goal, entering the tolerance band. No column, no migration, and — the reason it
+wins — it stays correct when the user retro-edits or deletes a weigh-in. A stored
+`achieved_at` would survive an edit that un-achieves it, which is a subtle lie on the chart.
+
+Cost is a scan of the goal's own period, which is already loaded for the chart.
 
 ## 16. Glossary
 
@@ -632,3 +859,86 @@ Steps 1–3 are useful on their own and ship without any algorithm.
 | **Checkpoint** | One `(calories, protein, fat)` point on a macro profile |
 | **Excluded day** | A day omitted from the estimate because logging was incomplete |
 | **Adaptive goal** | A calorie goal derived from maintenance + pace, updated weekly |
+
+## Long-range views (1W · 1M · 3M · 1Y · All)
+
+The chart was built for eight days. Beyond that the problem stops being rendering and
+becomes *what one mark means*.
+
+**The span chooses the bucket.** The rule is that the screen holds roughly 30–60 marks:
+fewer and the shape is guesswork, more and the marks stop being readable.
+
+**Every range is daily.** Weekly and monthly buckets existed to stop the marks crowding,
+but the readings are now a faint line with no markers, so the noise reads as texture
+rather than as a caterpillar. Aggregation was protecting the reader from something the
+design already handles, at the cost of showing summaries where the actual measurements
+were available.
+
+| Range | Bucket | Typical marks | X labels |
+| --- | --- | --- | --- |
+| 1W | day | 7 | 10/29 |
+| 1M | day | ~25 | 10/31 |
+| 3M | day | ~80 | Nov |
+| 1Y | day | ~300 | Nov, Mar, Jul |
+| All | day | up to ~1800 (5-year cap) | 2021, 2023, 2025 |
+
+Verified on device at the extremes: 309 daily points at 1Y and 1,583 at All both render
+without a stall, and the trend stays legible as the one bold line through the noise.
+
+`helper/weightRange.ts` owns this. `periodForDays` exists so a future free-form zoom can
+ask for a span and get a sane bucket back.
+
+**Bucket keys all emit a calendar day.** Day buckets are `"2026-11-02"`, weeks are the
+Monday of that week (`weekday 0`, `-6 days`), months are the first (`start of month`).
+One format means one parser and the chart can place a week exactly where it starts. `%W`
+was tried and abandoned: its keys (`"2026-W44"`) cannot be parsed back into a date.
+
+**Rings stop at 7 marks.** Beyond that they read as a caterpillar and hide the line they sit
+on, so the line carries the shape and only the held point still gets a ring. With daily
+points, only 1W qualifies.
+
+**One encoding, chosen: `dots`.** Faint 1.5 pt readings with 10 pt rings while there are
+≤ 7 marks, under a bold 3 pt trend. Four candidates were built and switched live — faint
+line only, rings, range bars, and trend-only — and the rings won: they mark the days at
+1W without crowding longer ranges, which have no rings at all. The others are deleted
+along with the switcher.
+
+**Gaps are bridged for a week, then broken.** With daily points, someone weighing weekly
+would otherwise see the line shattered into confetti. The tolerance is in days
+(`BRIDGE_DAYS`: 8 / 21 / 90), so a missed week still joins and a real pause breaks the
+line — and the trend breaks with it. Joining months would invent continuity nobody
+provided.
+
+**The trend is a fixed half-life, not a fixed alpha.** Smoothing with a 14-day half-life
+means "the trend" describes the same amount of time at 1W and at All. With a per-reading
+alpha the same line meant a 6-day trend on one view and a 6-week one on another.
+
+**The y-domain is percentile-clipped past ten points.** One message typed as 18 instead of
+180 collapses a five-year view into a flat line at the top of the axis. Below ten points
+percentiles are meaningless and the real extremes are kept, so nothing is hidden.
+
+**Goals are drawn as steps.** Every `weightGoal` row holds from its `started_at` until the
+next one begins, so a year shows 185 → 178 → a maintain band, rather than one horizontal
+rule pretending the target never changed. Maintain goals draw their tolerance as a band.
+
+**Range switches are prefetched, and never blank the card.** Two things were making the
+card flash when the timeline changed: the query treated each window as a cold start, and
+the summary swapped to "Loading…" while the next one ran. `weightHistoryQueryOptions`
+(a single shared definition, so a prefetch can never key differently from the hook) sets
+`placeholderData: keepPreviousData`, and the screen prefetches the other four windows in
+an effect. Switching now paints the new range from cache — measured at 400 ms after the
+tap, the card already reads "Down 1.4 lbs since Aug 7" rather than "Loading…".
+
+`period` is in the query key. It was missing, so the same window bucketed differently
+would have been served from the wrong cache entry.
+
+**The summary adapts to the range.** 1W keeps "Down 1.4 lbs over the week"; longer ranges
+say "Down 3.6 lbs since Aug 10" with "−0.3 lbs per week over 12 weeks · 41 weigh-ins".
+Statements of fact, no on-track judgement. Dates gain a year when the window spans one.
+
+**History is recent-20 plus "See all".** The card lists the last 20 logs; the button opens
+`app/(tabs)/(Home)/weightLogs.tsx`, a virtualised `FlatList` of every log ever. The card's
+`.map()` stops being a liability the day someone has a thousand weigh-ins.
+
+**`weightItem` is indexed on `timestamp`** (migration `0025`). Every query is a range scan;
+at five years of daily weigh-ins that was a full table scan each time.

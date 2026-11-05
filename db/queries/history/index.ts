@@ -170,3 +170,38 @@ export const getDailyFoodSums = async (
 
 	return results;
 };
+
+/**
+ * Calories logged per day, with the count of items that produced them.
+ *
+ * `getDailyFoodSums` already computes calories but zero-fills quiet days, which makes "ate
+ * nothing" indistinguishable from "logged nothing". The maintenance estimator has to tell
+ * those apart — an unlogged day is missing data, not a fast day — so it needs the count.
+ */
+export const getDailyCalorieIntake = async (
+	from: Date,
+	to: Date,
+): Promise<{ day: Date; calories: number; items: number }[]> => {
+	const dayBucket = sql<string>`date(${foodItem.timestamp}, 'unixepoch', 'localtime')`;
+
+	const rows = await db
+		.select({
+			day: dayBucket,
+			calories: sql<number>`sum((${food.protein} * 4 + ${food.carbs} * 4 + ${food.fat} * 9 - ${food.fiber} * 2) * ${foodItem.servings} * ${foodItem.serving_mult})`,
+			items: sql<number>`count(*)`,
+		})
+		.from(foodItem)
+		.innerJoin(food, eq(foodItem.food_id, food.id))
+		.where(and(gte(foodItem.timestamp, from), lt(foodItem.timestamp, to)))
+		.groupBy(dayBucket);
+
+	return rows.map((row) => {
+		const [year, month, day] = row.day.split("-").map(Number);
+		return {
+			// A calendar day, parsed as local time — not UTC midnight, which lands a day early.
+			day: new Date(year, month - 1, day),
+			calories: row.calories ?? 0,
+			items: row.items ?? 0,
+		};
+	});
+};

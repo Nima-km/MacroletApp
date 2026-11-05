@@ -2,7 +2,7 @@ import { db } from "@/db/client";
 import { weightGoal } from "@/db/schema";
 import { startedAtFor } from "@/helper/weightGoal";
 import { WeightGoalGet, WeightGoalInput } from "@/types/weightGoal";
-import { desc } from "drizzle-orm";
+import { asc, desc } from "drizzle-orm";
 
 /** The active goal: the newest row, or null when there is none. */
 export async function getLatestWeightGoal(): Promise<WeightGoalGet | null> {
@@ -51,4 +51,12 @@ export async function saveWeightGoal(input: WeightGoalInput): Promise<WeightGoal
  */
 export async function clearWeightGoal(): Promise<void> {
 	await db.delete(weightGoal);
+}
+
+/** Every goal ever set, oldest first. The chart draws these as steps over time. */
+export async function getAllWeightGoals(): Promise<WeightGoalGet[]> {
+	return db
+		.select()
+		.from(weightGoal)
+		.orderBy(asc(weightGoal.started_at), asc(weightGoal.id));
 }

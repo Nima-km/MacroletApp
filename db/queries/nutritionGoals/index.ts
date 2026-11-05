@@ -14,3 +14,11 @@ export const insertNutritionGoal = async (sumNutrition : nutritionGoalInsert) =>
   console.log('insertNutritionGoal')
   return db.insert(nutritionGoal).values(sumNutrition)
 };
+/** Recent goals, newest first — the adaptive changelog reads this. */
+export const getNutriGoalHistory = async (limit = 5) => {
+	return db
+		.select()
+		.from(nutritionGoal)
+		.orderBy(desc(nutritionGoal.timestamp))
+		.limit(limit);
+};

@@ -4,19 +4,41 @@ import { WeightInsert } from "@/types/weight";
 
 import { and, count, desc, gte, lt, sql } from "drizzle-orm";
 
+/**
+ * "2026-10-27" -> that day at local midnight.
+ *
+ * `new Date("2026-10-27")` reads the string as UTC midnight, which is the previous day
+ * everywhere west of Greenwich — every label on the chart was a day early.
+ */
+function parseDayBucket(bucket: string): Date {
+    const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(bucket);
+    if (day) {
+        return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+    }
+    console.log("weight history: unparseable bucket", bucket);
+    return new Date();
+}
+
 export const getWeightHistory = async (
     from: Date,
     to: Date,
     period: "day" | "week" | "month" = "day",
 ) => {
+    // Every period emits a *calendar day* ("2026-11-02"): the day itself, the Monday of
+    // its week, or the first of its month. One format means one parser, and the chart can
+    // place a week or a month exactly where it starts on the time axis.
+    //
+    // The week is computed as "next Sunday, minus six days", which lands on the Monday of
+    // the current week for every day including Sunday itself. `%W` was tried and is not
+    // worth it: its keys ("2026-W44") cannot be parsed back into a date.
     const getPeriodBucket = () => {
         switch (period) {
             case "day":
                 return sql<string>`strftime('%F', ${weightItem.timestamp}, 'unixepoch', 'localtime')`;
             case "week":
-                return sql<string>`strftime('%Y-W%W', ${weightItem.timestamp}, 'unixepoch', 'localtime')`;
+                return sql<string>`strftime('%F', ${weightItem.timestamp}, 'unixepoch', 'localtime', 'weekday 0', '-6 days')`;
             case "month":
-                return sql<string>`strftime('%Y-%m', ${weightItem.timestamp}, 'unixepoch', 'localtime')`;
+                return sql<string>`strftime('%F', ${weightItem.timestamp}, 'unixepoch', 'localtime', 'start of month')`;
         }
     };
 
@@ -41,7 +63,10 @@ export const getWeightHistory = async (
     console.log("Type of timestamp:", typeof results[0]?.timestamp);
     return results.map((row) => ({
         ...row,
-        timestamp: new Date(row.timestamp),
+        // The bucket key is a *calendar day* ("2026-10-27"), not an instant. `new Date`
+        // reads that as UTC midnight, which lands on the previous day everywhere west of
+        // Greenwich — every label on the chart was a day early. Build it as local time.
+        timestamp: parseDayBucket(row.timestamp),
     }));
 };
 

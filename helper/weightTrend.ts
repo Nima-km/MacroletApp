@@ -60,15 +60,24 @@ export function weekStart(date: Date, weekStartsOn = 1): Date {
 /**
  * Exponential moving average.
  *
- * The smoothing factor is applied per *day*, not per reading: someone weighing weekly
- * would otherwise see the line barely move, because 0.1 of a reading is applied once a
- * week instead of seven times. `1 - (1 - alpha) ^ days` gives the same smoothing as
- * daily readings over that gap.
+ * The smoothing is applied per *day* rather than per reading: someone weighing weekly
+ * would otherwise see the line barely move, because one step is applied once a week
+ * instead of seven times.
+ *
+ * `halfLifeDays` is the better way to say it. Smoothing by a fixed half-life means "the
+ * trend" describes the same amount of time whether the chart is showing days or months —
+ * otherwise the same line means a 6-day trend at 1W and a 6-week one at 1Y, and the word
+ * stops being useful. `alpha` is kept for callers that want the old per-reading feel.
  */
 export function emaTrend(
 	points: WeightPoint[],
-	alpha = DEFAULT_ALPHA,
+	options: { alpha?: number; halfLifeDays?: number } = {},
 ): TrendPoint[] {
+	const { alpha = DEFAULT_ALPHA, halfLifeDays } = options;
+	const effectiveFor = (days: number) =>
+		halfLifeDays && halfLifeDays > 0
+			? 1 - Math.pow(0.5, days / halfLifeDays)
+			: 1 - Math.pow(1 - alpha, days);
 	const entries = [...points]
 		.filter((point) => Number.isFinite(point.weight) && point.weight > 0)
 		.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
@@ -81,8 +90,7 @@ export function emaTrend(
 	return entries.map((point, index) => {
 		if (index > 0) {
 			const days = Math.max((point.timestamp.getTime() - previous) / DAY_MS, 1);
-			const effective = 1 - Math.pow(1 - alpha, days);
-			trend = trend + effective * (point.weight - trend);
+			trend = trend + effectiveFor(days) * (point.weight - trend);
 			previous = point.timestamp.getTime();
 		}
 		return { ...point, trend };

@@ -44,11 +44,12 @@ function publicApiKey(): string | undefined {
 	// `||`, not `??`: a defined-but-empty variable - an easy slip when wiring a build
 	// profile - is not a key, and configuring the SDK with "" fails obscurely rather
 	// than falling back to the Test Store key this function exists to provide.
-	return (
-		platformKey ||
-		process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY ||
-		undefined
-	);
+	// The Test Store key is a development convenience only: RevenueCat closes a release
+	// build configured with one ("Wrong API Key"). An admin build ships without platform
+	// keys on purpose, so in a release build it must resolve to nothing and stay dormant
+	// rather than fall back and die on launch.
+	if (platformKey) return platformKey;
+	return __DEV__ ? process.env.EXPO_PUBLIC_REVENUECAT_TEST_KEY || undefined : undefined;
 }
 
 let configured = false;
@@ -301,6 +302,21 @@ export const EMPTY_SUBSCRIPTION_STATE: SubscriptionState = {
 };
 
 export async function getSubscriptionState(): Promise<SubscriptionState> {
+	/**
+	 * Admin build: everything unlocked, RevenueCat never consulted.
+	 *
+	 * A boolean, deliberately — never an identity. The APK can be read, so the Clerk id
+	 * that actually grants access lives only in the server's `ADMIN_CLERK_IDS`, where it is
+	 * matched against the authenticated session.
+	 */
+	if (process.env.EXPO_PUBLIC_ADMIN_BUILD === "1") {
+		return {
+			...EMPTY_SUBSCRIPTION_STATE,
+			configured: true,
+			entitled: true,
+		};
+	}
+
 	if (!configureRevenueCat()) return EMPTY_SUBSCRIPTION_STATE;
 
 	const info = await Purchases.getCustomerInfo();

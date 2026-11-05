@@ -26,6 +26,11 @@ import m0021 from './0021_tough_shatterstar.sql';
 import m0022 from './0022_robust_famine.sql';
 import m0023 from './0023_weight_to_grams.sql';
 import m0024 from './0024_minor_doorman.sql';
+import m0025 from './0025_next_secret_warriors.sql';
+import m0026 from './0026_keen_manta.sql';
+import m0027 from './0027_shiny_spitfire.sql';
+import m0028 from './0028_white_william_stryker.sql';
+import m0029 from './0029_boring_misty_knight.sql';
 
   export default {
     journal,
@@ -54,7 +59,12 @@ m0020,
 m0021,
 m0022,
 m0023,
-m0024
+m0024,
+m0025,
+m0026,
+m0027,
+m0028,
+m0029
     }
   }
   

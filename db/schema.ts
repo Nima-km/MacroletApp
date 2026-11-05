@@ -120,13 +120,82 @@ export const recipeBookItemRelations = relations(recipeBookItem, ({ one }) => ({
 	}),
 }));
 
-export const weightItem = sqliteTable("weightItem", {
+/**
+ * The one row of body facts: height, birth year, sex, activity.
+ *
+ * A table rather than keys in `setting`, because these are inputs to the maintenance
+ * estimate, not display preferences. Columns are nullable and the row is written whole,
+ * so a half-filled profile is representable and is simply ignored by the estimator.
+ */
+/**
+ * A user's decision about one day of food logging.
+ *
+ * `day` is the local calendar day (`YYYY-MM-DD`), matching how intake is bucketed. Rows
+ * exist only for days the user has ruled on; everything else is decided automatically.
+ */
+/**
+ * A macro profile: calories in, macros out.
+ *
+ * `checkpoints` is JSON rather than a child table because a profile is always read and
+ * written whole, the count is arbitrary, and nothing ever queries an individual point.
+ * `preset` records which generator built it (null for hand-built), so a regenerable preset
+ * can be told apart from a profile the user made.
+ */
+export const macroProfile = sqliteTable("macroProfile", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
-	timestamp: integer("timestamp", { mode: "timestamp" })
+	name: text("name", { length: 40 }).notNull(),
+	/** "balanced" | "fatLoss" | "muscleGain" | "endurance" | null */
+	preset: text("preset", { length: 20 }),
+	/** Exactly one profile is active; 0/1 because SQLite has no boolean. */
+	active: integer("active").notNull().default(0),
+	/** JSON array of { calories, protein, fat }. */
+	checkpoints: text("checkpoints").notNull(),
+	created_at: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.default(sql`(unixepoch())`),
-	weight: integer("weight").notNull(),
+	updated_at: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.default(sql`(unixepoch())`),
 });
+
+export const intakeDayOverride = sqliteTable("intakeDayOverride", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	day: text("day", { length: 10 }).notNull().unique(),
+	/** "include" or "exclude". */
+	state: text("state", { length: 10 }).notNull(),
+	created_at: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.default(sql`(unixepoch())`),
+});
+
+export const profile = sqliteTable("profile", {
+	/** Singleton: always 1. A second row would mean a second person. */
+	id: integer("id").primaryKey(),
+	height_cm: integer("height_cm"),
+	birth_year: integer("birth_year"),
+	sex: text("sex", { length: 10 }),
+	activity: text("activity", { length: 20 }),
+	updated_at: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.default(sql`(unixepoch())`),
+});
+
+export const weightItem = sqliteTable(
+	"weightItem",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		timestamp: integer("timestamp", { mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		weight: integer("weight").notNull(),
+	},
+	(table) => [
+		// Every query is a range scan over `timestamp` (the chart's window, the history
+		// list, the latest reading). Without this it is a full table scan each time —
+		// invisible at 25 rows, routine at five years of daily weigh-ins.
+		index("weight_item_timestamp_idx").on(table.timestamp),
+	],
+);
 export const servingSize = sqliteTable("servingSize", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	serving_mult: integer("serving_mult").notNull(),
@@ -145,6 +214,14 @@ export const nutritionGoal = sqliteTable("nutritionGoal", {
 	fat: integer("fat").notNull().default(0),
 	calories: integer("calories").default(0).notNull(),
 	carbs: integer("carbs").notNull().default(0),
+	/**
+	 * How this number came to be. `manual` is what the user typed and never moves on its
+	 * own; `adaptive` was derived from maintenance and may update on the weekly cadence.
+	 * Rows are insert-only, so this also records what a past target was aiming at.
+	 */
+	source: text("source", { length: 10 }).notNull().default("manual"),
+	/** The maintenance estimate that produced an adaptive target, for the changelog. */
+	maintenance: integer("maintenance"),
 });
 
 export const macroSplit = sqliteTable("macroSplit", {

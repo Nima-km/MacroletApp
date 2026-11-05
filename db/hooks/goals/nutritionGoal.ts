@@ -1,4 +1,5 @@
 import {
+    getNutriGoalHistory,
     getNutriGoals,
     insertNutritionGoal,
 } from "@/db/queries/nutritionGoals";
@@ -22,3 +23,11 @@ export const useInsertNutritionGoal = () => {
         },
     });
 };
+
+/** Recent goal rows, newest first, for the changelog line. */
+export const useGetNutriGoalHistory = (limit = 5) =>
+	useQuery({
+		queryKey: ["nutrition-goals", "history", limit],
+		queryFn: () => getNutriGoalHistory(limit),
+		staleTime: 1000 * 30,
+	});

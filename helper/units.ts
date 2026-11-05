@@ -102,14 +102,26 @@ export function axisStep(unit: WeightUnit): number {
 	return unit === "lb" ? 5 : 2;
 }
 
-/** Empty space above and below the plotted area, in display units. */
+/**
+ * Empty space above and below the plotted area, in display units.
+ *
+ * Enough that the lowest reading never sits on the axis floor, small enough that a quiet
+ * week is not a thin line in a 30 lb void. It was 10 lb, which combined with a 20 lb
+ * minimum span put a 1 lb range on a 30 lb axis.
+ */
 export function axisPadding(unit: WeightUnit): number {
-	return unit === "lb" ? 10 : 5;
+	return unit === "lb" ? 0.25 : 0.1;
 }
 
-/** Smallest vertical span the chart will draw, so a flat week is not a straight edge. */
+/**
+ * Floor for the chart's vertical span, so a nearly flat week still has a shape rather
+ * than a straight line.
+ *
+ * Deliberately small — the headroom comes from `axisPadding`, not from this. Combining a
+ * large floor with the padding stretched a 2.5 lb change across 50 lb of axis.
+ */
 export function axisMinSpan(unit: WeightUnit): number {
-	return unit === "lb" ? 20 : 10;
+	return unit === "lb" ? 1 : 0.5;
 }
 
 /**

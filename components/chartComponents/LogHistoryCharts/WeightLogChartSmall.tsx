@@ -1,10 +1,10 @@
-import { bigRound } from "@/helper/bigRound";
 import {
 	axisMinSpan,
 	axisPadding,
 	axisStep,
 	toDisplay,
 } from "@/helper/units";
+import { valueDomain } from "@/helper/weightChartScale";
 import { emaTrend } from "@/helper/weightTrend";
 import { useUnitStore } from "@/store/unitStore";
 import { colors, typography } from "@/theme";
@@ -18,19 +18,24 @@ interface Props {
 	weightData?: WeightPoint[];
 	onSelect?: (item: WeightPoint) => void;
 }
-const formatWeightForChart = (
-	weightData: WeightPoint[],
-	//  onSelect: (item: WeightType) => void,
-) => {
-	return weightData.map((item) => ({
+/**
+ * Points for the sparkline.
+ *
+ * Dates on every other point, counting back from the newest. Seven labels across 275 px
+ * ran off the right edge, and two readings on the same day printed the same date twice.
+ */
+const formatWeightForChart = (weightData: WeightPoint[]) =>
+	weightData.map((item, index) => ({
 		value: item.weight,
-		// getDate() is already 1-based - the old +1 rendered every label a day late.
+		// Skip the newest point: its label is centred at the right edge of the plot and
+		// gets clipped (there is no trailing-space prop to make room). Its date is in the
+		// "last logged" line above anyway.
 		label:
-			(item.timestamp.getMonth() + 1).toString() +
-			"/" +
-			item.timestamp.getDate().toString(),
+			index < weightData.length - 1 && (weightData.length - 1 - index) % 2 === 1
+				? `${item.timestamp.getMonth() + 1}/${item.timestamp.getDate()}`
+				: "",
 	}));
-};
+
 const calculateStepValue = (
 	a: WeightPoint | undefined,
 	b: WeightPoint | undefined,
@@ -72,11 +77,11 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 		);
 	};
 
-	const minWeight = display?.reduce((a, b) =>
-		a.weight < b.weight || b.weight == 0 ? a : b,
-	);
-	const maxWeight = display?.reduce((a, b) =>
-		a.weight > b.weight ? a : b,
+	// Shared with the full chart so the two can never disagree about the scale.
+	const domain = valueDomain(
+		(display ?? []).map((point) => point.weight),
+		null,
+		{ minSpan: axisMinSpan(unit), pad: axisPadding(unit) },
 	);
 	const trendData = display
 		? emaTrend(display)
@@ -91,7 +96,7 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				curved
 				mostNegativeValue={0}
 				curveType={CurveType.CUBIC}
-				stepValue={calculateStepValue(maxWeight, minWeight, step)}
+				stepValue={domain.step}
 				dashGap={0}
 				showFractionalValues={false}
 				width={275}
@@ -119,13 +124,12 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				disableScroll
 				yAxisThickness={0}
 				xAxisColor={colors.light_gray}
-				yAxisOffset={Math.max(bigRound(minWeight?.weight, step) - pad, 0)}
-				maxValue={Math.max(
-					minSpan,
-					bigRound(maxWeight?.weight, step) -
-						bigRound(minWeight?.weight, step) +
-						minSpan,
-				)}
+				// Same domain rules as the full chart: padding at both ends, snapped outward.
+				// The old hand-rolled version was `offset = min - pad` and `max = (max - min)
+				// + minSpan`, which tops out at `max - pad + minSpan` — once `minSpan` became
+				// small, that ceiling landed below the highest reading and the line vanished.
+				yAxisOffset={domain.min}
+				maxValue={domain.max - domain.min}
 			/>
 		</View>
 	);

@@ -1,0 +1,1 @@
+CREATE INDEX `weight_item_timestamp_idx` ON `weightItem` (`timestamp`);
