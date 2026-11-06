@@ -33,6 +33,17 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://macrolet-express-production.up.railway.app"
       }
+    },
+    "admin": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://macrolet-express-production.up.railway.app",
+        "EXPO_PUBLIC_ADMIN_BUILD": "1"
+      }
     }
   },
   "submit": {

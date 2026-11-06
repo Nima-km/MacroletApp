@@ -54,7 +54,8 @@
       "expo-font",
       "expo-image",
       "expo-status-bar",
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      "./plugins/withGradleJvmArgs"
     ],
     "experiments": {
       "typedRoutes": true,

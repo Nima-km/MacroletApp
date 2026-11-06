@@ -83,6 +83,18 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 		null,
 		{ minSpan: axisMinSpan(unit), pad: axisPadding(unit) },
 	);
+
+	/**
+	 * Label spacing, with a floor.
+	 *
+	 * A tight span (75 kg → 74.3 kg is ~1.5 lb) made `valueDomain` choose a half-pound step
+	 * while the chart draws whole numbers, so two consecutive ticks rounded to the same
+	 * label. A pound is the smallest step that reads as two distinct numbers.
+	 */
+	const axisStepValue = Math.max(domain.step, unit === "lb" ? 1 : 0.5);
+	// Snap the ends to whole steps so the labels are round rather than "164.3 → 165".
+	const axisMin = Math.floor(domain.min / axisStepValue) * axisStepValue;
+	const axisMax = Math.ceil(domain.max / axisStepValue) * axisStepValue;
 	const trendData = display
 		? emaTrend(display)
 				.slice(-7)
@@ -96,9 +108,14 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				curved
 				mostNegativeValue={0}
 				curveType={CurveType.CUBIC}
-				stepValue={domain.step}
+				stepValue={axisStepValue}
 				dashGap={0}
-				showFractionalValues={false}
+				// Precision follows the unit, not the step: kilograms to a tenth, pounds to a
+				// whole pound. Two decimals in pounds would claim an accuracy a home scale
+				// does not have, and one decimal in kilograms is the resolution people
+				// actually read.
+				showFractionalValues={unit !== "lb"}
+				roundToDigits={unit === "lb" ? 0 : 1}
 				width={275}
 				height={120}
 				// The readings are the data; the trend is an annotation on top of them.
@@ -128,8 +145,8 @@ const WeightLogChartSmall = ({ weightData, onSelect }: Props) => {
 				// The old hand-rolled version was `offset = min - pad` and `max = (max - min)
 				// + minSpan`, which tops out at `max - pad + minSpan` — once `minSpan` became
 				// small, that ceiling landed below the highest reading and the line vanished.
-				yAxisOffset={domain.min}
-				maxValue={domain.max - domain.min}
+				yAxisOffset={axisMin}
+				maxValue={axisMax - axisMin}
 			/>
 		</View>
 	);
